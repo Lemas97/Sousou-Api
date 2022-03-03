@@ -1,0 +1,29 @@
+{
+  "env": {
+      "es2021": true,
+      "node": true,
+      "jest/globals": true
+  },
+  "extends": [
+      "plugin:jest/recommended",
+      "plugin:jest/style",
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "standard-with-typescript"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+      "project": "./tsconfig.json",
+      "ecmaVersion": 12,
+      "sourceType": "module"
+  },
+  "plugins": [
+      "@typescript-eslint",
+      "jest"
+  ],
+  "rules": {
+      "@typescript-eslint/naming-convention": "off",
+      "@typescript-eslint/strict-boolean-expressions": "off"
+  }
+}
