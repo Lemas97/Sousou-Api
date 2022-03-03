@@ -9,7 +9,7 @@ import { User } from 'src/types/entities/User'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 
-@Resolver()
+@Resolver() //test
 export class UserResolver {
   @Query(() => PaginatedUsers)
   async getUser (
