@@ -72,9 +72,7 @@ export async function loginUserAction (data: LoginUserInputData, em: EntityManag
   return token
 }
 
-export async function logoutUserAction (currentUser: User, em: EntityManager): Promise<boolean> {
-  currentUser.token = undefined
-
+export async function logoutUserAction (em: EntityManager): Promise<boolean> {
   await em.flush()
   return true
 }

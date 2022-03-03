@@ -37,10 +37,9 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async logoutUser (
-    @Ctx('em') em: EntityManager,
-      @Ctx('user') currentUser: User
+    @Ctx('em') em: EntityManager
   ): Promise<boolean> {
-    return await logoutUserAction(currentUser, em)
+    return await logoutUserAction(em)
   }
 
   @Mutation(() => User)
