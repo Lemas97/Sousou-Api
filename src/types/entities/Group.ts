@@ -51,5 +51,5 @@ export class Group {
 
   @ManyToMany(() => User)
   @Field(() => [User])
-    users = new Collection<User>(this)
+    members = new Collection<User>(this)
 }

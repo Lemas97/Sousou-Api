@@ -20,11 +20,20 @@ export class Message {
 
   @Property()
   @Field()
-    createdAt: Date
+    createdAt = new Date()
 
   @Property()
   @Field()
     text: string
+
+  @Property({ nullable: true })
+  @Field({ nullable: true })
+    deleteForAll?: boolean
+
+  // todo
+  // @Enum(() => MessageStateType)
+  // @Field(() => MessageStateType)
+  //   state: MessageStateType
 
   @ManyToOne(() => User)
   @Field(() => User)
@@ -37,4 +46,8 @@ export class Message {
   @ManyToOne(() => TextChannel)
   @Field(() => TextChannel)
     textChannel: TextChannel
+
+  @ManyToMany(() => User)
+  @Field(() => [User])
+    deletedFromUsers = new Collection<User>(this)
 }
