@@ -20,7 +20,7 @@ export class Message {
 
   @Property()
   @Field()
-    createdAt = new Date()
+    createdAt: Date = new Date()
 
   @Property()
   @Field()
