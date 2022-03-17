@@ -9,10 +9,10 @@ import { User } from 'src/types/entities/User'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 
-@Resolver() //test
+@Resolver() // test
 export class UserResolver {
   @Query(() => PaginatedUsers)
-  async getUser (
+  async getUsers (
     @Ctx('em') em: EntityManager,
       @Arg('paginatedData') paginatedData: PaginatedInputData
   ): Promise<PaginatedUsers> {

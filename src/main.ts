@@ -9,11 +9,14 @@ import { MikroORM } from '@mikro-orm/core'
 
 import { buildSchema } from 'type-graphql'
 
-import { ENVIRONMENT, HOST, PORT } from 'src/dependencies/config'
+import { ENVIRONMENT, HOST, PORT, PRIVATE_KEY } from 'src/dependencies/config'
 import { CustomContext } from './types/interfaces/CustomContext'
 import { UserResolver } from './lib/resolvers/UserResolver'
 import { FriendRequestResolver } from './lib/resolvers/FriendRequestResolver'
 import { GroupResolver } from './lib/resolvers/GroupResolver'
+import { isLogged } from './middlewares/guards/IsLogged'
+import jwt from 'koa-jwt'
+import { setStateUser } from './middlewares/SetStateUser'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -26,7 +29,9 @@ async function main (): Promise<void> {
       UserResolver,
       FriendRequestResolver,
       GroupResolver
-    ]
+
+    ],
+    globalMiddlewares: [isLogged]
   })
 
   const apolloServer = new ApolloServer({
@@ -50,10 +55,11 @@ async function main (): Promise<void> {
 
   app.use(cors())
 
-  // app.use(jwt({ secret: PRIVATE_KEY, passthrough: false }))
-  // app.use(setStateUser(connection.em.fork()))
+  app.use(jwt({ secret: PRIVATE_KEY, passthrough: true }))
 
-  app.use(apolloServer.getMiddleware({ cors: false }))
+  app.use(setStateUser(connection.em.fork()))
+
+  app.use(apolloServer.getMiddleware({ cors: app.proxy }))
 
   const httpServer = createServer(app.callback())
 
