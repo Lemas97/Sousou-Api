@@ -3,7 +3,7 @@ import { CustomContext } from 'src/types/interfaces/CustomContext'
 import { MiddlewareFn } from 'type-graphql'
 
 export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {
-  if (ctx.info.path.key === 'loginUser' || ctx.info.path.key === 'registerUser' || (ctx.info.path.prev && (ctx.info.path?.prev.key === 'loginUser' || ctx.info.path.prev.key === 'registerUser'))) {
+  if (ctx.info.operation.name?.value === 'loginUser' || ctx.info.operation.name?.value === 'registerUser') {
     return await next()
   }
 

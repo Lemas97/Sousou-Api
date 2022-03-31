@@ -19,11 +19,11 @@ export class UserResolver {
     return await getUsersAction(paginatedData, em)
   }
 
-  @Mutation(() => User)
+  @Mutation(() => Boolean)
   async registerUser (
     @Ctx('em') em: EntityManager,
       @Arg('data') data: UserRegisterInputData
-  ): Promise<User> {
+  ): Promise<boolean> {
     return await registerUserAction(data, em)
   }
 
