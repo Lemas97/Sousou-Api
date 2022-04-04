@@ -10,6 +10,9 @@ export class UserRegisterInputData {
   @IsEmail()
     email: string
 
+  @Field({ nullable: true })
+    displayName?: string
+
   @Field()
   @Length(6)
     password: string

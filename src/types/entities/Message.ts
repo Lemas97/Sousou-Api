@@ -1,6 +1,6 @@
 import {
   Collection,
-  Entity,
+  Enum,
   ManyToMany,
   ManyToOne,
   PrimaryKey,
@@ -8,10 +8,9 @@ import {
 } from '@mikro-orm/core'
 import { Field, ObjectType } from 'type-graphql'
 import { v4 } from 'uuid'
-import { TextChannel } from './TextChannel'
+import { MessageStateType } from '../enums/MessageStateType'
 import { User } from './User'
 
-@Entity()
 @ObjectType()
 export class Message {
   @PrimaryKey()
@@ -30,22 +29,17 @@ export class Message {
   @Field({ nullable: true })
     deleteForAll?: boolean
 
-  // todo
-  // @Enum(() => MessageStateType)
-  // @Field(() => MessageStateType)
-  //   state: MessageStateType
+  @Enum(() => MessageStateType)
+  @Field(() => MessageStateType)
+    state: MessageStateType
 
   @ManyToOne(() => User)
   @Field(() => User)
-    fromUser: User
+    from: User
 
   @ManyToMany(() => User)
   @Field(() => [User])
     readBy = new Collection<User>(this)
-
-  @ManyToOne(() => TextChannel)
-  @Field(() => TextChannel)
-    textChannel: TextChannel
 
   @ManyToMany(() => User)
   @Field(() => [User])

@@ -40,7 +40,8 @@ async function main (): Promise<void> {
       return {
         ctx,
         state: ctx.state,
-        em: connection.em.fork()
+        em: connection.em.fork(),
+        dataLoader: true
       }
     }
   })

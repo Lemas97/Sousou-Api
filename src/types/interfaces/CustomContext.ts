@@ -14,6 +14,8 @@ export interface CustomContext {
   }
 
   user?: User
+
+  dataLoader: boolean
 }
 
 export interface AuthCustomContext extends CustomContext {

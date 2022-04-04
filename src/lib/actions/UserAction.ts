@@ -51,6 +51,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
     ...data,
     password: hash,
     code,
+    displayName: data.username,
     preferences: preferences
   })
 

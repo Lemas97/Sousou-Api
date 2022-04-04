@@ -7,7 +7,7 @@ import { User } from './User'
 
 @Entity()
 @ObjectType()
-export class PersonalConversation {
+export class PersonalChat {
   @PrimaryKey()
   @Field()
     id: string = v4()
