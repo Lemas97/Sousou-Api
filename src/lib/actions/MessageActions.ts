@@ -1,7 +1,10 @@
 import { EntityManager } from '@mikro-orm/core'
 import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessageInputData'
+import { PersonalMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { SendMessageInputData } from 'src/types/classes/input-data/SendMessageInputData'
 import { Message } from 'src/types/entities/Message'
+import { PersonalConversation } from 'src/types/entities/PersonalConversation'
+import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { TextChannel } from 'src/types/entities/TextChannel'
 import { User } from 'src/types/entities/User'
 
@@ -43,6 +46,21 @@ export async function deleteMessageAction (id: string, data: DeleteMessageInputD
   }
 
   await em.flush()
+
+  return true
+}
+
+export async function sendMessageToFriendAction (personalConversationId: string, messageInputData: PersonalMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+  const personalConversation = em.findOneOrFail(PersonalConversation, personalConversationId)
+
+  const message = em.create(PersonalMessage, {
+    conversation: personalConversation,
+    from: currentUser,
+    text: messageInputData.text,
+    file: messageInputData.file
+  })
+
+  await em.persistAndFlush(message)
 
   return true
 }

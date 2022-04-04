@@ -18,6 +18,7 @@ import { UserPreferences } from '../embeddables/UserPreferences'
 
 import { FriendRequest } from './FriendRequest'
 import { Group } from './Group'
+import { PersonalConversation } from './PersonalConversation'
 import { VoiceChannel } from './VoiceChannel'
 
 @Entity()
@@ -83,4 +84,8 @@ export class User {
   @ManyToMany(() => User)
   @Field(() => [User])
     friendList = new Collection<User>(this)
+
+  @ManyToMany(() => PersonalConversation, personalConversation => personalConversation.users)
+  @Field(() => [PersonalConversation])
+    personalConversations = new Collection<PersonalConversation>(this)
 }
