@@ -10,7 +10,4 @@ export class GroupInputData {
 
   @Field()
     color: string
-
-  @Field()
-    ownerId: string
 }
