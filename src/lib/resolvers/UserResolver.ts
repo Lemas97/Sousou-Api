@@ -3,7 +3,7 @@ import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
-import { connectToVoiceChannelAction, disconnectFromVoiceChatAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, registerUserAction, updateUserPreferencesAction } from '../actions/UserAction'
+import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
@@ -76,5 +76,21 @@ export class UserResolver {
       @Arg('voiceChannelId') voiceChannelId: string
   ): Promise<boolean> {
     return await kickFromVoiceChannelAction(id, voiceChannelId, currentUser, em)
+  }
+
+  @Mutation(() => Boolean)
+  async confirmEmail (
+    @Ctx('em') em: EntityManager,
+      @Arg('id') id: string
+  ): Promise<boolean> {
+    return await confirmEmailAction(id, em)
+  }
+
+  @Mutation(() => Boolean)
+  async resendEmailConfirmation (
+    @Ctx('em') em: EntityManager,
+      @Arg('email') email: string
+  ): Promise<boolean> {
+    return await resendEmailConfirmationAction(email, em)
   }
 }

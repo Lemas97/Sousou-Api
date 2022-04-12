@@ -23,4 +23,12 @@ export const REGISTER_ROLE = process.env.REGISTER_ROLE as string
 export const JWKSURI = process.env.JWKSURI as string
 export const ISSUER = process.env.ISSUER as string
 
+export const USER_EMAIL = process.env.USER_EMAIL as string ?? ''
+export const USER_EMAIL_PWD = process.env.USER_PASSWORD as string ?? ''
+export const EMAIL_NAME = process.env.EMAIL_NAME as string ?? ''
+export const EMAIL_ADDRESS = process.env.EMAIL as string ?? ''
+
+export const EMAIL_HOST = (process.env.EMAIL_HOST !== '' && process.env.EMAIL_HOST != null) ? process.env.EMAIL_HOST : 'smtp.ethereal.email'
+export const EMAIL_PORT = (process.env.EMAIL_PORT !== '' && process.env.EMAIL_PORT != null) ? process.env.EMAIL_PORT : 587
+
 Debug.enable(DEBUG)

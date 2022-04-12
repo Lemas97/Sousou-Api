@@ -7,7 +7,7 @@ export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {
     return await next()
   }
 
-  if (ctx.info.operation.name?.value === 'loginUser' || ctx.info.operation.name?.value === 'registerUser') {
+  if (ctx.info.fieldName === 'loginUser' || ctx.info.fieldName === 'registerUser' || ctx.info.fieldName === 'resendEmailConfirmation') {
     return await next()
   }
 

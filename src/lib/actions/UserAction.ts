@@ -13,6 +13,8 @@ import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputD
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
 import { VoiceChannel } from 'src/types/entities/VoiceChannel'
 import { User } from 'src/types/entities/User'
+import { confirmEmailOnRegister } from '../tasks/emails/RegisterEmail'
+import { v4 } from 'uuid'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -28,7 +30,6 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 }
 
 export async function registerUserAction (data: UserRegisterInputData, em: EntityManager): Promise<boolean> {
-  // const secret = 'abcdefg'
   const hash = bcrypt.hashSync(data.password, 12)
 
   let code = (Math.random() * (9999 - 0)).toString()
@@ -52,10 +53,15 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
     password: hash,
     code,
     displayName: data.username,
-    preferences: preferences
+    preferences: preferences,
+    confirmEmailToken: v4()
   })
 
   await em.persistAndFlush(user)
+
+  console.log(user)
+
+  await confirmEmailOnRegister(user)
 
   return true
 }
@@ -64,6 +70,8 @@ export async function loginUserAction (data: LoginUserInputData, em: EntityManag
   const user = await em.findOneOrFail(User, { email: data.email })
 
   if (!bcrypt.compareSync(data.password, user.password)) throw new ValidationError('CREDENTIALS_NOT_MATCH')
+
+  if (!user.emailConfirm) throw new ForbiddenError('EMAIL_NOT_CONFIRMED')
 
   const token = jwt.sign({
     id: user.id,
@@ -125,6 +133,32 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
   user.connectedVoiceChannel = undefined
 
   await em.flush()
+
+  return true
+}
+
+export async function confirmEmailAction (confirmEmailToken: string, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, { confirmEmailToken })
+
+  if (user.emailConfirm) throw new UserInputError('USER_IS_ALREADY_CONFIRMED')
+
+  user.emailConfirm = true
+
+  await em.flush()
+
+  return true
+}
+
+export async function resendEmailConfirmationAction (email: string, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, { email })
+  console.log(user.emailConfirm)
+
+  if (user.emailConfirm) throw new UserInputError('USER_IS_ALREADY_CONFIRMED')
+
+  user.confirmEmailToken = v4()
+  await em.flush()
+
+  await confirmEmailOnRegister(user)
 
   return true
 }

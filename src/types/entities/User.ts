@@ -57,6 +57,14 @@ export class User {
   @Field()
     createdAt: Date = new Date()
 
+  @Property()
+  @Field()
+    confirmEmailToken: string
+
+  @Property({ type: Boolean })
+  @Field(() => Boolean)
+    emailConfirm = false
+
   @Embedded({ entity: () => UserPreferences, object: true })
   @Field(() => GraphQLJSONObject)
     preferences: UserPreferences
