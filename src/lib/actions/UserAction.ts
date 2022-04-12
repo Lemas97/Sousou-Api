@@ -15,6 +15,7 @@ import { VoiceChannel } from 'src/types/entities/VoiceChannel'
 import { User } from 'src/types/entities/User'
 import { confirmEmailOnRegister } from '../tasks/emails/RegisterEmail'
 import { v4 } from 'uuid'
+import { PersistedQueryNotFoundError } from 'apollo-server-errors'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -59,8 +60,6 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 
   await em.persistAndFlush(user)
 
-  console.log(user)
-
   await confirmEmailOnRegister(user)
 
   return true
@@ -69,15 +68,19 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 export async function loginUserAction (data: LoginUserInputData, em: EntityManager): Promise<string> {
   const user = await em.findOneOrFail(User, { email: data.email })
 
-  if (!bcrypt.compareSync(data.password, user.password)) throw new ValidationError('CREDENTIALS_NOT_MATCH')
-
   if (!user.emailConfirm) throw new ForbiddenError('EMAIL_NOT_CONFIRMED')
+
+  if (!bcrypt.compareSync(data.password, user.password)) throw new ValidationError('CREDENTIALS_NOT_MATCH')
 
   const token = jwt.sign({
     id: user.id,
     email: user.email,
-    username: user.username
-  }, PRIVATE_KEY)
+    username: user.username,
+    displayName: user.displayName,
+    icon: user.icon,
+    preferences: user.preferences,
+    code: user.code
+  }, PRIVATE_KEY, { expiresIn: '1h' })
   return token
 }
 
@@ -151,9 +154,8 @@ export async function confirmEmailAction (confirmEmailToken: string, em: EntityM
 
 export async function resendEmailConfirmationAction (email: string, em: EntityManager): Promise<boolean> {
   const user = await em.findOneOrFail(User, { email })
-  console.log(user.emailConfirm)
 
-  if (user.emailConfirm) throw new UserInputError('USER_IS_ALREADY_CONFIRMED')
+  if (user.emailConfirm) throw new PersistedQueryNotFoundError()
 
   user.confirmEmailToken = v4()
   await em.flush()

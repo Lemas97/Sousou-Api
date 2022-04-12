@@ -81,9 +81,9 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async confirmEmail (
     @Ctx('em') em: EntityManager,
-      @Arg('id') id: string
+      @Arg('confirmEmailToken') confirmEmailToken: string
   ): Promise<boolean> {
-    return await confirmEmailAction(id, em)
+    return await confirmEmailAction(confirmEmailToken, em)
   }
 
   @Mutation(() => Boolean)
