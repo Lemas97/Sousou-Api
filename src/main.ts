@@ -1,21 +1,23 @@
 import 'reflect-metadata'
 
-import cors from '@koa/cors'
-import Koa, { Context } from 'koa'
-import { ApolloServer } from 'apollo-server-koa'
 import { createServer } from 'http'
+import { ApolloServer } from 'apollo-server-koa'
+import Koa, { Context } from 'koa'
+import cors from '@koa/cors'
+import jwt from 'koa-jwt'
 
 import { MikroORM } from '@mikro-orm/core'
 
 import { buildSchema } from 'type-graphql'
 
 import { ENVIRONMENT, HOST, PORT, PRIVATE_KEY } from 'src/dependencies/config'
-import { CustomContext } from './types/interfaces/CustomContext'
-import { UserResolver } from './lib/resolvers/UserResolver'
+
 import { FriendRequestResolver } from './lib/resolvers/FriendRequestResolver'
 import { GroupResolver } from './lib/resolvers/GroupResolver'
+import { UserResolver } from './lib/resolvers/UserResolver'
+
+import { CustomContext } from './types/interfaces/CustomContext'
 import { isLogged } from './middlewares/guards/IsLogged'
-import jwt from 'koa-jwt'
 import { setStateUser } from './middlewares/SetStateUser'
 import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 
