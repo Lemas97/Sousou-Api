@@ -17,6 +17,7 @@ import { GroupResolver } from './lib/resolvers/GroupResolver'
 import { isLogged } from './middlewares/guards/IsLogged'
 import jwt from 'koa-jwt'
 import { setStateUser } from './middlewares/SetStateUser'
+import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -29,9 +30,8 @@ async function main (): Promise<void> {
       UserResolver,
       FriendRequestResolver,
       GroupResolver
-
     ],
-    globalMiddlewares: [isLogged]
+    globalMiddlewares: [isLogged, ErrorInterceptor]
   })
 
   const apolloServer = new ApolloServer({
