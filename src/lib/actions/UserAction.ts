@@ -24,7 +24,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   const [users, count] = await em.findAndCount(User, {}, {
     limit: paginationData.limit,
     offset,
-    populate: []
+    populate: ['friendList']
   })
 
   return { data: users, total: count }

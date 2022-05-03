@@ -23,10 +23,12 @@ export async function getGroupsAction (paginationData: PaginatedInputData, em: E
 }
 
 export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, { id: 'a3fd5f56-f0c6-48d9-b393-a52780b90547' })
   const group = em.create(Group, {
     ...data,
     createdAt: new Date(),
-    owner: currentUser.id
+    preferences: { approveInvites: false },
+    owner: user
   })
 
   await em.persistAndFlush(group)

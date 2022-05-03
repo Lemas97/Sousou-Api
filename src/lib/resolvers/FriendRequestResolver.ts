@@ -7,13 +7,13 @@ import { answerFriendRequestAction, cancelFriendRequestAction, sendFriendRequest
 
 @Resolver()
 export class FriendRequestResolver {
-  @Mutation(() => FriendRequest)
+  @Mutation(() => Boolean)
   @UseMiddleware()
   async createFriendRequest (
     @Ctx('em') em: EntityManager,
       @Ctx('user') currentUser: User,
       @Arg('data') data: FriendRequestInputData
-  ): Promise<FriendRequest> {
+  ): Promise<boolean> {
     return await sendFriendRequestAction(data, currentUser, em)
   }
 

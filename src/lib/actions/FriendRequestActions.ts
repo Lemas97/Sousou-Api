@@ -4,18 +4,20 @@ import { FriendRequestInputData } from 'src/types/classes/input-data/FriendReque
 import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { User } from 'src/types/entities/User'
 
-export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const toUser = await em.findOneOrFail(User, data.toUserId)
 
-  if (currentUser.friendList.contains(toUser)) {
-    throw new UserInputError('THIS_USER_IS_ALREADY_IN_YOUR_FRIEND_LIST')
-  }
+  const user = await em.findOneOrFail(User, { id: 'a3fd5f56-f0c6-48d9-b393-a52780b90547' })
+
+  // if (user.friendList.length && user.friendList.contains(toUser)) {
+  //   throw new UserInputError('THIS_USER_IS_ALREADY_IN_YOUR_FRIEND_LIST')
+  // }
 
   const friendRequestExists = await em.count(FriendRequest, {
     $or: [
       {
         $and: [
-          { fromUser: currentUser },
+          { fromUser: user },
           { toUser: toUser },
           { canceled: { $eq: null } },
           { answer: { $eq: null } }
@@ -24,7 +26,7 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
       {
         $and: [
           { fromUser: toUser },
-          { toUser: currentUser },
+          { toUser: user },
           { canceled: { $eq: null } },
           { answer: { $eq: null } }
         ]
@@ -39,13 +41,13 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
   const friendRequest = em.create(FriendRequest, {
     ...data,
     createdAt: new Date(),
-    fromUser: currentUser,
+    fromUser: user,
     toUser: toUser
   })
 
   await em.persistAndFlush(friendRequest)
 
-  return friendRequest
+  return true
 }
 
 export async function cancelFriendRequestAction (id: string, currentUser: User, em: EntityManager): Promise<FriendRequest> {
@@ -72,10 +74,11 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
 }
 
 export async function answerFriendRequestAction (id: string, answer: boolean, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+  const user = await em.findOneOrFail(User, { id: 'a3fd5f56-f0c6-48d9-b393-a52780b90547' })
   const friendRequest = await em.findOneOrFail(FriendRequest, {
     $and: [
       { id: { $eq: id } },
-      { toUser: { $eq: currentUser } }
+      { toUser: { $eq: user } }
     ]
   },
   ['toUser'])
@@ -89,8 +92,8 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   }
 
   if (answer) {
-    currentUser.friendList.add(friendRequest.toUser)
-    friendRequest.toUser.friendList.add(currentUser)
+    user.friendList.add(friendRequest.toUser)
+    friendRequest.toUser.friendList.add(user)
   }
 
   em.assign(friendRequest, { answer })

@@ -93,4 +93,12 @@ export class UserResolver {
   ): Promise<boolean> {
     return await resendEmailConfirmationAction(email, em)
   }
+
+  @Query(() => User)
+  async getUserById (
+    @Ctx('em') em: EntityManager,
+      @Arg('id') id: string
+  ): Promise<User> {
+    return await em.findOneOrFail(User, { id })
+  }
 }
