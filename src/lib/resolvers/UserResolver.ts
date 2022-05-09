@@ -3,11 +3,12 @@ import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
-import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
+import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getLoggedUserAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
+import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 
 @Resolver() // test
 export class UserResolver {
@@ -17,6 +18,14 @@ export class UserResolver {
       @Arg('paginatedData') paginatedData: PaginatedInputData
   ): Promise<PaginatedUsers> {
     return await getUsersAction(paginatedData, em)
+  }
+
+  @Query(() => User)
+  async getLoggedUser (
+    @Ctx('em') em: EntityManager,
+      @Ctx('user') currentUser: User
+  ): Promise<User> {
+    return await getLoggedUserAction(currentUser, em)
   }
 
   @Mutation(() => Boolean)
@@ -63,9 +72,9 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async disconnectFromVoiceChat (
     @Ctx('em') em: EntityManager,
-      @Ctx('user') currentUser: User
+      @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<boolean> {
-    return await disconnectFromVoiceChatAction(currentUser, em)
+    return await disconnectFromVoiceChatAction(ctx.user, em)
   }
 
   @Mutation(() => Boolean)

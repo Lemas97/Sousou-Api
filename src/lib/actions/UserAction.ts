@@ -30,6 +30,11 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   return { data: users, total: count }
 }
 
+export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
+  const user = await em.findOneOrFail(User, currentUser.id)
+  return user
+}
+
 export async function registerUserAction (data: UserRegisterInputData, em: EntityManager): Promise<boolean> {
   const hash = bcrypt.hashSync(data.password, 12)
 
