@@ -3,7 +3,6 @@ import { ForbiddenError } from 'apollo-server-koa'
 import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessageInputData'
 import { PersonalMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { SendMessageInputData } from 'src/types/classes/input-data/SendMessageInputData'
-import { Message } from 'src/types/entities/Message'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { TextChannel } from 'src/types/entities/TextChannel'
@@ -16,15 +15,18 @@ export async function sendMessageToTextChannelAction (data: SendMessageInputData
   const channel = await em.findOneOrFail(TextChannel, {
     $and: [
       { id: data.textChannelId },
-      { group: { members: { $in: currentUser } } }
+      { group: { members: { id: currentUser.id } } }
     ]
-  }, [
-    'group',
-    'group.members'
-  ])
+  }, {
+    populate: [
+      'group',
+      'group.members'
+    ]
+  })
 
-  const message = em.create(Message, {
-    fromUser: currentUser,
+  const message = em.create(TextChannelMessage, {
+    createdAt: new Date(),
+    from: currentUser,
     text: data.text,
     textChannel: channel,
     state: MessageStateType.SENDED
@@ -37,7 +39,7 @@ export async function sendMessageToTextChannelAction (data: SendMessageInputData
 
 // if deleteForAll = false handle on front to print message like "This message delete for you"
 export async function deleteMessageAction (id: string, data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const message = await em.findOneOrFail(TextChannelMessage, id, ['textChannel', 'textChannel.group'])
+  const message = await em.findOneOrFail(TextChannelMessage, id, { populate: ['textChannel', 'textChannel.group'] })
 
   if (message.from.id !== currentUser.id && message.textChannel.group.owner !== currentUser) {
     message.deletedFromUsers.add(currentUser)
@@ -57,11 +59,12 @@ export async function deleteMessageAction (id: string, data: DeleteMessageInputD
   return true
 }
 
-export async function sendMessageToFriendAction (personalConversationId: string, messageInputData: PersonalMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const personalConversation = em.findOneOrFail(PersonalChat, personalConversationId)
+export async function sendMessageToFriendAction (personalChatId: string, messageInputData: PersonalMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+  const personalChat = await em.findOneOrFail(PersonalChat, personalChatId)
 
   const message = em.create(PersonalMessage, {
-    conversation: personalConversation,
+    createdAt: new Date(),
+    personalChat: personalChat,
     from: currentUser,
     text: messageInputData.text,
     file: messageInputData.file,
@@ -74,9 +77,9 @@ export async function sendMessageToFriendAction (personalConversationId: string,
 }
 
 export async function deleteMessageFromPersonalConversationAction (personalMessageId: string, data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const message = await em.findOneOrFail(PersonalMessage, personalMessageId, [])
+  const message = await em.findOneOrFail(PersonalMessage, personalMessageId)
 
-  if (!message.conversation.users.contains(currentUser)) {
+  if (!message.personalChat.users.contains(currentUser)) {
     throw new ForbiddenError('NO_ACCESS')
   }
 

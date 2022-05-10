@@ -41,7 +41,7 @@ export class Group {
   @Field()
     createdAt: Date
 
-  @Embedded({ entity: () => GroupPreferences, object: true })
+  @Embedded(() => GroupPreferences, { object: true })
   @Field(() => GraphQLJSONObject)
     preferences: GroupPreferences
 

@@ -8,5 +8,5 @@ import { PersonalChat } from './PersonalChat'
 export class PersonalMessage extends Message {
   @ManyToOne(() => PersonalChat)
   @Field(() => PersonalChat)
-    conversation: PersonalChat
+    personalChat: PersonalChat
 }

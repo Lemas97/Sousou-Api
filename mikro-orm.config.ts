@@ -1,4 +1,4 @@
-import { DB_DATABASE, DB_HOST, DB_PORT, DB_USER } from './src/dependencies/config'
+import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './src/dependencies/config'
 
 export default {
   type: 'mariadb',
@@ -6,9 +6,16 @@ export default {
   user: DB_USER,
   host: DB_HOST,
   port: DB_PORT,
+  password: DB_PASSWORD,
   debug: true,
+  migrations: {
+    glob: '!(*.d).{js,ts}',
+    pathTs: './migrations',
+    snapshot: false,
+    emit: 'ts'
+  },
   entities: [
-    './src/types/entities/*.ts',
-    './src/types/embeddables/*.ts'
+    './src/types/embeddables/*.ts',
+    './src/types/entities/*.ts'
   ]
 }

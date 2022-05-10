@@ -25,6 +25,9 @@ export async function getGroupsAction (paginationData: PaginatedInputData, em: E
 export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = em.create(Group, {
     ...data,
+    preferences: {
+      approveInvites: false
+    },
     createdAt: new Date(),
     owner: currentUser.id
   })

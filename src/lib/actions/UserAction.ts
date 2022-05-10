@@ -16,6 +16,8 @@ import { User } from 'src/types/entities/User'
 import { confirmEmailOnRegister } from '../tasks/emails/RegisterEmail'
 import { v4 } from 'uuid'
 import { PersistedQueryNotFoundError } from 'apollo-server-errors'
+import { PersonalChat } from 'src/types/entities/PersonalChat'
+import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -31,7 +33,28 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 }
 
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
-  const user = await em.findOneOrFail(User, currentUser.id)
+  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['groups'] })
+
+  const personalChats = await em.find(PersonalChat, {
+    users: { id: { $in: [currentUser.id] } }
+  }, {
+    orderBy: { messages: { createdAt: 'DESC' } }
+  })
+
+  const firstPersonalChatsMessages = await em.find(PersonalMessage, { personalChat: { $in: personalChats } }, {
+    limit: 1,
+    offset: 1,
+    orderBy: { createdAt: 'DESC' },
+    populate: ['personalChat']
+  })
+
+  personalChats.forEach((personalChat, index) => {
+    personalChat.messages.add(firstPersonalChatsMessages.find(message => message.personalChat.id === personalChat.id) as PersonalMessage)
+    personalChats[index] = personalChat
+  })
+
+  user.personalChats.set(personalChats)
+
   return user
 }
 
@@ -56,6 +79,9 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 
   const user = em.create(User, {
     ...data,
+    emailConfirm: false,
+    icon: '',
+    createdAt: new Date(),
     password: hash,
     code,
     displayName: data.username,
@@ -100,7 +126,9 @@ export async function updateUserPreferencesAction (data: UserPreferencesInputDat
   if (data.masterOutputVolume < 0 || data.masterOutputVolume > 100) throw new UserInputError('MASTER_VOLUME_HAS_RANGE_0-100')
   if (data.inputVolume < 0 || data.inputVolume > 100) throw new UserInputError('MASTER_VOLUME_HAS_RANGE_0-100')
 
-  em.assign(user, { ...data })
+  em.assign(user, {
+    preferences: data
+  })
 
   await em.flush()
 
@@ -108,7 +136,7 @@ export async function updateUserPreferencesAction (data: UserPreferencesInputDat
 }
 
 export async function connectToVoiceChannelAction (voiceChannelId: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, voiceChannelId, ['group'])
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, voiceChannelId, { populate: ['group'] })
 
   if (!currentUser.groups.contains(voiceChannel.group)) throw new ForbiddenError('NO_ACCESS')
 
@@ -134,7 +162,7 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
 
   if (!user.connectedVoiceChannel || user.connectedVoiceChannel.id !== voiceChannelId) throw new UserInputError('USER_IS_NOT_CONNECTED_TO_THIS_VOICE_CHANNEL')
 
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, voiceChannelId, ['group', 'group.owner'])
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, voiceChannelId, { populate: ['group', 'group.owner'] })
 
   if (voiceChannel.group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
 

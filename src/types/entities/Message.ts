@@ -33,6 +33,10 @@ export class Message {
   @Field(() => MessageStateType)
     state: MessageStateType
 
+  @Property({ nullable: true })
+  @Field({ nullable: true })
+    file?: string
+
   @ManyToOne(() => User)
   @Field(() => User)
     from: User

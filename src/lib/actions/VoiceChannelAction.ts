@@ -23,7 +23,7 @@ export async function createVoiceChannelAction (data: VoiceChannelInputData, cur
 }
 
 export async function updateVoiceChannelAction (id: string, data: VoiceChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, ['group'])
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
   if (voiceChannel.group.owner !== currentUser) {
     throw new ForbiddenError('NO_ACCESS')
@@ -36,7 +36,7 @@ export async function updateVoiceChannelAction (id: string, data: VoiceChannelIn
 }
 
 export async function deleteVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, ['group'])
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
   if (voiceChannel.group.owner !== currentUser) {
     throw new ForbiddenError('NO_ACCESS')
@@ -48,7 +48,7 @@ export async function deleteVoiceChannelAction (id: string, currentUser: User, e
 }
 
 export async function connectToVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, ['group'])
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
   if (!voiceChannel.group.members.contains(currentUser)) {
     throw new ForbiddenError('NO_ACCESS')
@@ -62,7 +62,7 @@ export async function connectToVoiceChannelAction (id: string, currentUser: User
 }
 
 export async function disconnectFromVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, ['group'])
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
   // if (!voiceChannel.group.members.contains(currentUser)) {
   //   throw new ForbiddenError('NO_ACCESS')

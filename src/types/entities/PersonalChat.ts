@@ -16,7 +16,7 @@ export class PersonalChat {
   @Field(() => [User])
     users = new Collection<User>(this)
 
-  @OneToMany(() => PersonalMessage, message => message.conversation)
+  @OneToMany(() => PersonalMessage, message => message.personalChat)
   @Field(() => [PersonalMessage])
     messages = new Collection<PersonalMessage>(this)
 }

@@ -78,7 +78,7 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
       { toUser: { $eq: currentUser } }
     ]
   },
-  ['toUser'])
+  { populate: ['toUser'] })
 
   if (friendRequest.canceled) {
     throw new UserInputError('FRIEND_REQUEST_IS_ALREADY_CANCELLED')

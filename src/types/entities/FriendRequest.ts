@@ -18,17 +18,17 @@ export class FriendRequest {
   @Field()
     createdAt: Date
 
-  @Property()
-  @Field()
-    updatedAt: Date
+  @Property({ nullable: true })
+  @Field({ nullable: true })
+    updatedAt?: Date
 
   @Property({ nullable: true })
   @Field({ nullable: true })
-    answer: boolean
+    answer?: boolean
 
   @Property({ nullable: true })
   @Field({ nullable: true })
-    canceled: boolean
+    canceled?: boolean
 
   @ManyToOne(() => User)
   @Field(() => User)

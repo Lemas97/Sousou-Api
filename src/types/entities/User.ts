@@ -55,7 +55,7 @@ export class User {
 
   @Property()
   @Field()
-    createdAt: Date = new Date()
+    createdAt: Date
 
   @Property()
   @Field()
@@ -63,7 +63,7 @@ export class User {
 
   @Property({ type: Boolean })
   @Field(() => Boolean)
-    emailConfirm = false
+    emailConfirm: boolean
 
   @Embedded({ entity: () => UserPreferences, object: true })
   @Field(() => GraphQLJSONObject)
@@ -93,7 +93,7 @@ export class User {
   @Field(() => [User])
     friendList = new Collection<User>(this)
 
-  @ManyToMany(() => PersonalChat, personalConversation => personalConversation.users)
+  @ManyToMany(() => PersonalChat, personalChat => personalChat.users)
   @Field(() => [PersonalChat])
-    personalConversations = new Collection<PersonalChat>(this)
+    personalChats = new Collection<PersonalChat>(this)
 }
