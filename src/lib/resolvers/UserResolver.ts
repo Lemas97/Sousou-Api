@@ -23,9 +23,9 @@ export class UserResolver {
   @Query(() => User)
   async getLoggedUser (
     @Ctx('em') em: EntityManager,
-      @Ctx('user') currentUser: User
+      @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<User> {
-    return await getLoggedUserAction(currentUser, em)
+    return await getLoggedUserAction(ctx.user, em)
   }
 
   @Mutation(() => Boolean)
@@ -54,19 +54,19 @@ export class UserResolver {
   @Mutation(() => User)
   async updateUserPreferences (
     @Ctx('em') em: EntityManager,
-      @Ctx('user') currentUser: User,
+      @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('data') data: UserPreferencesInputData
   ): Promise<User> {
-    return await updateUserPreferencesAction(data, currentUser, em)
+    return await updateUserPreferencesAction(data, ctx.user, em)
   }
 
   @Mutation(() => Boolean)
   async connectToVoiceChannel (
     @Ctx('em') em: EntityManager,
-      @Ctx('user') currentUser: User,
+      @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('voiceChannelId') voiceChannelId: string
   ): Promise<boolean> {
-    return await connectToVoiceChannelAction(voiceChannelId, currentUser, em)
+    return await connectToVoiceChannelAction(voiceChannelId, ctx.user, em)
   }
 
   @Mutation(() => Boolean)
@@ -80,11 +80,11 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async kickFromVoiceChannel (
     @Ctx('em') em: EntityManager,
-      @Ctx('user') currentUser: User,
+      @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string,
       @Arg('voiceChannelId') voiceChannelId: string
   ): Promise<boolean> {
-    return await kickFromVoiceChannelAction(id, voiceChannelId, currentUser, em)
+    return await kickFromVoiceChannelAction(id, voiceChannelId, ctx.user, em)
   }
 
   @Mutation(() => Boolean)

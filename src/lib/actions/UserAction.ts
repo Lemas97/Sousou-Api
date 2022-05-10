@@ -16,8 +16,8 @@ import { User } from 'src/types/entities/User'
 import { confirmEmailOnRegister } from '../tasks/emails/RegisterEmail'
 import { v4 } from 'uuid'
 import { PersistedQueryNotFoundError } from 'apollo-server-errors'
-import { PersonalChat } from 'src/types/entities/PersonalChat'
-import { PersonalMessage } from 'src/types/entities/PersonalMessage'
+// import { PersonalChat } from 'src/types/entities/PersonalChat'
+// import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -33,27 +33,39 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 }
 
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
-  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['groups'] })
-
-  const personalChats = await em.find(PersonalChat, {
-    users: { id: { $in: [currentUser.id] } }
-  }, {
-    orderBy: { messages: { createdAt: 'DESC' } }
+  const user = await em.findOneOrFail(User, currentUser.id, {
+    populate: [
+      'connectedVoiceChannel',
+      'connectedVoiceChannel.users',
+      'connectedVoiceChannel.group',
+      'groups',
+      'ownedGroups',
+      'friendRequests',
+      'myFriendRequests',
+      'friendList',
+      'personalChats'
+    ]
   })
 
-  const firstPersonalChatsMessages = await em.find(PersonalMessage, { personalChat: { $in: personalChats } }, {
-    limit: 1,
-    offset: 1,
-    orderBy: { createdAt: 'DESC' },
-    populate: ['personalChat']
-  })
+  // const personalChats = await em.find(PersonalChat, {
+  //   users: { id: { $in: [currentUser.id] } }
+  // }, {
+  //   orderBy: { messages: { createdAt: 'DESC' } }
+  // })
 
-  personalChats.forEach((personalChat, index) => {
-    personalChat.messages.add(firstPersonalChatsMessages.find(message => message.personalChat.id === personalChat.id) as PersonalMessage)
-    personalChats[index] = personalChat
-  })
+  // const firstPersonalChatsMessages = await em.find(PersonalMessage, { personalChat: { $in: personalChats } }, {
+  //   limit: 1,
+  //   offset: 1,
+  //   orderBy: { createdAt: 'DESC' },
+  //   populate: ['personalChat']
+  // })
 
-  user.personalChats.set(personalChats)
+  // personalChats.forEach((personalChat, index) => {
+  //   personalChat.messages.add(firstPersonalChatsMessages.find(message => message.personalChat.id === personalChat.id) as PersonalMessage)
+  //   personalChats[index] = personalChat
+  // })
+
+  // user.personalChats.set(personalChats)
 
   return user
 }
