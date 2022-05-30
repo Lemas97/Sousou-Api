@@ -22,10 +22,21 @@ import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
-  if (!paginationData.filter) paginationData.filter = ''
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
 
-  const [users, count] = await em.findAndCount(User, {}, {
+  const [users, count] = await em.findAndCount(User, {
+    $and: [
+      paginationData.filter
+        ? {
+            $or: [
+              { displayName: { $like: `%${paginationData.filter}%` } },
+              { email: { $like: `%${paginationData.filter}%` } },
+              { username: { $like: `%${paginationData.filter}%` } }
+            ]
+          }
+        : {}
+    ]
+  }, {
     limit: paginationData.limit,
     offset,
     populate: []
