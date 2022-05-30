@@ -43,6 +43,8 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
     toUser: toUser
   })
 
+  await em.populate(friendRequest, ['fromUser', 'toUser'])
+
   await em.persistAndFlush(friendRequest)
 
   return friendRequest
