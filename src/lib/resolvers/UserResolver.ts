@@ -3,7 +3,7 @@ import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
-import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getLoggedUserAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
+import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getLoggedUserAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, refreshTokenAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
@@ -44,11 +44,20 @@ export class UserResolver {
     return await loginUserAction(data, em)
   }
 
+  @Mutation(() => String)
+  async refreshToken (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext
+  ): Promise<string> {
+    return await refreshTokenAction(ctx.user, em)
+  }
+
   @Mutation(() => Boolean)
   async logoutUser (
-    @Ctx('em') em: EntityManager
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<boolean> {
-    return await logoutUserAction(em)
+    return await logoutUserAction(ctx.user, em)
   }
 
   @Mutation(() => User)

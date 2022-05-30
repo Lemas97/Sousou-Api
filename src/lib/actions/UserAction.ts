@@ -18,6 +18,8 @@ import { v4 } from 'uuid'
 import { PersistedQueryNotFoundError } from 'apollo-server-errors'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { PersonalMessage } from 'src/types/entities/PersonalMessage'
+import { FriendRequest } from 'src/types/entities/FriendRequest'
+import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -68,6 +70,21 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
   user.personalChats.set(personalChats)
 
   return user
+}
+
+export async function getFriendRequests (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedFriendRequests> {
+  const offset = (paginationData.limit * paginationData.page) - paginationData.limit
+  const [friendRequests, count] = await em.findAndCount(FriendRequest, forMe
+    ? {
+        toUser: { id: currentUser.id }
+      }
+    : { fromUser: { id: currentUser.id } }, {
+    populate: [forMe ? 'fromUser' : 'toUser'],
+    offset,
+    limit: paginationData.limit
+  })
+
+  return { data: friendRequests, total: count }
 }
 
 export async function registerUserAction (data: UserRegisterInputData, em: EntityManager): Promise<boolean> {
@@ -124,10 +141,35 @@ export async function loginUserAction (data: LoginUserInputData, em: EntityManag
     preferences: user.preferences,
     code: user.code
   }, PRIVATE_KEY, { expiresIn: '1h' })
+
+  user.jwtToken = token
+
+  await em.flush()
+
   return token
 }
 
-export async function logoutUserAction (em: EntityManager): Promise<boolean> {
+export async function refreshTokenAction (currentUser: User, em: EntityManager): Promise<string> {
+  const token = jwt.sign({
+    id: currentUser.id,
+    email: currentUser.email,
+    username: currentUser.username,
+    displayName: currentUser.displayName,
+    icon: currentUser.icon,
+    preferences: currentUser.preferences,
+    code: currentUser.code
+  }, PRIVATE_KEY, { expiresIn: '1h' })
+
+  currentUser.jwtToken = token
+
+  await em.flush()
+
+  return token
+}
+
+export async function logoutUserAction (currentUser: User, em: EntityManager): Promise<boolean> {
+  currentUser.jwtToken = undefined
+
   await em.flush()
   return true
 }

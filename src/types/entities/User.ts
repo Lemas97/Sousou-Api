@@ -65,6 +65,10 @@ export class User {
   @Field(() => Boolean)
     emailConfirm: boolean
 
+  @Property({ nullable: true })
+  @Field({ nullable: true })
+    jwtToken?: string
+
   @Embedded({ entity: () => UserPreferences, object: true })
   @Field(() => GraphQLJSONObject)
     preferences: UserPreferences
