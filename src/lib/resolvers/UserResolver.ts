@@ -3,12 +3,13 @@ import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
-import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getLoggedUserAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, refreshTokenAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
+import { confirmEmailAction, connectToVoiceChannelAction, disconnectFromVoiceChatAction, getFriendRequestsAction, getLoggedUserAction, getUsersAction, kickFromVoiceChannelAction, loginUserAction, logoutUserAction, refreshTokenAction, registerUserAction, resendEmailConfirmationAction, updateUserPreferencesAction } from '../actions/UserAction'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
+import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 
 @Resolver() // test
 export class UserResolver {
@@ -26,6 +27,17 @@ export class UserResolver {
       @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<User> {
     return await getLoggedUserAction(ctx.user, em)
+  }
+
+  // make getFriendRequests query
+  @Query(() => PaginatedFriendRequests)
+  async getFriendRequests (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('paginatedData') paginatedData: PaginatedInputData,
+      @Arg('forMe') forMe: boolean
+  ): Promise<PaginatedFriendRequests> {
+    return await getFriendRequestsAction(paginatedData, forMe, ctx.user, em)
   }
 
   @Mutation(() => Boolean)

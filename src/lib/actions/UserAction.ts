@@ -72,7 +72,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
   return user
 }
 
-export async function getFriendRequests (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedFriendRequests> {
+export async function getFriendRequestsAction (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedFriendRequests> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
   const [friendRequests, count] = await em.findAndCount(FriendRequest, forMe
     ? {
