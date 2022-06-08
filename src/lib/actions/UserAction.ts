@@ -37,7 +37,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
         : {}
     ]
   }, {
-    limit: paginationData.limit,
+    limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset,
     populate: []
   })
@@ -88,36 +88,33 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
   paginationData.filter = paginationData.filter ?? ''
 
   const [friendRequests, count] = await em.findAndCount(FriendRequest,
-    {
-      $and: [
-        forMe
-          ? {
-              toUser: {
-                $and: [
-                  { id: currentUser.id },
-                  { username: { $like: `%${paginationData.filter}%` } },
-                  { email: { $like: `%${paginationData.filter}%` } },
-                  { displayName: { $like: `%${paginationData.filter}%` } },
-                  { code: { $like: `%${paginationData.filter}%` } }
-                ]
-              }
-            }
-          : {
-              fromUser: {
-                $and: [
-                  { id: currentUser.id },
-                  { username: { $like: `%${paginationData.filter}%` } },
-                  { email: { $like: `%${paginationData.filter}%` } },
-                  { displayName: { $like: `%${paginationData.filter}%` } },
-                  { code: { $like: `%${paginationData.filter}%` } }
-                ]
-              }
-            }
-      ]
-    }, {
+    forMe
+      ? {
+          toUser: {
+            $and: [
+              { id: currentUser.id },
+              { username: { $like: `%${paginationData.filter}%` } },
+              { email: { $like: `%${paginationData.filter}%` } },
+              { displayName: { $like: `%${paginationData.filter}%` } },
+              { code: { $like: `%${paginationData.filter}%` } }
+            ]
+          }
+        }
+      : {
+          fromUser: {
+            $and: [
+              { id: currentUser.id },
+              { username: { $like: `%${paginationData.filter}%` } },
+              { email: { $like: `%${paginationData.filter}%` } },
+              { displayName: { $like: `%${paginationData.filter}%` } },
+              { code: { $like: `%${paginationData.filter}%` } }
+            ]
+          }
+        }
+    , {
       populate: [forMe ? 'fromUser' : 'toUser'],
       offset,
-      limit: paginationData.limit
+      limit: paginationData.limit > 0 ? paginationData.limit : undefined
     })
 
   return { data: friendRequests, total: count }

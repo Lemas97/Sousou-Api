@@ -14,7 +14,7 @@ export async function getGroupsAction (paginationData: PaginatedInputData, em: E
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
 
   const [group, count] = await em.findAndCount(Group, {}, {
-    limit: paginationData.limit,
+    limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset,
     orderBy: { createdAt: 'DESC' },
     populate: ['owner']
