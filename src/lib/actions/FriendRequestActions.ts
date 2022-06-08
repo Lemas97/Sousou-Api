@@ -5,12 +5,16 @@ import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { User } from 'src/types/entities/User'
 
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+  if (data.toUserId === currentUser.id) {
+    throw new UserInputError('You cannot send a friend request to yourself')
+  }
+
   const toUser = await em.findOneOrFail(User, data.toUserId)
 
   await em.populate(currentUser, ['friendList'])
 
   if (currentUser.friendList.contains(toUser)) {
-    throw new UserInputError('THIS_USER_IS_ALREADY_IN_YOUR_FRIEND_LIST')
+    throw new UserInputError('You are already friends with this user')
   }
 
   const friendRequestExists = await em.count(FriendRequest, {
@@ -35,19 +39,19 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
   })
 
   if (friendRequestExists) {
-    throw new UserInputError('THIS_REQUEST_ALREADY_EXISTS')
+    throw new UserInputError('You already sent a friend request to this user')
   }
 
   const friendRequest = em.create(FriendRequest, {
-    ...data,
+    message: data.message,
     createdAt: new Date(),
     fromUser: currentUser,
     toUser: toUser
   })
 
-  await em.populate(friendRequest, ['fromUser', 'toUser'])
-
   await em.persistAndFlush(friendRequest)
+
+  await em.populate(friendRequest, ['fromUser', 'toUser'])
 
   return friendRequest
 }
@@ -61,11 +65,11 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
   })
 
   if (friendRequest.canceled) {
-    throw new UserInputError('FRIEND_REQUEST_IS_ALREADY_CANCELLED')
+    throw new UserInputError('This friend request has already been canceled')
   }
 
   if (friendRequest.answer) {
-    throw new UserInputError('FRIEND_REQUEST_IS_ALREADY_ANSWERED')
+    throw new UserInputError('This friend request has already been answered')
   }
 
   em.assign(friendRequest, { canceled: true })
@@ -85,11 +89,11 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   { populate: ['toUser'] })
 
   if (friendRequest.canceled) {
-    throw new UserInputError('FRIEND_REQUEST_IS_ALREADY_CANCELLED')
+    throw new UserInputError('This friend request has already been canceled')
   }
 
   if (friendRequest.answer) {
-    throw new UserInputError('FRIEND_REQUEST_IS_ALREADY_ANSWERED')
+    throw new UserInputError('This friend request has already been answered')
   }
 
   if (answer) {

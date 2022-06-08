@@ -113,7 +113,6 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
                 ]
               }
             }
-
       ]
     }, {
       populate: [forMe ? 'fromUser' : 'toUser'],
