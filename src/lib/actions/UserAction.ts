@@ -85,15 +85,41 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
 
 export async function getFriendRequestsAction (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedFriendRequests> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
-  const [friendRequests, count] = await em.findAndCount(FriendRequest, forMe
-    ? {
-        toUser: { id: currentUser.id }
-      }
-    : { fromUser: { id: currentUser.id } }, {
-    populate: [forMe ? 'fromUser' : 'toUser'],
-    offset,
-    limit: paginationData.limit
-  })
+  paginationData.filter = paginationData.filter ?? ''
+
+  const [friendRequests, count] = await em.findAndCount(FriendRequest,
+    {
+      $and: [
+        forMe
+          ? {
+              toUser: {
+                $and: [
+                  { id: currentUser.id },
+                  { username: { $like: `%${paginationData.filter}%` } },
+                  { email: { $like: `%${paginationData.filter}%` } },
+                  { displayName: { $like: `%${paginationData.filter}%` } },
+                  { code: { $like: `%${paginationData.filter}%` } }
+                ]
+              }
+            }
+          : {
+              fromUser: {
+                $and: [
+                  { id: currentUser.id },
+                  { username: { $like: `%${paginationData.filter}%` } },
+                  { email: { $like: `%${paginationData.filter}%` } },
+                  { displayName: { $like: `%${paginationData.filter}%` } },
+                  { code: { $like: `%${paginationData.filter}%` } }
+                ]
+              }
+            }
+
+      ]
+    }, {
+      populate: [forMe ? 'fromUser' : 'toUser'],
+      offset,
+      limit: paginationData.limit
+    })
 
   return { data: friendRequests, total: count }
 }
