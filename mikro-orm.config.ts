@@ -1,7 +1,7 @@
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './src/dependencies/config'
 
 export default {
-  type: 'mariadb',
+  type: 'mysql',
   dbName: DB_DATABASE,
   user: DB_USER,
   host: DB_HOST,

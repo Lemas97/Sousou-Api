@@ -5,6 +5,8 @@ import { ApolloServer } from 'apollo-server-koa'
 import Koa, { Context } from 'koa'
 import cors from '@koa/cors'
 import jwt from 'koa-jwt'
+import { WebSocketServer } from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { MikroORM } from '@mikro-orm/core'
 
@@ -20,6 +22,7 @@ import { CustomContext } from './types/interfaces/CustomContext'
 import { isLogged } from './middlewares/guards/IsLogged'
 import { setStateUser } from './middlewares/SetStateUser'
 import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
+import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -35,9 +38,38 @@ async function main (): Promise<void> {
     ],
     globalMiddlewares: [isLogged, ErrorInterceptor]
   })
+  const app = new Koa()
+  const httpServer = createServer(app.callback())
+
+  const wsServer = new WebSocketServer({
+    // This is the `httpServer` we created in a previous step.
+    server: httpServer,
+    // verifyClient: (_info, _done) => {
+    // },
+    // Pass a different path here if your ApolloServer serves at
+    // a different path.
+    path: '/graphql'
+  })
+
+  wsServer.on('connection', (_ws, _request) => {
+    // console.log(request.url?.split('param=')[1])
+  })
+
+  const serverCleanup = useServer(
+    {
+      schema,
+      context: (_ctx, _msg, _args) => {
+        // Returning an object will add that information to our
+        // GraphQL context, which all of our resolvers have access to.
+        // return getDynamicContext(ctx, msg, args)
+      }
+    },
+    wsServer
+  )
 
   const apolloServer = new ApolloServer({
     schema,
+    csrfPrevention: true,
     context ({ ctx }: { ctx: Context }): CustomContext {
       return {
         ctx,
@@ -45,10 +77,23 @@ async function main (): Promise<void> {
         em: connection.em.fork(),
         dataLoader: true
       }
-    }
-  })
+    },
+    plugins: [
+      // Proper shutdown for the HTTP server.
+      ApolloServerPluginDrainHttpServer({ httpServer }),
 
-  const app = new Koa()
+      // Proper shutdown for the WebSocket server.
+      {
+        async serverWillStart () {
+          return {
+            async drainServer () {
+              await serverCleanup.dispose()
+            }
+          }
+        }
+      }
+    ]
+  })
 
   if (ENVIRONMENT === 'production') {
     app.proxy = true
@@ -63,8 +108,6 @@ async function main (): Promise<void> {
   app.use(setStateUser(connection.em.fork()))
 
   app.use(apolloServer.getMiddleware({ cors: app.proxy }))
-
-  const httpServer = createServer(app.callback())
 
   httpServer.listen({ port: PORT }, () => {
     console.log(`http://${HOST}:${PORT}/graphql`)
