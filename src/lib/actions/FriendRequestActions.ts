@@ -7,6 +7,8 @@ import { User } from 'src/types/entities/User'
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
   const toUser = await em.findOneOrFail(User, data.toUserId)
 
+  await em.populate(currentUser, ['friendList'])
+
   if (currentUser.friendList.contains(toUser)) {
     throw new UserInputError('THIS_USER_IS_ALREADY_IN_YOUR_FRIEND_LIST')
   }
@@ -43,7 +45,7 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
     toUser: toUser
   })
 
-  await em.populate(friendRequest, ['fromUser', 'toUser'])
+  await em.populate(friendRequest, ['fromUser', 'toUser', ''])
 
   await em.persistAndFlush(friendRequest)
 
