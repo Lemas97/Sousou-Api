@@ -7,10 +7,12 @@ import {
   PrimaryKey,
   Property
 } from '@mikro-orm/core'
-import { GraphQLJSONObject } from 'graphql-type-json'
 
+import { GraphQLJSONObject } from 'graphql-type-json'
 import { Field, ObjectType } from 'type-graphql'
+
 import { v4 } from 'uuid'
+
 import { GroupPreferences } from '../embeddables/GroupPreferences'
 import { User } from './User'
 

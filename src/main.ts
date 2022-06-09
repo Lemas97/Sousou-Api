@@ -17,12 +17,14 @@ import { ENVIRONMENT, HOST, PORT, PRIVATE_KEY } from 'src/dependencies/config'
 import { FriendRequestResolver } from './lib/resolvers/FriendRequestResolver'
 import { GroupResolver } from './lib/resolvers/GroupResolver'
 import { UserResolver } from './lib/resolvers/UserResolver'
+import { GroupInviteResolver } from './lib/resolvers/GroupInviteResolver'
 
 import { CustomContext } from './types/interfaces/CustomContext'
 import { isLogged } from './middlewares/guards/IsLogged'
 import { setStateUser } from './middlewares/SetStateUser'
 import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
+import { User } from './types/entities/User'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -34,7 +36,8 @@ async function main (): Promise<void> {
     resolvers: [
       UserResolver,
       FriendRequestResolver,
-      GroupResolver
+      GroupResolver,
+      GroupInviteResolver
     ],
     globalMiddlewares: [isLogged, ErrorInterceptor]
   })
@@ -59,9 +62,15 @@ async function main (): Promise<void> {
     {
       schema,
       context: (_ctx, _msg, _args) => {
-        // Returning an object will add that information to our
-        // GraphQL context, which all of our resolvers have access to.
-        // return getDynamicContext(ctx, msg, args)
+        return {
+          dataLoader: true,
+          state: {
+            user: new User()
+          }
+        }
+      // Returning an object will add that information to our
+      // GraphQL context, which all of our resolvers have access to.
+      // return getDynamicContext(ctx, msg, args)
       }
     },
     wsServer
@@ -75,7 +84,7 @@ async function main (): Promise<void> {
         ctx,
         state: ctx.state,
         em: connection.em.fork(),
-        dataLoader: true
+        dataLoader: false
       }
     },
     plugins: [

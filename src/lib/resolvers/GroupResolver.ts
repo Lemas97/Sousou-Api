@@ -3,6 +3,7 @@ import { GroupInputData } from 'src/types/classes/input-data/GroupInputData'
 import { GroupPreferencesInputData } from 'src/types/classes/input-data/json-input-data/GroupPreferencesInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedGroups } from 'src/types/classes/pagination/PaginatedGroups'
+import { GroupSubscription } from 'src/types/classes/subscriptions/GroupSubscription'
 import { Group } from 'src/types/entities/Group'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Publisher, PubSub, Query, Resolver, Root, Subscription } from 'type-graphql'
@@ -25,34 +26,35 @@ export class GroupResolver {
     return await getGroupsAction(paginationInputData, em)
   }
 
-  @Mutation(() => Group)
+  @Mutation(() => Boolean)
   async createGroup (
-    @Ctx('em') em: EntityManager,
-      @PubSub('GROUP_CREATED') publish: Publisher<Group>,
+    @PubSub('GROUP_CREATED') publish: Publisher<Group>,
+      @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('data') data: GroupInputData
-  ): Promise<Group> {
-    const group = await em.find(Group, {})
-    console.log('edw')
-    await publish(group[0])
-    console.log('edw')
-    await createGroupAction(data, ctx.user, em)
-    return group[0]
+  ): Promise<boolean> {
+    const group = await createGroupAction(data, ctx.user, em)
+    await publish(group)
+    return true
   }
 
   @Mutation(() => Boolean)
   async updateGroup (
-    @Ctx('em') em: EntityManager,
+    @PubSub('GROUP_UPDATED') publish: Publisher<Group>,
+      @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string,
       @Arg('data') data: GroupInputData
   ): Promise<boolean> {
-    return await updateGroupAction(id, data, ctx.user, em)
+    const group = await updateGroupAction(id, data, ctx.user, em)
+    await publish(group)
+    return true
   }
 
   @Mutation(() => Boolean)
   async deleteGroup (
-    @Ctx('em') em: EntityManager,
+    @PubSub('GROUP_DELETED') _publish: Publisher<Group>,
+      @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string
   ): Promise<boolean> {
@@ -79,11 +81,11 @@ export class GroupResolver {
     return await transferOwnershipToUserAction(id, newOwnerId, ctx.user, em)
   }
 
-  @Subscription(() => Group, {
-    topics: 'GROUP_CREATED'
-    // filter: ({ payload, args }) => args.store_slug === payload.store_slug
+  @Subscription(() => GroupSubscription, {
+    topics: ['GROUP_CREATED', 'GROUP_UPDATED', 'GROUP_DELETED'],
+    filter: ({ payload, args }) => args.userId === payload.owner.id || (payload as Group).members.getItems().map(member => member.id).includes(args.userId)
   })
-  onCreateGroup (@Root() payload: Group, @Arg('store_slug') _: string): Group {
-    return payload
+  onGroupActions (@Root() payload: Group, @Arg('userId') _: string): GroupSubscription {
+    return { group: payload, event: 'delete' }
   }
 }

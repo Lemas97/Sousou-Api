@@ -22,7 +22,7 @@ export async function getGroupsAction (paginationData: PaginatedInputData, em: E
   return { data: group, total: count }
 }
 
-export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<Group> {
   const group = em.create(Group, {
     ...data,
     preferences: {
@@ -33,11 +33,12 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
   })
 
   await em.persistAndFlush(group)
+  await em.populate(group, ['owner'])
 
-  return true
+  return group
 }
 
-export async function updateGroupAction (id: string, data: GroupInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function updateGroupAction (id: string, data: GroupInputData, currentUser: User, em: EntityManager): Promise<Group> {
   const group = await em.findOneOrFail(Group, id)
 
   if (group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
@@ -46,7 +47,7 @@ export async function updateGroupAction (id: string, data: GroupInputData, curre
 
   await em.flush()
 
-  return true
+  return group
 }
 
 export async function updateGroupPreferencesAction (id: string, groupPreferencesInputData: GroupPreferencesInputData, currentUser: User, em: EntityManager): Promise<boolean> {
