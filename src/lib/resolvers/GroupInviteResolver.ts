@@ -60,7 +60,10 @@ export class GroupInviteResolver {
 
   @Subscription(() => GroupInviteSubscription, {
     topics: ['GROUP_INVITE_CREATE', 'GROUP_INVITE_UPDATE', 'GROUP_INVITE_ANSWER'],
-    filter: ({ payload, args }) => (args.userId === (payload.payload as GroupInvite).fromUser.id || (payload.payload as GroupInvite).toUser.id === args.userId)
+    filter: ({ payload, args }) => {
+      console.log(args)
+      return (args.userId === (payload.data as GroupInvite).fromUser.id || (payload.data as GroupInvite).toUser.id === args.userId)
+    }
   })
   onGroupInviteActions (@Root() payload: PayloadGeneric<GroupInvite>, @Arg('userId') _: string): GroupInviteSubscription {
     return { group: payload.data, event: payload.event }

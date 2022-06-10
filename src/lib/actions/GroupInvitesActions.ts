@@ -48,6 +48,8 @@ export async function getGroupInviteActions (paginationData: PaginatedInputData,
 }
 
 export async function createGroupInviteAction (groupInviteInputData: GroupInviteInputData, currentUser: User, em: EntityManager): Promise<GroupInvite> {
+  if (currentUser.id === groupInviteInputData.toUserId) throw new UserInputError('You cannot invite yourself to a group')
+
   const group = await em.findOneOrFail(Group, groupInviteInputData.groupId)
   const toUser = await em.findOneOrFail(User, groupInviteInputData.toUserId)
 
@@ -62,6 +64,10 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
   await em.persistAndFlush(groupInvite)
 
   await em.populate(groupInvite, ['toUser', 'fromUser'])
+
+  await em.populate(currentUser, ['groups'])
+
+  console.log(currentUser.groups.getItems())
 
   return groupInvite
 }
@@ -80,13 +86,19 @@ export async function cancelGroupInviteAction (id: string, currentUser: User, em
 }
 
 export async function answerGroupInviteAction (id: string, answer: boolean, currentUser: User, em: EntityManager): Promise<GroupInvite> {
-  const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser'] })
+  const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser', 'group', 'group.members'] })
+
+  const group = await em.findOneOrFail(Group, groupInvite.group.id)
 
   if (currentUser.id !== groupInvite.toUser.id) throw new UserInputError('NO_ACCESS')
 
   if (groupInvite.answer !== null) throw new UserInputError('Cannot answer invite that has already been answered')
 
   em.assign(groupInvite, { answer: answer })
+
+  await em.populate(currentUser, ['groups'])
+  em.assign(group, { members: [...group.members.getItems(), currentUser] })
+
   await em.flush()
 
   return groupInvite
