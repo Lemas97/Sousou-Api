@@ -1,9 +1,10 @@
 import { ForbiddenError, UserInputError, ValidationError } from 'apollo-server-errors'
 import { MiddlewareFn } from 'type-graphql'
-
-import { CustomContext } from 'src/types/interfaces/CustomContext'
+import { NotFoundError } from '@mikro-orm/core'
 
 import * as Sentry from '@sentry/node'
+
+import { CustomContext } from 'src/types/interfaces/CustomContext'
 
 export const ErrorInterceptor: MiddlewareFn<CustomContext> = async (_ctx, next) => {
   try {
@@ -11,14 +12,17 @@ export const ErrorInterceptor: MiddlewareFn<CustomContext> = async (_ctx, next) 
   } catch (err) {
     console.log(err)
     Sentry.captureException(err.message)
-    if (err.extensions.code && err.extensions.code === 'BAD_USER_INPUT') {
+    if (err.extensions?.code && err.extensions.code === 'BAD_USER_INPUT') {
       throw new UserInputError(err.message)
     }
-    if (err.extensions.code && err.extensions.code === 'GRAPHQL_VALIDATION_FAILED') {
+    if (err.extensions?.code && err.extensions.code === 'GRAPHQL_VALIDATION_FAILED') {
       throw new ValidationError(err.message)
     }
-    if (err.extensions.code && err.extensions.code === 'FORBIDDEN') {
+    if (err.extensions?.code && err.extensions.code === 'FORBIDDEN') {
       throw new ForbiddenError(err.message)
+    }
+    if (err.entity || err.entity === undefined) {
+      throw new NotFoundError(err.message)
     }
     if (err.message === 'Argument Validation Error') {
       let errorMessage = ''
