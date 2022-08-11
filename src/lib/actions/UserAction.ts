@@ -121,6 +121,7 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
 }
 
 export async function registerUserAction (data: UserRegisterInputData, em: EntityManager): Promise<boolean> {
+  // console.log(data)
   const hash = bcrypt.hashSync(data.password, 12)
   let code = Math.round(Math.random() * (9999 - 0)).toString()
 

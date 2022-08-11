@@ -9,6 +9,8 @@ export interface CustomContext {
 
   em: EntityManager
 
+  request?: Request & { authFree: boolean }
+
   state: {
     user?: AuthUser
   }

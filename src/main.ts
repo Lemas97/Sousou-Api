@@ -82,6 +82,7 @@ async function main (): Promise<void> {
     context ({ ctx }: { ctx: Context }): CustomContext {
       return {
         ctx,
+        request: undefined,
         state: ctx.state,
         em: connection.em.fork(),
         dataLoader: false
