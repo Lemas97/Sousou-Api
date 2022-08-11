@@ -67,8 +67,6 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   await em.populate(currentUser, ['groups'])
 
-  console.log(currentUser.groups.getItems())
-
   return groupInvite
 }
 

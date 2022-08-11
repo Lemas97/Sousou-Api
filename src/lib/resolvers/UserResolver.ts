@@ -40,11 +40,12 @@ export class UserResolver {
     return await getFriendRequestsAction(paginatedData, forMe, ctx.user, em)
   }
 
-  @Mutation(() => Boolean)
+  // @Mutation(() => Boolean)
+  @Mutation(() => String)
   async registerUser (
     @Ctx('em') em: EntityManager,
       @Arg('data') data: UserRegisterInputData
-  ): Promise<boolean> {
+  ): Promise<string> {
     return await registerUserAction(data, em)
   }
 

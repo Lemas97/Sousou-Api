@@ -120,8 +120,7 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
   return { data: friendRequests, total: count }
 }
 
-export async function registerUserAction (data: UserRegisterInputData, em: EntityManager): Promise<boolean> {
-  // console.log(data)
+export async function registerUserAction (data: UserRegisterInputData, em: EntityManager): Promise<string> {
   const hash = bcrypt.hashSync(data.password, 12)
   let code = Math.round(Math.random() * (9999 - 0)).toString()
 
@@ -155,7 +154,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 
   await confirmEmailOnRegister(user)
 
-  return true
+  return user.confirmEmailToken
 }
 
 export async function loginUserAction (data: LoginUserInputData, em: EntityManager): Promise<string> {
