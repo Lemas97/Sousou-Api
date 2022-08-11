@@ -31,4 +31,7 @@ export const EMAIL_ADDRESS = process.env.EMAIL as string ?? ''
 export const EMAIL_HOST = (process.env.EMAIL_HOST !== '' && process.env.EMAIL_HOST != null) ? process.env.EMAIL_HOST : 'smtp.ethereal.email'
 export const EMAIL_PORT = (process.env.EMAIL_PORT !== '' && process.env.EMAIL_PORT != null) ? process.env.EMAIL_PORT : 587
 
+export const FRONT_URL = (process.env.FRONT_URL !== '' && process.env.FRONT_URL != null) ? process.env.FRONT_URL : 'http://localhost'
+export const FRONT_PORT = (process.env.FRONT_PORT !== '' && process.env.FRONT_PORT != null) ? process.env.FRONT_PORT : 9000
+
 Debug.enable(DEBUG)

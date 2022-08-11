@@ -283,3 +283,10 @@ export async function resendEmailConfirmationAction (email: string, em: EntityMa
 
   return true
 }
+
+// authFree
+export async function usernameExistsAction (username: string, em: EntityManager): Promise<boolean> {
+  const user = await em.findOne(User, { username })
+
+  return !!user
+}
