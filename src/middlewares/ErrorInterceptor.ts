@@ -26,7 +26,7 @@ export const ErrorInterceptor: MiddlewareFn<CustomContext> = async (_ctx, next) 
         if (error.constraints) {
           errorMessage += (Object.values(error.constraints)).toString()
           if (index < error.length) {
-            errorMessage += ', test'
+            errorMessage += ', '
           }
         }
       })
