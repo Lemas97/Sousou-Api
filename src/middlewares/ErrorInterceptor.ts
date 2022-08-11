@@ -11,13 +11,13 @@ export const ErrorInterceptor: MiddlewareFn<CustomContext> = async (_ctx, next) 
   } catch (err) {
     console.log(err)
     Sentry.captureException(err.message)
-    if (err.code === 'BAD_USER_INPUT') {
+    if (err.extensions.code && err.extensions.code === 'BAD_USER_INPUT') {
       throw new UserInputError(err.message)
     }
-    if (err.code === 'GRAPHQL_VALIDATION_FAILED') {
+    if (err.extensions.code && err.extensions.code === 'GRAPHQL_VALIDATION_FAILED') {
       throw new ValidationError(err.message)
     }
-    if (err.code === 'FORBIDDEN') {
+    if (err.extensions.code && err.extensions.code === 'FORBIDDEN') {
       throw new ForbiddenError(err.message)
     }
     if (err.message === 'Argument Validation Error') {
