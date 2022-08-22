@@ -33,7 +33,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset,
-    populate: []
+    populate: ['groups']
   })
 
   return { data: users, total: count }
@@ -50,7 +50,10 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'friendRequests',
       'myFriendRequests',
       'friendList',
-      'personalChats'
+      'personalChats',
+      'friendRequests.fromUser',
+      'friendRequests.fromUser.groups',
+      'friendRequests.fromUser.ownedGroups'
     ]
   })
 
@@ -65,7 +68,9 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
     limit: 1,
     offset: 1,
     orderBy: { createdAt: 'DESC' },
-    populate: ['personalChat']
+    populate: [
+      'personalChat'
+    ]
   })
 
   personalChats.forEach((personalChat, index) => {
