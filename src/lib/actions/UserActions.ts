@@ -97,7 +97,8 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
               { displayName: { $like: `%${paginationData.filter}%` } },
               { code: { $like: `%${paginationData.filter}%` } }
             ]
-          }
+          },
+          answer: { $eq: undefined }
         }
       : {
           fromUser: {
