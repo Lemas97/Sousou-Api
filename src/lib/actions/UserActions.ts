@@ -191,3 +191,13 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
 
   return true
 }
+
+export async function getAvailableUsersToAddAction (currentUser: User, em: EntityManager, pending?: boolean): Promise<PaginatedUsers> {
+  const [users, count] = await em.findAndCount(User, {
+    id: { $ne: currentUser.id },
+    friendList: { $nin: [currentUser.id] },
+    friendRequests: !pending ? { $nin: [currentUser.id] } : {}
+  })
+
+  return { data: users, total: count }
+}

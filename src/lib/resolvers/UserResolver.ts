@@ -6,6 +6,7 @@ import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
 import {
   connectToVoiceChannelAction,
   disconnectFromVoiceChatAction,
+  getAvailableUsersToAddAction,
   getFriendRequestsAction,
   getLoggedUserAction,
   getUsersAction,
@@ -30,6 +31,15 @@ export class UserResolver {
       @Arg('paginatedData') paginatedData: PaginatedInputData
   ): Promise<PaginatedUsers> {
     return await getUsersAction(paginatedData, em)
+  }
+
+  @Query(() => PaginatedUsers)
+  async getAvailableUsersToAdd (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('pending') pending: boolean
+  ): Promise<PaginatedUsers> {
+    return await getAvailableUsersToAddAction(ctx.user, em, pending)
   }
 
   @Query(() => User)
