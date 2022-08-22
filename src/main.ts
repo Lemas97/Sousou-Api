@@ -118,7 +118,6 @@ async function main (): Promise<void> {
   app.use(setStateUser(connection.em.fork()))
 
   app.use(apolloServer.getMiddleware({ cors: app.proxy }))
-
   httpServer.listen({ port: PORT }, () => {
     console.log(`http://${HOST}:${PORT}/graphql`)
   })
