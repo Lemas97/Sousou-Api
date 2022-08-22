@@ -22,6 +22,17 @@ export async function getGroupsAction (paginationData: PaginatedInputData, em: E
   return { data: group, total: count }
 }
 
+export async function getGroupByIdAction (id: string, currentUser: User, em: EntityManager): Promise<Group> {
+  const group = await em.findOneOrFail(Group, {
+    id,
+    members: { id: { $in: [currentUser.id] } }
+  }, {
+    populate: ['members']
+  })
+
+  return group
+}
+
 export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<Group> {
   const group = em.create(Group, {
     ...data,

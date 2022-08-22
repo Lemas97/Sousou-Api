@@ -77,7 +77,7 @@ export class User {
   @Field(() => VoiceChannel, { nullable: true })
     connectedVoiceChannel?: VoiceChannel
 
-  @ManyToMany(() => Group)
+  @ManyToMany(() => Group, 'members')
   @Field(() => [Group])
     groups = new Collection<Group>(this)
 

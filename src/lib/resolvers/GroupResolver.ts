@@ -10,6 +10,7 @@ import { Arg, Ctx, Mutation, Publisher, PubSub, Query, Resolver, Root, Subscript
 import {
   createGroupAction,
   deleteGroupAction,
+  getGroupByIdAction,
   getGroupsAction,
   transferOwnershipToUserAction,
   updateGroupAction,
@@ -24,6 +25,15 @@ export class GroupResolver {
       @Arg('paginationInputData') paginationInputData: PaginatedInputData
   ): Promise<PaginatedGroups> {
     return await getGroupsAction(paginationInputData, em)
+  }
+
+  @Query(() => Group)
+  async getGroupById (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('id') id: string
+  ): Promise<Group> {
+    return await getGroupByIdAction(id, ctx.user, em)
   }
 
   @Mutation(() => Boolean)
