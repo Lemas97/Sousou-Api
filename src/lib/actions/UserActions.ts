@@ -39,6 +39,19 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   return { data: users, total: count }
 }
 
+export async function getAvailableUsersToInviteAction (groupId: string, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
+  const [users, count] = await em.findAndCount(User, {
+    id: { $ne: currentUser.id },
+    groups: {
+      $and: [
+        { $nin: [groupId] }
+      ]
+    }
+  })
+
+  return { data: users, total: count }
+}
+
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
   const user = await em.findOneOrFail(User, currentUser.id, {
     populate: [
@@ -198,11 +211,16 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
   return true
 }
 
-export async function getAvailableUsersToAddAction (currentUser: User, em: EntityManager, pending?: boolean): Promise<PaginatedUsers> {
+export async function getAvailableUsersToAddAction (currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   const [users, count] = await em.findAndCount(User, {
     id: { $ne: currentUser.id },
-    friendList: { $nin: [currentUser.id] },
-    friendRequests: !pending ? { $nin: [currentUser.id] } : {}
+    friendList: { id: { $nin: [currentUser.id] } }
+  },
+  {
+    populate: [
+      'friendRequests',
+      'friendRequests.fromUser'
+    ]
   })
 
   return { data: users, total: count }

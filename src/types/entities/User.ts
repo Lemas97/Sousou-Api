@@ -11,13 +11,15 @@ import {
 } from '@mikro-orm/core'
 
 import { GraphQLJSONObject } from 'graphql-type-json'
-import { Field, ObjectType } from 'type-graphql'
+import { Arg, Ctx, Field, ObjectType } from 'type-graphql'
 import { v4 } from 'uuid'
 
 import { UserPreferences } from '../embeddables/UserPreferences'
+import { AuthCustomContext } from '../interfaces/CustomContext'
 
 import { FriendRequest } from './FriendRequest'
 import { Group } from './Group'
+import { GroupInvite } from './GroupInvite'
 import { PersonalChat } from './PersonalChat'
 import { VoiceChannel } from './VoiceChannel'
 
@@ -97,7 +99,27 @@ export class User {
   @Field(() => [User])
     friendList = new Collection<User>(this)
 
+  @OneToMany(() => GroupInvite, group => group.toUser)
+  @Field(() => [GroupInvite])
+    groupInvites = new Collection<GroupInvite>(this)
+
   @ManyToMany(() => PersonalChat, personalChat => personalChat.users)
   @Field(() => [PersonalChat])
     personalChats = new Collection<PersonalChat>(this)
+
+  @Field(() => Boolean, { nullable: true })
+  pending (
+    @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('groupId', { nullable: true }) groupId?: string
+  ): boolean | null {
+    if (groupId) {
+      return !(this.groupInvites.getItems().map(grI => grI.id).includes(groupId))
+    } else {
+      const friendRequest = this.friendRequests.getItems().filter(frR => frR.fromUser.id === ctx.user.id)
+      if (friendRequest) {
+        return true
+      }
+      return false
+    }
+  }
 }

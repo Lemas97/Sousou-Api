@@ -36,10 +36,9 @@ export class UserResolver {
   @Query(() => PaginatedUsers)
   async getAvailableUsersToAdd (
     @Ctx('em') em: EntityManager,
-      @Ctx('ctx') ctx: AuthCustomContext,
-      @Arg('pending') pending: boolean
+      @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<PaginatedUsers> {
-    return await getAvailableUsersToAddAction(ctx.user, em, pending)
+    return await getAvailableUsersToAddAction(ctx.user, em)
   }
 
   @Query(() => User)
