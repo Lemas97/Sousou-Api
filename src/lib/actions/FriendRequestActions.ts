@@ -99,6 +99,7 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
 
   if (answer) {
     user.friendList.add(friendRequest.fromUser)
+    friendRequest.fromUser.friendList.add(user)
   }
 
   em.assign(friendRequest, { answer })
