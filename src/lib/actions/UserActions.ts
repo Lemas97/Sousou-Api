@@ -278,6 +278,8 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
 }
 
 export async function deleteFriendAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
+  if (id === currentUser.id) throw new UserInputError('You cannot delete yourself')
+
   const userToDelete = await em.findOneOrFail(User, id, { populate: ['friendList'] })
   const user = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList'] })
 
