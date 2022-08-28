@@ -122,7 +122,17 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'friendRequests.fromUser',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups'
-    ]
+    ],
+    populateWhere: {
+      friendRequests: {
+        answer: { $eq: undefined },
+        canceled: { $eq: undefined }
+      },
+      groupInvites: {
+        answer: { $eq: undefined },
+        canceled: { $eq: undefined }
+      }
+    }
   })
 
   const personalChats = await em.find(PersonalChat, {

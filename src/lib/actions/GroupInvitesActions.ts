@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core'
-import { UserInputError } from 'apollo-server-koa'
+import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import { GroupInviteInputData } from 'src/types/classes/input-data/GroupInviteInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedGroupInvites } from 'src/types/classes/pagination/GroupInvitePagination'
@@ -51,9 +51,18 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
   if (currentUser.id === groupInviteInputData.toUserId) throw new UserInputError('You cannot invite yourself to a group')
 
   const group = await em.findOneOrFail(Group, groupInviteInputData.groupId)
-  const toUser = await em.findOneOrFail(User, groupInviteInputData.toUserId)
+  if (!group.invitationPermissionUsers && group.owner.id !== currentUser.id) {
+    throw new ForbiddenError('Invitations are forbidden in this group')
+  }
 
-  const groupInvite = await em.create(GroupInvite, {
+  const toUser = await em.findOneOrFail(User, groupInviteInputData.toUserId, {
+    populate: ['groupInvites', 'groups']
+  })
+
+  if (toUser.groups.getItems().map(gr => gr.id).includes(groupInviteInputData.groupId)) throw new UserInputError('This user is already a member')
+  if (toUser.groupInvites.getItems().map(gr => gr.group.id).includes(groupInviteInputData.groupId)) throw new UserInputError('This user is already invited')
+
+  const groupInvite = em.create(GroupInvite, {
     ...groupInviteInputData,
     createdAt: new Date(),
     group: group.id,

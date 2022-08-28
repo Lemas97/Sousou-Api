@@ -117,7 +117,7 @@ export class User {
       @Arg('groupId', { nullable: true }) groupId?: string
   ): boolean | null {
     if (groupId) {
-      return this.groupInvites.getItems().map(grI => grI.group.id).includes(groupId) && this.groupInvites.getItems().map(grI => grI.fromUser.id).includes(ctx.user.id)
+      return this.groupInvites.getItems().map(grI => grI.group.id).includes(groupId)
     } else {
       const friendRequest = this.friendRequests.getItems().filter(frR => frR.fromUser.id === ctx.user.id)
       if (friendRequest) {

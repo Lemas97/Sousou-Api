@@ -86,18 +86,18 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
       { toUser: { $eq: currentUser } }
     ]
   },
-  { populate: ['toUser'] })
+  { populate: ['fromUser'] })
 
   if (friendRequest.canceled) {
-    throw new UserInputError('This friend request has already been canceled')
+    throw new UserInputError('This friend request is canceled')
   }
 
-  if (friendRequest.answer) {
-    throw new UserInputError('This friend request has already been answered')
+  if (friendRequest.answer !== undefined) {
+    throw new UserInputError('This friend request has been answered')
   }
 
   if (answer) {
-    currentUser.friendList.add(friendRequest.toUser)
+    currentUser.friendList.add(friendRequest.fromUser)
     friendRequest.toUser.friendList.add(currentUser)
   }
 
