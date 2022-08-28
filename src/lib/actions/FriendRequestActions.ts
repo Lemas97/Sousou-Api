@@ -68,7 +68,7 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
     throw new UserInputError('This friend request has already been canceled')
   }
 
-  if (friendRequest.answer) {
+  if (friendRequest.answer !== null) {
     throw new UserInputError('This friend request has already been answered')
   }
 
@@ -80,6 +80,7 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
 }
 
 export async function answerFriendRequestAction (id: string, answer: boolean, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList'] })
   const friendRequest = await em.findOneOrFail(FriendRequest, {
     $and: [
       { id: { $eq: id } },
@@ -92,13 +93,12 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
     throw new UserInputError('This friend request is canceled')
   }
 
-  if (friendRequest.answer !== undefined) {
+  if (friendRequest.answer !== null) {
     throw new UserInputError('This friend request has been answered')
   }
 
   if (answer) {
-    currentUser.friendList.add(friendRequest.fromUser)
-    friendRequest.toUser.friendList.add(currentUser)
+    user.friendList.add(friendRequest.fromUser)
   }
 
   em.assign(friendRequest, { answer })
