@@ -7,6 +7,7 @@ import {
   connectToVoiceChannelAction,
   disconnectFromVoiceChatAction,
   getAvailableUsersToAddAction,
+  getAvailableUsersToInviteAction,
   getFriendRequestsAction,
   getLoggedUserAction,
   getUsersAction,
@@ -36,9 +37,20 @@ export class UserResolver {
   @Query(() => PaginatedUsers)
   async getAvailableUsersToAdd (
     @Ctx('em') em: EntityManager,
-      @Ctx('ctx') ctx: AuthCustomContext
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('paginatedData') paginatedData: PaginatedInputData
   ): Promise<PaginatedUsers> {
-    return await getAvailableUsersToAddAction(ctx.user, em)
+    return await getAvailableUsersToAddAction(paginatedData, ctx.user, em)
+  }
+
+  @Query(() => PaginatedUsers)
+  async getAvailableUsersToInvite (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('paginatedData') paginatedData: PaginatedInputData,
+      @Arg('groupId') groupId: string
+  ): Promise<PaginatedUsers> {
+    return await getAvailableUsersToInviteAction(paginatedData, groupId, ctx.user, em)
   }
 
   @Query(() => User)

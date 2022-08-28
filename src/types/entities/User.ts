@@ -103,6 +103,10 @@ export class User {
   @Field(() => [GroupInvite])
     groupInvites = new Collection<GroupInvite>(this)
 
+  @OneToMany(() => GroupInvite, group => group.fromUser)
+  @Field(() => [GroupInvite])
+    myGroupInvites = new Collection<GroupInvite>(this)
+
   @ManyToMany(() => PersonalChat, personalChat => personalChat.users)
   @Field(() => [PersonalChat])
     personalChats = new Collection<PersonalChat>(this)
@@ -113,7 +117,7 @@ export class User {
       @Arg('groupId', { nullable: true }) groupId?: string
   ): boolean | null {
     if (groupId) {
-      return !(this.groupInvites.getItems().map(grI => grI.id).includes(groupId))
+      return this.groupInvites.getItems().map(grI => grI.group.id).includes(groupId) && this.groupInvites.getItems().map(grI => grI.fromUser.id).includes(ctx.user.id)
     } else {
       const friendRequest = this.friendRequests.getItems().filter(frR => frR.fromUser.id === ctx.user.id)
       if (friendRequest) {

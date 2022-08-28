@@ -14,12 +14,11 @@ import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
+import { Group } from 'src/types/entities/Group'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
-  const offset = (paginationData.limit * paginationData.page) - paginationData.limit
-
   const [users, count] = await em.findAndCount(User, {
-    $and: [
+    $or: [
       paginationData.filter
         ? {
             $or: [
@@ -32,21 +31,74 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
     ]
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
-    offset,
+    offset: (paginationData.limit * paginationData.page) - paginationData.limit,
     populate: ['groups']
   })
 
   return { data: users, total: count }
 }
 
-export async function getAvailableUsersToInviteAction (groupId: string, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
+export async function getAvailableUsersToAddAction (paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   const [users, count] = await em.findAndCount(User, {
-    id: { $ne: currentUser.id },
-    groups: {
-      $and: [
-        { $nin: [groupId] }
-      ]
-    }
+    $and: [
+      {
+        $or: [
+          paginationData.filter
+            ? {
+                $or: [
+                  { displayName: { $like: `%${paginationData.filter}%` } },
+                  { email: { $like: `%${paginationData.filter}%` } },
+                  { username: { $like: `%${paginationData.filter}%` } }
+                ]
+              }
+            : {}
+        ]
+      },
+      { id: { $ne: currentUser.id } },
+      { friendList: { id: { $nin: [currentUser.id] } } }
+    ]
+  },
+  {
+    populate: [
+      'friendRequests',
+      'friendRequests.fromUser'
+    ]
+  })
+
+  return { data: users, total: count }
+}
+
+export async function getAvailableUsersToInviteAction (paginationData: PaginatedInputData, groupId: string, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
+  const offset = (paginationData.limit * paginationData.page) - paginationData.limit
+
+  await em.findOneOrFail(Group, groupId)
+  const [users, count] = await em.findAndCount(User, {
+    $and: [
+      {
+        $or: [
+          paginationData.filter
+            ? {
+                $or: [
+                  { displayName: { $like: `%${paginationData.filter}%` } },
+                  { email: { $like: `%${paginationData.filter}%` } },
+                  { username: { $like: `%${paginationData.filter}%` } }
+                ]
+              }
+            : {}
+        ]
+      },
+      { id: { $ne: currentUser.id } },
+      { groups: { $ne: groupId } }
+    ]
+  }, {
+    limit: paginationData.limit > 0 ? paginationData.limit : undefined,
+    offset,
+    populate: [
+      'groupInvites',
+      'groupInvites.fromUser',
+      'myGroupInvites',
+      'groups'
+    ]
   })
 
   return { data: users, total: count }
@@ -58,7 +110,10 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'connectedVoiceChannel',
       'connectedVoiceChannel.users',
       'connectedVoiceChannel.group',
-      'groups',
+      'groupInvites',
+      'groupInvites.fromUser',
+      'myGroupInvites',
+      'myGroupInvites.toUser',
       'ownedGroups',
       'friendRequests',
       'myFriendRequests',
@@ -209,19 +264,4 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
   await em.flush()
 
   return true
-}
-
-export async function getAvailableUsersToAddAction (currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
-  const [users, count] = await em.findAndCount(User, {
-    id: { $ne: currentUser.id },
-    friendList: { id: { $nin: [currentUser.id] } }
-  },
-  {
-    populate: [
-      'friendRequests',
-      'friendRequests.fromUser'
-    ]
-  })
-
-  return { data: users, total: count }
 }
