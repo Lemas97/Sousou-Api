@@ -119,6 +119,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'myFriendRequests',
       'friendList',
       'personalChats',
+      'groups',
       'friendRequests.fromUser',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups'
@@ -275,3 +276,5 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
 
   return true
 }
+
+// export async deleteUserFromFriendList(id: string, )
