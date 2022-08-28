@@ -5,6 +5,7 @@ import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputD
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
 import {
   connectToVoiceChannelAction,
+  deleteFriendAction,
   disconnectFromVoiceChatAction,
   getAvailableUsersToAddAction,
   getAvailableUsersToInviteAction,
@@ -155,5 +156,14 @@ export class UserResolver {
       @Arg('email') email: string
   ): Promise<string> {
     return await resendEmailConfirmationAction(email, em)
+  }
+
+  @Mutation(() => Boolean)
+  async deleteFriend (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('id') id: string
+  ): Promise<boolean> {
+    return await deleteFriendAction(id, ctx.user, em)
   }
 }

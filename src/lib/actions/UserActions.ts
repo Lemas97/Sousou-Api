@@ -277,4 +277,16 @@ export async function kickFromVoiceChannelAction (id: string, voiceChannelId: st
   return true
 }
 
-// export async deleteUserFromFriendList(id: string, )
+export async function deleteFriendAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
+  const userToDelete = await em.findOneOrFail(User, id, { populate: ['friendList'] })
+  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList'] })
+
+  if (!user.friendList.getItems().map(fl => fl.id).includes(userToDelete.id)) throw new UserInputError('This user is not in your friendlist')
+
+  userToDelete.friendList.remove(user)
+  user.friendList.remove(userToDelete)
+
+  await em.flush()
+
+  return true
+}
