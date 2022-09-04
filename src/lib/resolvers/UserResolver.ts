@@ -16,8 +16,9 @@ import {
   kickFromVoiceChannelAction,
   logoutUserAction,
   updateUserAction,
-  updateUserPreferencesAction,
-  updateUsersEmailAction
+  updateUserEmailAction,
+  updateUserPasswordAction,
+  updateUserPreferencesAction
 } from '../actions/UserActions'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
@@ -96,7 +97,16 @@ export class UserResolver {
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('newEmail') newEmail: string
   ): Promise<boolean> {
-    return await updateUsersEmailAction(newEmail, ctx.user, em)
+    return await updateUserEmailAction(newEmail, ctx.user, em)
+  }
+
+  @Mutation(() => Boolean, { description: 'Sending an email to user with this link ${FRONT_URL}:${FRONT_PORT}/change-email/${changeEmailToken}' })
+  async updateUserPassword (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('newEmail') newEmail: string
+  ): Promise<boolean> {
+    return await updateUserPasswordAction(newEmail, ctx.user, em)
   }
 
   @Mutation(() => User)

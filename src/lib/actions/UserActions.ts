@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
@@ -228,7 +229,7 @@ export async function updateUserAction (data: UpdateUserInputData, currentUser: 
   return true
 }
 
-export async function updateUsersEmailAction (newEmail: string, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function updateUserEmailAction (newEmail: string, currentUser: User, em: EntityManager): Promise<boolean> {
   const user = await em.findOneOrFail(User, currentUser.id)
   if (user.email === newEmail) throw new UserInputError('You are already using this email')
 
@@ -245,6 +246,17 @@ export async function updateUsersEmailAction (newEmail: string, currentUser: Use
   })
 
   await changeEmail(user, newEmail, changeEmailToken)
+
+  return true
+}
+
+export async function updateUserPasswordAction (newPassword: string, currentUser: User, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, currentUser.id)
+
+  if (bcrypt.compareSync(newPassword, user.password)) throw new UserInputError('You are already using this password')
+
+  user.password = newPassword
+  await em.flush()
 
   return true
 }
