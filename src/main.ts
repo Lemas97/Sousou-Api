@@ -21,10 +21,11 @@ import { GroupInviteResolver } from './lib/resolvers/GroupInviteResolver'
 
 import { CustomContext } from './types/interfaces/CustomContext'
 import { isLogged } from './middlewares/guards/IsLogged'
-import { setStateUser } from './middlewares/SetStateUser'
+import { authAndSettStateUser } from './middlewares/SetStateUser'
 import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
 import { User } from './types/entities/User'
+import { AuthResolver } from './lib/resolvers/AuthResolver'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -37,7 +38,8 @@ async function main (): Promise<void> {
       UserResolver,
       FriendRequestResolver,
       GroupResolver,
-      GroupInviteResolver
+      GroupInviteResolver,
+      AuthResolver
     ],
     globalMiddlewares: [isLogged, ErrorInterceptor]
   })
@@ -115,7 +117,7 @@ async function main (): Promise<void> {
 
   app.use(jwt({ secret: PRIVATE_KEY, passthrough: true }))
 
-  app.use(setStateUser(connection.em.fork()))
+  app.use(authAndSettStateUser(connection.em.fork()))
 
   app.use(apolloServer.getMiddleware({ cors: app.proxy }))
   httpServer.listen({ port: PORT }, () => {

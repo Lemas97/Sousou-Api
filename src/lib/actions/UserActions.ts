@@ -1,8 +1,5 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
-import jwt from 'jsonwebtoken'
-
-import { PRIVATE_KEY } from 'src/dependencies/config'
 
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
@@ -72,7 +69,8 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
 
   await em.findOneOrFail(Group, groupId)
-  const [users, count] = await em.findAndCount(User, {
+
+  const users = await em.find(User, {
     $and: [
       {
         $or: [
@@ -81,27 +79,34 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
                 $or: [
                   { displayName: { $like: `%${paginationData.filter}%` } },
                   { email: { $like: `%${paginationData.filter}%` } },
-                  { username: { $like: `%${paginationData.filter}%` } }
+                  { username: { $ilike: `%${paginationData.filter}%` } }
                 ]
               }
             : {}
         ]
       },
-      { id: { $ne: currentUser.id } },
-      { groups: { $ne: groupId } }
+      { id: { $ne: currentUser.id } }
     ]
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset,
     populate: [
       'groupInvites',
+      'groupInvites.group',
       'groupInvites.fromUser',
       'myGroupInvites',
       'groups'
     ]
   })
 
-  return { data: users, total: count }
+  let usersToReturn = users.filter(u => {
+    return (!u.groups.getItems().find(g => g.id === groupId) && !u.groupInvites.getItems().find(gI => gI.group.id === groupId))
+  })
+
+  const count = usersToReturn.length
+  usersToReturn = usersToReturn.slice(offset, paginationData.limit)
+
+  return { data: usersToReturn, total: count }
 }
 
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
@@ -197,24 +202,6 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
     })
 
   return { data: friendRequests, total: count }
-}
-
-export async function refreshTokenAction (currentUser: User, em: EntityManager): Promise<string> {
-  const token = jwt.sign({
-    id: currentUser.id,
-    email: currentUser.email,
-    username: currentUser.username,
-    displayName: currentUser.displayName,
-    icon: currentUser.icon,
-    preferences: currentUser.preferences,
-    code: currentUser.code
-  }, PRIVATE_KEY, { expiresIn: '1h' })
-
-  currentUser.jwtToken = token
-
-  await em.flush()
-
-  return token
 }
 
 export async function logoutUserAction (currentUser: User, em: EntityManager): Promise<boolean> {

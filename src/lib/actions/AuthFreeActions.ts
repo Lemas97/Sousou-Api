@@ -56,7 +56,12 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 }
 
 export async function loginUserAction (data: LoginUserInputData, em: EntityManager): Promise<string> {
-  const user = await em.findOneOrFail(User, { email: data.email })
+  const user = await em.findOneOrFail(User, {
+    $or: [
+      { email: data.email },
+      { username: data.email }
+    ]
+  })
 
   if (!user.emailConfirm) throw new ForbiddenError('EMAIL_NOT_CONFIRMED')
 
@@ -102,4 +107,22 @@ export async function resendEmailConfirmationAction (email: string, em: EntityMa
   await confirmEmailOnRegister(user)
 
   return user.confirmEmailToken
+}
+
+export async function refreshTokenAction (currentUser: User, em: EntityManager): Promise<string> {
+  const token = jwt.sign({
+    id: currentUser.id,
+    email: currentUser.email,
+    username: currentUser.username,
+    displayName: currentUser.displayName,
+    icon: currentUser.icon,
+    preferences: currentUser.preferences,
+    code: currentUser.code
+  }, PRIVATE_KEY, { expiresIn: '1h' })
+
+  currentUser.jwtToken = token
+
+  await em.flush()
+
+  return token
 }

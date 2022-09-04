@@ -14,18 +14,14 @@ import {
   getUsersAction,
   kickFromVoiceChannelAction,
   logoutUserAction,
-  refreshTokenAction,
   updateUserPreferencesAction
 } from '../actions/UserActions'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
-import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
-import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
-import { confirmEmailAction, loginUserAction, registerUserAction, resendEmailConfirmationAction } from '../actions/AuthFreeActions'
 
-@Resolver() // test
+@Resolver()
 export class UserResolver {
   @Query(() => PaginatedUsers)
   async getUsers (
@@ -73,31 +69,6 @@ export class UserResolver {
     return await getFriendRequestsAction(paginatedData, forMe, ctx.user, em)
   }
 
-  // @Mutation(() => Boolean)
-  @Mutation(() => String)
-  async registerUser (
-    @Ctx('em') em: EntityManager,
-      @Arg('data') data: UserRegisterInputData
-  ): Promise<string> {
-    return await registerUserAction(data, em)
-  }
-
-  @Mutation(() => String)
-  async loginUser (
-    @Ctx('em') em: EntityManager,
-      @Arg('data') data: LoginUserInputData
-  ): Promise<string> {
-    return await loginUserAction(data, em)
-  }
-
-  @Mutation(() => String)
-  async refreshToken (
-    @Ctx('em') em: EntityManager,
-      @Ctx('ctx') ctx: AuthCustomContext
-  ): Promise<string> {
-    return await refreshTokenAction(ctx.user, em)
-  }
-
   @Mutation(() => Boolean)
   async logoutUser (
     @Ctx('em') em: EntityManager,
@@ -140,22 +111,6 @@ export class UserResolver {
       @Arg('voiceChannelId') voiceChannelId: string
   ): Promise<boolean> {
     return await kickFromVoiceChannelAction(id, voiceChannelId, ctx.user, em)
-  }
-
-  @Mutation(() => Boolean)
-  async confirmEmail (
-    @Ctx('em') em: EntityManager,
-      @Arg('confirmEmailToken') confirmEmailToken: string
-  ): Promise<boolean> {
-    return await confirmEmailAction(confirmEmailToken, em)
-  }
-
-  @Mutation(() => String)
-  async resendEmailConfirmation (
-    @Ctx('em') em: EntityManager,
-      @Arg('email') email: string
-  ): Promise<string> {
-    return await resendEmailConfirmationAction(email, em)
   }
 
   @Mutation(() => Boolean)
