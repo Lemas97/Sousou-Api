@@ -1,5 +1,6 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
+import jwt from 'jsonwebtoken'
 
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
@@ -12,6 +13,9 @@ import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 import { Group } from 'src/types/entities/Group'
+import { UpdateUserInputData } from 'src/types/classes/input-data/UpdateUserInputData'
+import { PRIVATE_KEY } from 'src/dependencies/config'
+import { changeEmail } from '../tasks/emails/EmailTexts'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   const [users, count] = await em.findAndCount(User, {
@@ -202,6 +206,47 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
     })
 
   return { data: friendRequests, total: count }
+}
+
+export async function updateUserAction (data: UpdateUserInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, currentUser.id)
+  if (data.username) {
+    const usernameOrEmailExist = await em.findOne(User, {
+      $or: [
+        data.username ? { username: data.username } : { username: undefined }
+      ],
+      id: { $ne: currentUser.id }
+    })
+
+    if (usernameOrEmailExist) throw new UserInputError('This username already exist')
+  }
+
+  em.assign(user, data)
+
+  await em.flush()
+
+  return true
+}
+
+export async function updateUsersEmailAction (newEmail: string, currentUser: User, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, currentUser.id)
+  if (user.email === newEmail) throw new UserInputError('You are already using this email')
+
+  const emailExists = await em.find(User, { email: newEmail })
+
+  if (emailExists) throw new UserInputError('This email is already in use')
+
+  const changeEmailToken = jwt.sign({
+    id: user.id,
+    email: user.email,
+    newEmail
+  }, PRIVATE_KEY, {
+    algorithm: 'HS256'
+  })
+
+  await changeEmail(user, newEmail, changeEmailToken)
+
+  return true
 }
 
 export async function logoutUserAction (currentUser: User, em: EntityManager): Promise<boolean> {

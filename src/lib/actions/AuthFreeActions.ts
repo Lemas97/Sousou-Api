@@ -5,7 +5,7 @@ import { User } from 'src/types/entities/User'
 import { v4 } from 'uuid'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { confirmEmailOnRegister } from '../tasks/emails/RegisterEmail'
+import { emailTexts } from '../tasks/emails/EmailTexts'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 import { PRIVATE_KEY } from 'src/dependencies/config'
 import { EntityManager } from '@mikro-orm/core'
@@ -50,7 +50,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 
   await em.persistAndFlush(user)
 
-  await confirmEmailOnRegister(user)
+  await emailTexts(user)
 
   return user.confirmEmailToken
 }
@@ -104,7 +104,7 @@ export async function resendEmailConfirmationAction (email: string, em: EntityMa
   user.confirmEmailToken = v4()
   await em.flush()
 
-  await confirmEmailOnRegister(user)
+  await emailTexts(user)
 
   return user.confirmEmailToken
 }
@@ -125,4 +125,16 @@ export async function refreshTokenAction (currentUser: User, em: EntityManager):
   await em.flush()
 
   return token
+}
+
+export async function confirmChangeEmailAction (changeEmailToken: string, em: EntityManager): Promise<boolean> {
+  const data = jwt.verify(changeEmailToken, PRIVATE_KEY, { algorithms: ['HS256'], ignoreExpiration: true }) as { id: string, email: string, newEmail: string}
+
+  if (!data.id || !data.email || !data.newEmail) throw new ForbiddenError('This token is not valid')
+
+  const user = await em.findOneOrFail(User, data.id)
+  em.assign(user, { email: data.newEmail })
+  await em.flush()
+
+  return true
 }

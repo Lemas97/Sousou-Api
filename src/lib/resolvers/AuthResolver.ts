@@ -1,9 +1,10 @@
+/* eslint-disable no-template-curly-in-string */
 import { EntityManager } from '@mikro-orm/core'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction } from '../actions/AuthFreeActions'
+import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction, confirmChangeEmailAction } from '../actions/AuthFreeActions'
 
 @Resolver()
 export class AuthResolver {
@@ -46,5 +47,13 @@ export class AuthResolver {
       @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<string> {
     return await refreshTokenAction(ctx.user, em)
+  }
+
+  @Mutation(() => Boolean, { description: 'Send the `changeEmailToken` you get by email' })
+  async confirmChangeEmail (
+    @Ctx('em') em: EntityManager,
+      @Arg('changeEmailToken') changeEmailToken: string
+  ): Promise<boolean> {
+    return await confirmChangeEmailAction(changeEmailToken, em)
   }
 }

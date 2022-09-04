@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import { EntityManager } from '@mikro-orm/core'
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
@@ -14,12 +15,15 @@ import {
   getUsersAction,
   kickFromVoiceChannelAction,
   logoutUserAction,
-  updateUserPreferencesAction
+  updateUserAction,
+  updateUserPreferencesAction,
+  updateUsersEmailAction
 } from '../actions/UserActions'
 import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { User } from 'src/types/entities/User'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
+import { UpdateUserInputData } from 'src/types/classes/input-data/UpdateUserInputData'
 
 @Resolver()
 export class UserResolver {
@@ -75,6 +79,24 @@ export class UserResolver {
       @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<boolean> {
     return await logoutUserAction(ctx.user, em)
+  }
+
+  @Mutation(() => Boolean)
+  async updateUser (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('data') data: UpdateUserInputData
+  ): Promise<boolean> {
+    return await updateUserAction(data, ctx.user, em)
+  }
+
+  @Mutation(() => Boolean, { description: 'Sending an email to user with this link ${FRONT_URL}:${FRONT_PORT}/change-email/${changeEmailToken}' })
+  async updateUserEmail (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('newEmail') newEmail: string
+  ): Promise<boolean> {
+    return await updateUsersEmailAction(newEmail, ctx.user, em)
   }
 
   @Mutation(() => User)
