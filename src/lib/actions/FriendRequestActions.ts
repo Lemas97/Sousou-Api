@@ -68,7 +68,7 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
     throw new UserInputError('This friend request has already been canceled')
   }
 
-  if (friendRequest.answer !== null) {
+  if (friendRequest.answer !== undefined) {
     throw new UserInputError('This friend request has already been answered')
   }
 
