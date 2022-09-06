@@ -34,7 +34,8 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset: (paginationData.limit * paginationData.page) - paginationData.limit,
-    populate: ['groups']
+    populate: ['groups', 'ownedGroups']
+
   })
 
   return { data: users, total: count }
@@ -120,6 +121,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'ownedGroups',
       'friendRequests',
       'myFriendRequests',
+      'myFriendRequests.toUser',
       'friendList',
       'personalChats',
       'groups',
