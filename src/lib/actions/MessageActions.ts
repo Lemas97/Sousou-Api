@@ -3,6 +3,7 @@ import { ForbiddenError } from 'apollo-server-koa'
 import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessageInputData'
 import { PersonalMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { SendMessageInputData } from 'src/types/classes/input-data/SendMessageInputData'
+import { Message } from 'src/types/entities/Message'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { TextChannel } from 'src/types/entities/TextChannel'
@@ -11,7 +12,7 @@ import { User } from 'src/types/entities/User'
 import { MessageStateType } from 'src/types/enums/MessageStateType'
 
 // todo check on resolver type of message
-export async function sendMessageToTextChannelAction (data: SendMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function sendMessageToTextChannelAction (data: SendMessageInputData, currentUser: User, em: EntityManager): Promise<Message> {
   const channel = await em.findOneOrFail(TextChannel, {
     $and: [
       { id: data.textChannelId },
@@ -34,7 +35,7 @@ export async function sendMessageToTextChannelAction (data: SendMessageInputData
 
   await em.persistAndFlush(message)
 
-  return true
+  return message
 }
 
 // if deleteForAll = false handle on front to print message like "This message delete for you"

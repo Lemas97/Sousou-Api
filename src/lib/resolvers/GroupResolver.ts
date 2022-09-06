@@ -3,10 +3,9 @@ import { GroupInputData } from 'src/types/classes/input-data/GroupInputData'
 import { GroupPreferencesInputData } from 'src/types/classes/input-data/json-input-data/GroupPreferencesInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { PaginatedGroups } from 'src/types/classes/pagination/PaginatedGroups'
-import { GroupSubscription } from 'src/types/classes/subscriptions/GroupSubscription'
 import { Group } from 'src/types/entities/Group'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
-import { Arg, Ctx, Mutation, Publisher, PubSub, Query, Resolver, Root, Subscription } from 'type-graphql'
+import { Arg, Ctx, Mutation, Publisher, PubSub, Query, Resolver } from 'type-graphql'
 import {
   createGroupAction,
   deleteGroupAction,
@@ -89,13 +88,5 @@ export class GroupResolver {
       @Arg('newOwnerId') newOwnerId: string
   ): Promise<boolean> {
     return await transferOwnershipToUserAction(id, newOwnerId, ctx.user, em)
-  }
-
-  @Subscription(() => GroupSubscription, {
-    topics: ['GROUP_CREATED', 'GROUP_UPDATED', 'GROUP_DELETED'],
-    filter: ({ payload, args }) => args.userId === payload.owner.id || (payload as Group).members.getItems().map(member => member.id).includes(args.userId)
-  })
-  onGroupActions (@Root() payload: Group, @Arg('userId') _: string): GroupSubscription {
-    return { group: payload, event: 'delete' }
   }
 }

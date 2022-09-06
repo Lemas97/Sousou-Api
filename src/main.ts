@@ -5,9 +5,7 @@ import { ApolloServer } from 'apollo-server-koa'
 import Koa, { Context } from 'koa'
 import cors from '@koa/cors'
 import jwt from 'koa-jwt'
-import { WebSocketServer } from 'ws'
-import { useServer } from 'graphql-ws/lib/use/ws'
-
+import { Server } from 'socket.io'
 import { MikroORM } from '@mikro-orm/core'
 
 import { buildSchema } from 'type-graphql'
@@ -24,8 +22,8 @@ import { isLogged } from './middlewares/guards/IsLogged'
 import { authAndSettStateUser } from './middlewares/SetStateUser'
 import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
-import { User } from './types/entities/User'
 import { AuthResolver } from './lib/resolvers/AuthResolver'
+import { initSocketEvents } from './lib/socket/SocketInitEvents'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -46,64 +44,28 @@ async function main (): Promise<void> {
   const app = new Koa()
   const httpServer = createServer(app.callback())
 
-  const wsServer = new WebSocketServer({
-    // This is the `httpServer` we created in a previous step.
-    server: httpServer,
-    // verifyClient: (_info, _done) => {
-    // },
-    // Pass a different path here if your ApolloServer serves at
-    // a different path.
-    path: '/graphql'
+  const io = new Server(httpServer, {
+    transports: ['websocket'],
+    allowEIO3: true
   })
 
-  wsServer.on('connection', (_ws, _request) => {
-    // console.log(request.url?.split('param=')[1])
-  })
-
-  const serverCleanup = useServer(
-    {
-      schema,
-      context: (_ctx, _msg, _args) => {
-        return {
-          dataLoader: true,
-          state: {
-            user: new User()
-          }
-        }
-      // Returning an object will add that information to our
-      // GraphQL context, which all of our resolvers have access to.
-      // return getDynamicContext(ctx, msg, args)
-      }
-    },
-    wsServer
-  )
+  await initSocketEvents(io, connection.em.fork())
 
   const apolloServer = new ApolloServer({
     schema,
-    csrfPrevention: true,
     context ({ ctx }: { ctx: Context }): CustomContext {
       return {
         ctx,
         request: undefined,
         state: ctx.state,
         em: connection.em.fork(),
-        dataLoader: true
+        dataLoader: true,
+        io: io
       }
     },
     plugins: [
       // Proper shutdown for the HTTP server.
-      ApolloServerPluginDrainHttpServer({ httpServer }),
-
-      // Proper shutdown for the WebSocket server.
-      {
-        async serverWillStart () {
-          return {
-            async drainServer () {
-              await serverCleanup.dispose()
-            }
-          }
-        }
-      }
+      ApolloServerPluginDrainHttpServer({ httpServer })
     ]
   })
 
@@ -120,6 +82,7 @@ async function main (): Promise<void> {
   app.use(authAndSettStateUser(connection.em.fork()))
 
   app.use(apolloServer.getMiddleware({ cors: app.proxy }))
+
   httpServer.listen({ port: PORT }, () => {
     console.log(`http://${HOST}:${PORT}/graphql`)
   })

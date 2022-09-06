@@ -25,6 +25,7 @@ import { User } from 'src/types/entities/User'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 import { UpdateUserInputData } from 'src/types/classes/input-data/UpdateUserInputData'
+import { Server } from 'socket.io'
 
 @Resolver()
 export class UserResolver {
@@ -87,9 +88,10 @@ export class UserResolver {
   async updateUser (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('data') data: UpdateUserInputData
   ): Promise<boolean> {
-    return await updateUserAction(data, ctx.user, em)
+    return await updateUserAction(data, ctx.user, io, em)
   }
 
   @Mutation(() => Boolean, { description: 'Sending an email to user with this link ${FRONT_URL}:${FRONT_PORT}/change-email/${changeEmailToken}' })

@@ -17,6 +17,8 @@ import { Group } from 'src/types/entities/Group'
 import { UpdateUserInputData } from 'src/types/classes/input-data/UpdateUserInputData'
 import { PRIVATE_KEY } from 'src/dependencies/config'
 import { changeEmail } from '../tasks/emails/EmailTexts'
+import { Server } from 'socket.io'
+import { updateUserEvent } from '../socket/SocketInitEvents'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   const [users, count] = await em.findAndCount(User, {
@@ -204,7 +206,7 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
   return { data: friendRequests, total: count }
 }
 
-export async function updateUserAction (data: UpdateUserInputData, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function updateUserAction (data: UpdateUserInputData, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
   const user = await em.findOneOrFail(User, currentUser.id)
   if (data.username) {
     const usernameOrEmailExist = await em.findOne(User, {
@@ -220,6 +222,8 @@ export async function updateUserAction (data: UpdateUserInputData, currentUser: 
   em.assign(user, data)
 
   await em.flush()
+
+  updateUserEvent(user, io)
 
   return true
 }
