@@ -3023,6 +3023,29 @@ graceful-fs@^4.2.4:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.9.tgz#041b05df45755e587a24942279b9d113146e1c96"
   integrity sha512-NtNxqUcXgpW2iMrfqSfR73Glt39K+BLwWsPs94yR63v45T0Wbej7eRmL5cWfwEgqXnmjQp3zaJTshdRW/qC2ZQ==
 
+graphql-compose@^9.0.9:
+  version "9.0.9"
+  resolved "https://registry.yarnpkg.com/graphql-compose/-/graphql-compose-9.0.9.tgz#ca919ce61cf5ec0545e5ce123bda2051c7c78a1e"
+  integrity sha512-kEXdwuBk7GKaThWY7eKDP+GLF9pGrGuMpYLu3O5w+lwDsgsfdiUCEC8jTsuPjm1qz9AxsspZHqc3jA4vKwyiNg==
+  dependencies:
+    graphql-type-json "0.3.2"
+
+graphql-composer-decorators@^1.0.23:
+  version "1.0.23"
+  resolved "https://registry.yarnpkg.com/graphql-composer-decorators/-/graphql-composer-decorators-1.0.23.tgz#f4c5057b2ddd1299f106acafe1c061f2ac5add9f"
+  integrity sha512-Rb1kSayBVAZKT9dHy2JyPXIFk1j9c9SQjBfOznAdhSFjfgTrIMSWUH8O+E7BylfBeASGXT+nzllOW0qljcNnsA==
+  dependencies:
+    glob "^7.1.6"
+    graphql-composer "^1.0.65"
+    reflect-metadata "^0.1.13"
+
+graphql-composer@^1.0.65:
+  version "1.0.65"
+  resolved "https://registry.yarnpkg.com/graphql-composer/-/graphql-composer-1.0.65.tgz#9a67a9a1cea4fbfe7ef5554918cd42965aaf45ed"
+  integrity sha512-1tU16gT0Oiy+6R5iC5M3QtJ8z5+UoTq0fyxAQUMqR1CKyXpsLYy8R6uno1BfC6OGUtXZebMPyLMASvWQUAlS2w==
+  dependencies:
+    graphql "^15.1.0"
+
 graphql-query-complexity@^0.7.0:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/graphql-query-complexity/-/graphql-query-complexity-0.7.2.tgz#7fc6bb20930ab1b666ecf3bbfb24b65b6f08ecc4"
@@ -3044,7 +3067,7 @@ graphql-tag@^2.11.0:
   dependencies:
     tslib "^2.1.0"
 
-graphql-type-json@^0.3.2:
+graphql-type-json@0.3.2, graphql-type-json@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/graphql-type-json/-/graphql-type-json-0.3.2.tgz#f53a851dbfe07bd1c8157d24150064baab41e115"
   integrity sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==
@@ -3059,7 +3082,7 @@ graphql@*:
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.3.0.tgz#a91e24d10babf9e60c706919bb182b53ccdffc05"
   integrity sha512-xm+ANmA16BzCT5pLjuXySbQVFwH3oJctUVdy81w1sV0vBU0KgDdBGtxQOUd5zqOBk/JayAFeG8Dlmeq74rjm/A==
 
-graphql@^15.3.0:
+graphql@^15.1.0, graphql@^15.3.0:
   version "15.8.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
   integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==

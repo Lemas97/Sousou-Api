@@ -31,6 +31,8 @@
     "cross-env": "^7.0.3",
     "dotenv": "^14.3.0",
     "graphql": "^15.3.0",
+    "graphql-compose": "^9.0.9",
+    "graphql-composer-decorators": "^1.0.23",
     "graphql-ws": "^5.8.2",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.4",

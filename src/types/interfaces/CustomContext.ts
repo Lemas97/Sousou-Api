@@ -1,7 +1,6 @@
 import { Context } from 'koa'
 import { EntityManager } from '@mikro-orm/core'
 
-import { AuthUser } from 'src/types/interfaces/AuthUser'
 import { User } from 'src/types/entities/User'
 
 export interface CustomContext {
@@ -12,7 +11,7 @@ export interface CustomContext {
   request?: Request & { authFree: boolean }
 
   state: {
-    user?: AuthUser
+    user?: User
   }
 
   user?: User

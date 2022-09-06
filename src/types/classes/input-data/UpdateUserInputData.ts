@@ -7,4 +7,12 @@ export class UpdateUserInputData {
   @IsOptional()
   @IsString()
     username?: string
+
+  @Field()
+  @IsString()
+    icon: string
+
+  @Field()
+  @IsString()
+    displayName: string
 }

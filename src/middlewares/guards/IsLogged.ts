@@ -9,7 +9,8 @@ export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {
   if (!ctx.context.dataLoader) {
     return await next()
   }
-
+  console.log(ctx.info.fieldName)
+  console.log(ctx.context.state.user)
   if (
     ctx.info.fieldName === 'loginUser' ||
     ctx.info.fieldName === 'registerUser' ||
@@ -22,7 +23,9 @@ export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {
   if (ctx.context.state.user === undefined) {
     throw new ForbiddenError('Not authorized!')
   }
+  ctx.context.user = ctx.context.state.user
 
+  console.log(ctx.context.user)
   ctx.context.dataLoader = false
   return await next()
 }
