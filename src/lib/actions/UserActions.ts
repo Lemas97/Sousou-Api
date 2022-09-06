@@ -41,6 +41,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 }
 
 export async function getAvailableUsersToAddAction (paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
+  await em.populate(currentUser, ['friendList'])
   const [users, count] = await em.findAndCount(User, {
     $and: [
       {
@@ -56,8 +57,7 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
             : {}
         ]
       },
-      { id: { $ne: currentUser.id } },
-      { friendList: { id: { $nin: [currentUser.id] } } }
+      { id: { $nin: [...currentUser.friendList.getItems().map(fl => fl.id), currentUser.id] } }
     ]
   },
   {
@@ -73,9 +73,9 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
 export async function getAvailableUsersToInviteAction (paginationData: PaginatedInputData, groupId: string, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
 
-  await em.findOneOrFail(Group, groupId)
+  const group = await em.findOneOrFail(Group, groupId, { populate: ['members'] })
 
-  const users = await em.find(User, {
+  const [users, count] = await em.findAndCount(User, {
     $and: [
       {
         $or: [
@@ -90,7 +90,7 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
             : {}
         ]
       },
-      { id: { $ne: currentUser.id } }
+      { id: { $nin: [...group.members.getItems().map(me => me.id), currentUser.id] } }
     ]
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
@@ -104,14 +104,7 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
     ]
   })
 
-  let usersToReturn = users.filter(u => {
-    return (!u.groups.getItems().find(g => g.id === groupId) && !u.groupInvites.getItems().find(gI => gI.group.id === groupId))
-  })
-
-  const count = usersToReturn.length
-  usersToReturn = usersToReturn.slice(offset, paginationData.limit)
-
-  return { data: usersToReturn, total: count }
+  return { data: users, total: count }
 }
 
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
