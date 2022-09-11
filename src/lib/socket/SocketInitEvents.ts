@@ -2,10 +2,10 @@ import { EntityManager } from '@mikro-orm/core'
 import jwt from 'jsonwebtoken'
 import { Server } from 'socket.io'
 import { PRIVATE_KEY } from 'src/dependencies/config'
-import { PersonalMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
+import { SendMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from 'src/types/classes/input-data/ReadMessageInputData'
 import { User } from 'src/types/entities/User'
-import { readMessageAction, sendMessageToFriendAction } from '../actions/MessageActions'
+import { readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
 
 export async function initSocketEvents (io: Server, em: EntityManager): Promise<void> {
   io.on('connection', async (socket) => {
@@ -26,21 +26,26 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     await socket.join(`user:${user.id}`)
     await socket.join(user.groups.getItems().map(group => `group:${group.id}`))
 
-    socket.on('sendMessage', async (data: PersonalMessageInputData) => {
-      const message = await sendMessageToFriendAction(data, user, em)
-      io.to(message.personalChat.users.getItems().map(pm => `user:${pm.id}`)).emit('messageReceive', message)
+    socket.on('message-send', async (data: SendMessageInputData) => {
+      let socketMessageRooms: SocketMessageRooms
+      if (data.personal) {
+        socketMessageRooms = await sendMessageToFriendAction(data, user, em)
+      } else {
+        socketMessageRooms = await sendMessageToTextChannelAction(data, user, em)
+      }
+      io.to(socketMessageRooms.rooms).emit('message-receive', socketMessageRooms.message)
     })
 
-    socket.on('readMessage', async (data: ReadMessageInputData) => {
+    socket.on('message-read', async (data: ReadMessageInputData) => {
       const result = await readMessageAction(data, user, em)
 
-      io.to(result.rooms).emit('readMessage', result.message)
+      io.to(result.rooms).emit('message-read', result.message)
     })
 
-    socket.on('dataChange', async () => {
+    socket.on('profile-update', async () => {
       const roomsToSeeTheChange = [...user.friendList.getItems().map(friend => `user:${friend.id}`, ...user.groups.getItems().map(group => `group:${group.id}`))]
 
-      io.to(roomsToSeeTheChange).emit('somethingChanged', user)
+      io.to(roomsToSeeTheChange).emit('profile-updated', user)
     })
 
     socket.on('disconnect', () => {

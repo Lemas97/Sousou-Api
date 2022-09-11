@@ -1,10 +1,8 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError } from 'apollo-server-koa'
 import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessageInputData'
-import { PersonalMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
+import { SendMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from 'src/types/classes/input-data/ReadMessageInputData'
-import { SendMessageInputData } from 'src/types/classes/input-data/SendMessageInputData'
-import { Message } from 'src/types/entities/Message'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { TextChannel } from 'src/types/entities/TextChannel'
@@ -13,10 +11,10 @@ import { User } from 'src/types/entities/User'
 import { MessageStateType } from 'src/types/enums/MessageStateType'
 
 // todo check on resolver type of message
-export async function sendMessageToTextChannelAction (data: SendMessageInputData, currentUser: User, em: EntityManager): Promise<Message> {
+export async function sendMessageToTextChannelAction (data: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
   const channel = await em.findOneOrFail(TextChannel, {
     $and: [
-      { id: data.textChannelId },
+      { id: data.identifier },
       { group: { members: { id: currentUser.id } } }
     ]
   }, {
@@ -36,7 +34,7 @@ export async function sendMessageToTextChannelAction (data: SendMessageInputData
 
   await em.persistAndFlush(message)
 
-  return message
+  return { message, rooms: message.textChannel.group.members.getItems().map(pm => `user:${pm.id}`) }
 }
 
 // if deleteForAll = false handle on front to print message like "This message delete for you"
@@ -61,8 +59,8 @@ export async function deleteMessageAction (id: string, data: DeleteMessageInputD
   return true
 }
 
-export async function sendMessageToFriendAction (messageInputData: PersonalMessageInputData, currentUser: User, em: EntityManager): Promise<PersonalMessage> {
-  const personalChat = await em.findOneOrFail(PersonalChat, messageInputData.personalChatId, {
+export async function sendMessageToFriendAction (messageInputData: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
+  const personalChat = await em.findOneOrFail(PersonalChat, messageInputData.identifier, {
     populate: ['users'],
     populateWhere: {
       users: { id: { $ne: currentUser.id } }
@@ -78,7 +76,7 @@ export async function sendMessageToFriendAction (messageInputData: PersonalMessa
     state: MessageStateType.SENDED
   })
 
-  return message
+  return { message, rooms: message.personalChat.users.getItems().map(pm => `user:${pm.id}`) }
 }
 
 export async function deleteMessageFromPersonalConversationAction (personalMessageId: string, data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
@@ -105,7 +103,7 @@ export async function deleteMessageFromPersonalConversationAction (personalMessa
   return true
 }
 
-export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<{ rooms: string[], message: TextChannelMessage | PersonalMessage}> {
+export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
   let message: TextChannelMessage | PersonalMessage
   let rooms: string[]
   if (data.personal) {
@@ -122,4 +120,9 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
     rooms = [`group:${message.textChannel.group.id}`]
   }
   return { rooms, message }
+}
+
+export class SocketMessageRooms {
+  rooms: string[]
+  message: TextChannelMessage | PersonalMessage
 }

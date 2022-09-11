@@ -1,9 +1,12 @@
 import { Field, InputType } from 'type-graphql'
 
 @InputType()
-export class PersonalMessageInputData {
+export class SendMessageInputData {
   @Field()
-    personalChatId: string
+    identifier: string
+
+  @Field()
+    personal: boolean
 
   @Field()
     text: string

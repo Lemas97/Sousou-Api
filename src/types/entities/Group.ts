@@ -4,6 +4,7 @@ import {
   Entity,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property
 } from '@mikro-orm/core'
@@ -14,6 +15,7 @@ import { Field, ObjectType } from 'type-graphql'
 import { v4 } from 'uuid'
 
 import { GroupPreferences } from '../embeddables/GroupPreferences'
+import { TextChannel } from './TextChannel'
 import { User } from './User'
 
 @Entity()
@@ -54,4 +56,7 @@ export class Group {
   @ManyToMany(() => User)
   @Field(() => [User])
     members = new Collection<User>(this)
+
+  @OneToMany(() => TextChannel, textChannel => textChannel.group)
+    textChannels = new Collection<TextChannel>(this)
 }

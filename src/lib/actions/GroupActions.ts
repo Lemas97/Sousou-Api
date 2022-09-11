@@ -8,6 +8,7 @@ import { User } from 'src/types/entities/User'
 import { GroupPreferencesInputData } from 'src/types/classes/input-data/json-input-data/GroupPreferencesInputData'
 import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
 import { GroupInputData } from 'src/types/classes/input-data/GroupInputData'
+import { TextChannel } from 'src/types/entities/TextChannel'
 
 export async function getGroupsAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedGroups> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -44,6 +45,13 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
   })
 
   await em.persistAndFlush(group)
+
+  const generalTextChannel = em.create(TextChannel, {
+    name: 'General',
+    group: group.id
+  })
+
+  await em.persistAndFlush(generalTextChannel)
 
   const user = await em.findOneOrFail(User, currentUser.id)
 
