@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError } from 'apollo-server-koa'
 import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessageInputData'
 import { PersonalMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
+import { ReadMessageInputData } from 'src/types/classes/input-data/ReadMessageInputData'
 import { SendMessageInputData } from 'src/types/classes/input-data/SendMessageInputData'
 import { Message } from 'src/types/entities/Message'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
@@ -60,8 +61,13 @@ export async function deleteMessageAction (id: string, data: DeleteMessageInputD
   return true
 }
 
-export async function sendMessageToFriendAction (personalChatId: string, messageInputData: PersonalMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const personalChat = await em.findOneOrFail(PersonalChat, personalChatId)
+export async function sendMessageToFriendAction (messageInputData: PersonalMessageInputData, currentUser: User, em: EntityManager): Promise<PersonalMessage> {
+  const personalChat = await em.findOneOrFail(PersonalChat, messageInputData.personalChatId, {
+    populate: ['users'],
+    populateWhere: {
+      users: { id: { $ne: currentUser.id } }
+    }
+  })
 
   const message = em.create(PersonalMessage, {
     createdAt: new Date(),
@@ -72,9 +78,7 @@ export async function sendMessageToFriendAction (personalChatId: string, message
     state: MessageStateType.SENDED
   })
 
-  await em.persistAndFlush(message)
-
-  return true
+  return message
 }
 
 export async function deleteMessageFromPersonalConversationAction (personalMessageId: string, data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
@@ -99,4 +103,23 @@ export async function deleteMessageFromPersonalConversationAction (personalMessa
   }
 
   return true
+}
+
+export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<{ rooms: string[], message: TextChannelMessage | PersonalMessage}> {
+  let message: TextChannelMessage | PersonalMessage
+  let rooms: string[]
+  if (data.personal) {
+    message = await em.findOneOrFail(PersonalMessage, data.messageId, {
+      populate: ['personalChat', 'personalChat.users'],
+      populateWhere: { personalChat: { users: { id: { $ne: currentUser.id } } } }
+    })
+
+    rooms = message.personalChat.users.getItems().map(pcu => `user:${pcu.id}`)
+  } else {
+    message = await em.findOneOrFail(TextChannelMessage, data.messageId, {
+      populate: ['textChannel', 'textChannel.group']
+    })
+    rooms = [`group:${message.textChannel.group.id}`]
+  }
+  return { rooms, message }
 }

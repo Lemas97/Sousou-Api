@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/core'
 import { UserInputError } from 'apollo-server-koa'
 import { FriendRequestInputData } from 'src/types/classes/input-data/FriendRequestInputData'
 import { FriendRequest } from 'src/types/entities/FriendRequest'
+import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { User } from 'src/types/entities/User'
 
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
@@ -100,6 +101,10 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   if (answer) {
     user.friendList.add(friendRequest.fromUser)
     friendRequest.fromUser.friendList.add(user)
+
+    const personalChat = em.create(PersonalChat, {})
+    await em.persistAndFlush(personalChat)
+    personalChat.users.add(user, friendRequest.fromUser)
   }
 
   em.assign(friendRequest, { answer })

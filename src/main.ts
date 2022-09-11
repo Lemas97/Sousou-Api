@@ -45,8 +45,10 @@ async function main (): Promise<void> {
   const httpServer = createServer(app.callback())
 
   const io = new Server(httpServer, {
-    transports: ['websocket'],
-    allowEIO3: true
+    allowEIO3: true,
+    pingInterval: 25000,
+    pingTimeout: 60000
+
   })
 
   await initSocketEvents(io, connection.em.fork())
