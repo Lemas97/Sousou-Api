@@ -61,7 +61,6 @@ export class UserResolver {
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext
   ): Promise<User> {
-    console.log(ctx)
     return await getLoggedUserAction(ctx.user, em)
   }
 
