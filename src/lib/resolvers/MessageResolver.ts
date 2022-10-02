@@ -4,7 +4,7 @@ import { MessageInputData } from 'src/types/classes/input-data/MessageInputData'
 import { Message } from 'src/types/entities/Message'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { deleteMessageAction, sendMessageToTextChannelAction } from '../actions/MessageActions'
+import { deleteTextChannelMessageAction, sendMessageToTextChannelAction } from '../actions/MessageActions'
 
 @Resolver()
 export class MessageResolver {
@@ -24,6 +24,6 @@ export class MessageResolver {
       @Arg('id') id: string,
       @Arg('data') data: DeleteMessageInputData
   ): Promise<boolean> {
-    return await deleteMessageAction(id, data, ctx.user, em)
+    return await deleteTextChannelMessageAction(id, data, ctx.user, em)
   }
 }

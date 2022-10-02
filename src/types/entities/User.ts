@@ -71,6 +71,10 @@ export class User {
   @Field({ nullable: true })
     jwtToken?: string
 
+  @Property({ type: Boolean })
+  @Field(() => Boolean)
+    isLogged: boolean
+
   @Embedded({ entity: () => UserPreferences, object: true })
   @Field(() => GraphQLJSONObject)
     preferences: UserPreferences
@@ -111,19 +115,20 @@ export class User {
   @Field(() => [PersonalChat])
     personalChats = new Collection<PersonalChat>(this)
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => String, { nullable: true })
   pending (
     @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('groupId', { nullable: true }) groupId?: string
-  ): boolean | null {
+  ): string | null {
     if (groupId) {
-      return this.groupInvites.getItems().map(grI => grI.group.id).includes(groupId)
+      const inviteIndex = this.groupInvites.getItems().findIndex(grI => grI.group.id === groupId)
+      return inviteIndex >= 0 ? this.groupInvites.getItems()[inviteIndex].id : null
     } else {
       const friendRequest = this.friendRequests.getItems().filter(frR => frR.fromUser.id === ctx.user.id && frR.answer === null && frR.canceled === null)
       if (friendRequest.length) {
-        return true
+        return friendRequest[0].id
       }
-      return false
+      return null
     }
   }
 }

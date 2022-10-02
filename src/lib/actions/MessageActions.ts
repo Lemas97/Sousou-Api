@@ -34,17 +34,17 @@ export async function sendMessageToTextChannelAction (data: SendMessageInputData
 
   await em.persistAndFlush(message)
 
-  return { message, rooms: message.textChannel.group.members.getItems().map(pm => `user:${pm.id}`) }
+  return { message, rooms: [`group:${channel.group.id}`] }
 }
 
 // if deleteForAll = false handle on front to print message like "This message delete for you"
-export async function deleteMessageAction (id: string, data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const message = await em.findOneOrFail(TextChannelMessage, id, { populate: ['textChannel', 'textChannel.group'] })
+export async function deleteTextChannelMessageAction (data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
+  const message = await em.findOneOrFail(TextChannelMessage, data.id, { populate: ['textChannel', 'textChannel.group'] })
 
   if (message.from.id !== currentUser.id && message.textChannel.group.owner !== currentUser) {
     message.deletedFromUsers.add(currentUser)
     await em.flush()
-    return true
+    return { message, rooms: [`user:${currentUser.id}`] }
   }
 
   if (data.deleteForAll) {
@@ -56,7 +56,7 @@ export async function deleteMessageAction (id: string, data: DeleteMessageInputD
 
   await em.flush()
 
-  return true
+  return { message, rooms: [`group:${message.textChannel.group.id}`] }
 }
 
 export async function sendMessageToFriendAction (messageInputData: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
@@ -79,8 +79,8 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
   return { message, rooms: message.personalChat.users.getItems().map(pm => `user:${pm.id}`) }
 }
 
-export async function deleteMessageFromPersonalConversationAction (personalMessageId: string, data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const message = await em.findOneOrFail(PersonalMessage, personalMessageId)
+export async function deleteMessageFromPersonalConversationAction (data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
+  const message = await em.findOneOrFail(PersonalMessage, data.id, { populate: ['personalChat', 'personalChat.users'] })
 
   if (!message.personalChat.users.contains(currentUser)) {
     throw new ForbiddenError('NO_ACCESS')
@@ -100,7 +100,7 @@ export async function deleteMessageFromPersonalConversationAction (personalMessa
     await em.flush()
   }
 
-  return true
+  return { message, rooms: message.personalChat.users.getItems().map(user => `user:${user.id}`) }
 }
 
 export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
