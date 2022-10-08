@@ -37,6 +37,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 
   const user = em.create(User, {
     ...data,
+    isLogged: false,
     emailConfirm: false,
     icon: '',
     createdAt: new Date(),
