@@ -207,7 +207,7 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
 }
 
 export async function updateUserAction (data: UpdateUserInputData, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
-  const user = await em.findOneOrFail(User, currentUser.id)
+  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['groups', 'friendList'] })
   if (data.username) {
     const usernameOrEmailExist = await em.findOne(User, {
       $or: [
