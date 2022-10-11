@@ -3,11 +3,19 @@ import { EntityManager } from '@mikro-orm/core'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
 import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction, confirmChangeEmailAction } from '../actions/AuthFreeActions'
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction, confirmChangeEmailAction, usernameExistsAction } from '../actions/AuthFreeActions'
 
 @Resolver()
 export class AuthResolver {
+  @Query(() => Boolean)
+  async usernameExists (
+    @Ctx('em') em: EntityManager,
+      @Arg('username') username: string
+  ): Promise<boolean> {
+    return await usernameExistsAction(username, em)
+  }
+
   // @Mutation(() => Boolean)
   @Mutation(() => String)
   async registerUser (
