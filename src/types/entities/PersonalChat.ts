@@ -19,4 +19,5 @@ export class PersonalChat {
   @OneToMany(() => PersonalMessage, message => message.personalChat)
   @Field(() => [PersonalMessage])
     messages = new Collection<PersonalMessage>(this)
+  pC: any
 }
