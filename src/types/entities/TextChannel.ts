@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryKey,
@@ -10,6 +11,8 @@ import { Field, ObjectType } from 'type-graphql'
 import { v4 } from 'uuid'
 import { Group } from './Group'
 import { TextChannelMessage } from './TextChannelMessage'
+import { TextChannelUserPivot } from './TextChannelUserPivot'
+import { User } from './User'
 
 @Entity()
 @ObjectType()
@@ -29,6 +32,9 @@ export class TextChannel {
   @ManyToOne(() => Group)
   @Field(() => Group)
     group: Group
+
+  @ManyToMany({ entity: () => User, pivotEntity: () => TextChannelUserPivot })
+    users = new Collection<User>(this)
 
   @OneToMany(() => TextChannelMessage, message => message.textChannel)
   @Field(() => [TextChannelMessage])

@@ -27,6 +27,8 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     await socket.join(`user:${user.id}`)
     const groupsRooms = user.groups.getItems().map(group => `group:${group.id}`)
     await socket.join(groupsRooms)
+    const personalChatRooms = user.personalChats.getItems().map(personalChat => `personal-chat:${personalChat.id}`)
+    await socket.join(personalChatRooms)
 
     io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-in')
 
@@ -43,7 +45,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     socket.on('message-read', async (data: ReadMessageInputData) => {
       const result = await readMessageAction(data, user, em)
 
-      io.to(result.rooms).emit('message-read', result.message)
+      io.to(result.rooms).emit('message-read', result.channel)
     })
 
     socket.on('message-delete', async (data: DeleteMessageInputData) => {

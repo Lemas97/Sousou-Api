@@ -43,9 +43,5 @@ export class Message {
 
   @ManyToMany(() => User)
   @Field(() => [User])
-    readBy = new Collection<User>(this)
-
-  @ManyToMany(() => User)
-  @Field(() => [User])
     deletedFromUsers = new Collection<User>(this)
 }

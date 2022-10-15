@@ -4,9 +4,11 @@ import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessa
 import { SendMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from 'src/types/classes/input-data/ReadMessageInputData'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
+import { PersonalChatUsersPivot } from 'src/types/entities/PersonalChatUserPivot'
 import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { TextChannel } from 'src/types/entities/TextChannel'
 import { TextChannelMessage } from 'src/types/entities/TextChannelMessage'
+import { TextChannelUserPivot } from 'src/types/entities/TextChannelUserPivot'
 import { User } from 'src/types/entities/User'
 import { MessageStateType } from 'src/types/enums/MessageStateType'
 
@@ -103,23 +105,56 @@ export async function deleteMessageFromPersonalConversationAction (data: DeleteM
   return { message, rooms: message.personalChat.users.getItems().map(user => `user:${user.id}`) }
 }
 
-export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
+export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketReadMessageRooms> {
   let message: TextChannelMessage | PersonalMessage
   let rooms: string[]
+  let returnValue: PersonalChat | TextChannel
   if (data.personal) {
     message = await em.findOneOrFail(PersonalMessage, data.messageId, {
       populate: ['personalChat', 'personalChat.users'],
       populateWhere: { personalChat: { users: { id: { $ne: currentUser.id } } } }
     })
 
-    rooms = message.personalChat.users.getItems().map(pcu => `user:${pcu.id}`)
+    const personalChatUserPivot = await em.findOneOrFail(PersonalChatUsersPivot, {
+      user: currentUser.id,
+      personalChat: message.personalChat.id
+    })
+
+    em.assign(personalChatUserPivot, { lastReadMessage: message })
+
+    returnValue = message.personalChat
+
+    rooms = [`personal-chat:${message.personalChat.id}`]
   } else {
     message = await em.findOneOrFail(TextChannelMessage, data.messageId, {
       populate: ['textChannel', 'textChannel.group']
     })
+    if (message.textChannel.users.contains(currentUser)) {
+      message.textChannel.users.add(currentUser)
+      await em.flush()
+    }
+
+    const textChannelUserPivot = await em.findOneOrFail(TextChannelUserPivot, {
+      user: currentUser.id,
+      textChannel: message.textChannel
+    })
+
+    em.assign(textChannelUserPivot, {
+      lastReadMessage: message
+    })
+
+    returnValue = message.textChannel
+
     rooms = [`group:${message.textChannel.group.id}`]
   }
-  return { rooms, message }
+  await em.flush()
+
+  return { rooms, channel: returnValue }
+}
+
+export class SocketReadMessageRooms {
+  rooms: string[]
+  channel: TextChannel | PersonalChat
 }
 
 export class SocketMessageRooms {
