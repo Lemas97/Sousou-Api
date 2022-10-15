@@ -10,7 +10,6 @@ import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
 import { VoiceChannel } from 'src/types/entities/VoiceChannel'
 import { User } from 'src/types/entities/User'
 import { PersonalChat } from 'src/types/entities/PersonalChat'
-import { PersonalMessage } from 'src/types/entities/PersonalMessage'
 import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 import { Group } from 'src/types/entities/Group'
@@ -143,27 +142,18 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
     }
   })
 
-  const personalChats = await em.find(PersonalChat, {
-    users: { id: currentUser.id }
-  }, {
-    orderBy: { messages: { createdAt: 'DESC' } },
-    populate: ['messages']
+  const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChat> => {
+    const kati = await pC.messages.matching({ limit: 1, offset: 0 })
+    em.assign(pC, { messages: kati })
+
+    return pC
+  }))
+
+  em.assign(user, {
+    personalChats: personalChats
   })
 
-  const firstPersonalChatsMessages = await em.find(PersonalMessage, { personalChat: { $in: personalChats } }, {
-    limit: 1,
-    offset: 1,
-    orderBy: { createdAt: 'DESC' },
-    populate: [
-      'personalChat'
-    ]
-  })
-
-  personalChats.forEach((personalChat, index) => {
-    personalChat.messages.add(firstPersonalChatsMessages.find(message => message.personalChat.id === personalChat.id) as PersonalMessage)
-    personalChats[index] = personalChat
-  })
-  user.personalChats.set(personalChats)
+  em.clear()
 
   return user
 }
