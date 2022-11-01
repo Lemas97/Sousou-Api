@@ -1,4 +1,4 @@
-import { IsBoolean, IsString, IsUUID } from 'class-validator'
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator'
 import { Field, InputType } from 'type-graphql'
 
 @InputType()
@@ -8,8 +8,9 @@ export class TextChannelInputData {
     name: string
 
   @Field()
-  @IsBoolean()
-    slowMode?: boolean
+  @IsOptional()
+  @IsNumber()
+    slowMode?: number
 
   @Field()
   @IsUUID()

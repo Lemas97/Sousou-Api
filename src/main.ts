@@ -24,6 +24,8 @@ import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
 import { AuthResolver } from './lib/resolvers/AuthResolver'
 import { initSocketEvents } from './lib/socket/SocketInitEvents'
+import { TextChannelResolver } from './lib/resolvers/TextChannelResolver'
+import { VoiceChannelResolver } from './lib/resolvers/VoiceChannelResolver'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -37,7 +39,9 @@ async function main (): Promise<void> {
       FriendRequestResolver,
       GroupResolver,
       GroupInviteResolver,
-      AuthResolver
+      AuthResolver,
+      TextChannelResolver,
+      VoiceChannelResolver
     ],
     globalMiddlewares: [isLogged, ErrorInterceptor]
   })
