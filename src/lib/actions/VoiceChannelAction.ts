@@ -8,7 +8,7 @@ import { VoiceChannel } from 'src/types/entities/VoiceChannel'
 export async function createVoiceChannelAction (data: VoiceChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = await em.findOneOrFail(Group, data.groupId)
 
-  if (group.owner !== currentUser) {
+  if (group.owner.id !== currentUser.id) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
@@ -25,7 +25,7 @@ export async function createVoiceChannelAction (data: VoiceChannelInputData, cur
 export async function updateVoiceChannelAction (id: string, data: VoiceChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
-  if (voiceChannel.group.owner !== currentUser) {
+  if (voiceChannel.group.owner.id !== currentUser.id) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
@@ -38,7 +38,7 @@ export async function updateVoiceChannelAction (id: string, data: VoiceChannelIn
 export async function deleteVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
-  if (voiceChannel.group.owner !== currentUser) {
+  if (voiceChannel.group.owner.id !== currentUser.id) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
@@ -50,7 +50,7 @@ export async function deleteVoiceChannelAction (id: string, currentUser: User, e
 export async function connectToVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
 
-  if (!voiceChannel.group.members.contains(currentUser)) {
+  if (!voiceChannel.group.members.getItems().map(member => member.id).includes(currentUser.id)) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
