@@ -8,7 +8,7 @@ import { User } from 'src/types/entities/User'
 export async function createTextChannelAction (data: TextChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = await em.findOneOrFail(Group, data.groupId)
 
-  if (group.owner !== currentUser) {
+  if (group.owner.id !== currentUser.id) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
@@ -27,7 +27,7 @@ export async function updateTextChannelAction (id: string, data: TextChannelInpu
 
   if (data.groupId !== textChannel.group.id) throw new UserInputError('Cannot move text channels to another group')
 
-  if (textChannel.group.owner !== currentUser) throw new ForbiddenError('NO_ACCESS')
+  if (textChannel.group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
 
   em.assign(textChannel, {
     ...data
@@ -41,7 +41,7 @@ export async function updateTextChannelAction (id: string, data: TextChannelInpu
 export async function deleteTextChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
   const textChannel = await em.findOneOrFail(TextChannel, id, { populate: ['group.owner'] })
 
-  if (textChannel.group.owner !== currentUser) throw new ForbiddenError('NO_ACCESS')
+  if (textChannel.group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
 
   await em.removeAndFlush(textChannel)
 
