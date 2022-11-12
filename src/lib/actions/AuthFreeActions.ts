@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { emailTexts } from '../tasks/emails/EmailTexts'
 import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
-import { PRIVATE_KEY } from 'src/dependencies/config'
+import { ENVIRONMENT, PRIVATE_KEY } from 'src/dependencies/config'
 import { EntityManager } from '@mikro-orm/core'
 import { PersistedQueryNotFoundError } from 'apollo-server-errors'
 
@@ -50,8 +50,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
   })
 
   await em.persistAndFlush(user)
-
-  await emailTexts(user)
+  if (ENVIRONMENT !== 'test') await emailTexts(user)
 
   return user.confirmEmailToken
 }
@@ -105,7 +104,7 @@ export async function resendEmailConfirmationAction (email: string, em: EntityMa
   user.confirmEmailToken = v4()
   await em.flush()
 
-  await emailTexts(user)
+  if (ENVIRONMENT !== 'test') await emailTexts(user)
 
   return user.confirmEmailToken
 }
