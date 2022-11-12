@@ -35,8 +35,10 @@ let userData = {
 }
 
 const clearData = (): void => {
+  userId = v4()
+
   userData = {
-    id: v4(),
+    id: userId,
     isLogged: false,
     emailConfirm: false,
     icon: '',
@@ -49,7 +51,6 @@ const clearData = (): void => {
     preferences: {},
     confirmEmailToken: v4()
   }
-  userId = v4()
   friendRequestData.toUserId = userId
 }
 
@@ -96,15 +97,17 @@ describe('FriendRequestAction: sendFriendRequestAction', () => {
   })
   test('sendFriendRequestAction already friends', async () => {
     expect.assertions(1)
-
     const user = await createBasicUser()
     generateNewUserDetails()
 
-    const currentUser = await createBasicUser()
+    let currentUser = await createBasicUser()
 
     user.friendList.add(currentUser)
+    currentUser.friendList.add(user)
 
     await em.flush()
+
+    currentUser = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList'] })
 
     await expect(async () => await sendFriendRequestAction(friendRequestData, currentUser, em)).rejects.toThrow('You are already friends with this user')
   })
