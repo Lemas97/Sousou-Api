@@ -40,7 +40,7 @@ export class VoiceChannelResolver {
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string
   ): Promise<boolean> {
-    return await connectToVoiceChannelAction(id, ctx.user, em)
+    return await connectToVoiceChannelAction(id, ctx.user, ctx.io, em)
   }
 
   @Mutation(() => Boolean, { description: 'Disconnects the current user from the voice channel' })
@@ -49,7 +49,7 @@ export class VoiceChannelResolver {
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string
   ): Promise<boolean> {
-    return await disconnectFromVoiceChannelAction(id, ctx.user, em)
+    return await disconnectFromVoiceChannelAction(id, ctx.user, ctx.io, em)
   }
 
   @Mutation(() => Boolean, { description: 'Can only be used by owner of the group, and the user they\'re choosing has to be in the voice channel' })
@@ -59,6 +59,6 @@ export class VoiceChannelResolver {
       @Arg('id') id: string,
       @Arg('userId') userId: string
   ): Promise<boolean> {
-    return await disconnectOtherUserAction(id, userId, ctx.user, em)
+    return await disconnectOtherUserAction(id, userId, ctx.user, ctx.io, em)
   }
 }

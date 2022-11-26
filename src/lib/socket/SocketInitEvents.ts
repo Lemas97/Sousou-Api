@@ -6,6 +6,7 @@ import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessa
 import { SendMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from 'src/types/classes/input-data/ReadMessageInputData'
 import { User } from 'src/types/entities/User'
+import { VoiceChannel } from 'src/types/entities/VoiceChannel'
 import { deleteMessageFromPersonalConversationAction, deleteTextChannelMessageAction, readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
 
 export async function initSocketEvents (io: Server, em: EntityManager): Promise<void> {
@@ -79,4 +80,12 @@ export function updateUserEvent (user: User, io: Server): void {
 
 export function emitMessageEvents (io: Server, event: string, data: SocketMessageRooms): void {
   io.to(data.rooms).emit(event, data.message)
+}
+
+export function connectedUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
+  io.to([`group:${voiceChannel.group.id}`]).emit('connectedUserInVoiceChannel', voiceChannel)
+}
+
+export function disconnectUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
+  io.to([`group:${voiceChannel.group.id}`]).emit('disconnectUserInVoiceChannel', voiceChannel)
 }

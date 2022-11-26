@@ -1,9 +1,11 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
+import { Server } from 'socket.io'
 import { VoiceChannelInputData } from 'src/types/classes/input-data/VoiceChannelInputData'
 import { Group } from 'src/types/entities/Group'
 import { User } from 'src/types/entities/User'
 import { VoiceChannel } from 'src/types/entities/VoiceChannel'
+import { connectedUserInVoiceChannel, disconnectUserInVoiceChannel } from '../socket/SocketInitEvents'
 
 export async function createVoiceChannelAction (data: VoiceChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = await em.findOneOrFail(Group, data.groupId)
@@ -47,7 +49,7 @@ export async function deleteVoiceChannelAction (id: string, currentUser: User, e
   return true
 }
 
-export async function connectToVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function connectToVoiceChannelAction (id: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group.members', 'users'] })
   const user = await em.findOneOrFail(User, currentUser.id)
 
@@ -59,10 +61,12 @@ export async function connectToVoiceChannelAction (id: string, currentUser: User
 
   await em.flush()
 
+  connectedUserInVoiceChannel(voiceChannel, io)
+
   return true
 }
 
-export async function disconnectFromVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function disconnectFromVoiceChannelAction (id: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group', 'users'] })
   const user = await em.findOneOrFail(User, currentUser.id)
 
@@ -74,10 +78,12 @@ export async function disconnectFromVoiceChannelAction (id: string, currentUser:
 
   await em.flush()
 
+  disconnectUserInVoiceChannel(voiceChannel, io)
+
   return true
 }
 
-export async function disconnectOtherUserAction (id: string, userId: string, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function disconnectOtherUserAction (id: string, userId: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group.owner', 'users'] })
   const userToDisconnect = await em.findOneOrFail(User, userId)
 
@@ -90,6 +96,8 @@ export async function disconnectOtherUserAction (id: string, userId: string, cur
   voiceChannel.users.remove(userToDisconnect)
 
   await em.flush()
+
+  disconnectUserInVoiceChannel(voiceChannel, io)
 
   return true
 }
