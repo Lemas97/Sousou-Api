@@ -24,7 +24,7 @@ export class PersonalChatUsersPivot {
   @Field(() => PersonalMessage, { nullable: true })
     lastReadMessage?: PersonalMessage
 
-  @Property() // can place properties into pivot
+  @Property()
   @Field()
     mute: boolean
 }

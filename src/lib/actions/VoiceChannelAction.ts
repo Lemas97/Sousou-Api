@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core'
-import { ForbiddenError } from 'apollo-server-koa'
+import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import { VoiceChannelInputData } from 'src/types/classes/input-data/VoiceChannelInputData'
 import { Group } from 'src/types/entities/Group'
 import { User } from 'src/types/entities/User'
@@ -48,13 +48,14 @@ export async function deleteVoiceChannelAction (id: string, currentUser: User, e
 }
 
 export async function connectToVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group.members', 'users'] })
+  const user = await em.findOneOrFail(User, currentUser.id)
 
   if (!voiceChannel.group.members.getItems().map(member => member.id).includes(currentUser.id)) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
-  voiceChannel.users.add(currentUser)
+  voiceChannel.users.add(user)
 
   await em.flush()
 
@@ -62,13 +63,31 @@ export async function connectToVoiceChannelAction (id: string, currentUser: User
 }
 
 export async function disconnectFromVoiceChannelAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group'] })
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group', 'users'] })
+  const user = await em.findOneOrFail(User, currentUser.id)
 
-  // if (!voiceChannel.group.members.contains(currentUser)) {
-  //   throw new ForbiddenError('NO_ACCESS')
-  // }
+  if (!voiceChannel.users.getItems().map(u => u.id).includes(currentUser.id)) {
+    throw new UserInputError('You are not connected to this voice channel')
+  }
 
-  voiceChannel.users.remove(currentUser)
+  voiceChannel.users.remove(user)
+
+  await em.flush()
+
+  return true
+}
+
+export async function disconnectOtherUserAction (id: string, userId: string, currentUser: User, em: EntityManager): Promise<boolean> {
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group.owner', 'users'] })
+  const userToDisconnect = await em.findOneOrFail(User, userId)
+
+  if (currentUser.id !== voiceChannel.group.owner.id) throw new ForbiddenError('You cannot disconnect another user from a voice channel')
+
+  if (!voiceChannel.users.getItems().map(u => u.id).includes(userToDisconnect.id)) {
+    throw new UserInputError('This User is not connected to this voice channel')
+  }
+
+  voiceChannel.users.remove(userToDisconnect)
 
   await em.flush()
 

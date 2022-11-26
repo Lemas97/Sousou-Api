@@ -2,7 +2,7 @@ import { EntityManager } from '@mikro-orm/core'
 import { VoiceChannelInputData } from 'src/types/classes/input-data/VoiceChannelInputData'
 import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
+import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, disconnectOtherUserAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
 
 @Resolver()
 export class VoiceChannelResolver {
@@ -50,5 +50,15 @@ export class VoiceChannelResolver {
       @Arg('id') id: string
   ): Promise<boolean> {
     return await disconnectFromVoiceChannelAction(id, ctx.user, em)
+  }
+
+  @Mutation(() => Boolean)
+  async disconnectOtherUser (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('id') id: string,
+      @Arg('userId') userId: string
+  ): Promise<boolean> {
+    return await disconnectOtherUserAction(id, userId, ctx.user, em)
   }
 }
