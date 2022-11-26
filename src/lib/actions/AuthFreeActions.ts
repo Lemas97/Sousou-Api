@@ -37,7 +37,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
 
   const user = em.create(User, {
     ...data,
-    isLogged: false,
+    isLoggedIn: false,
     emailConfirm: false,
     icon: '',
     createdAt: new Date(),
@@ -78,8 +78,11 @@ export async function loginUserAction (data: LoginUserInputData, em: EntityManag
   }, PRIVATE_KEY, { expiresIn: '1h' })
 
   user.jwtToken = token
+  user.isLoggedIn = true
 
   await em.flush()
+
+  // todo check socket needed
 
   return token
 }

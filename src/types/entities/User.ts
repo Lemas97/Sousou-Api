@@ -73,7 +73,7 @@ export class User {
 
   @Property({ type: Boolean })
   @Field(() => Boolean)
-    isLogged: boolean
+    isLoggedIn: boolean
 
   @Embedded({ entity: () => UserPreferences, object: true })
   @Field(() => GraphQLJSONObject)

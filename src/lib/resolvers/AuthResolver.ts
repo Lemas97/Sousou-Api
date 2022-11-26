@@ -25,7 +25,7 @@ export class AuthResolver {
     return await registerUserAction(data, em)
   }
 
-  @Mutation(() => String)
+  @Mutation(() => String, { description: 'Set connected' })
   async loginUser (
     @Ctx('em') em: EntityManager,
       @Arg('data') data: LoginUserInputData

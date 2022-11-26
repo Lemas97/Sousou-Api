@@ -34,7 +34,7 @@ export class VoiceChannelResolver {
     return await deleteVoiceChannelAction(id, ctx.user, em)
   }
 
-  @Mutation(() => Boolean, { description: 'Connects the current user to the voice channel' })
+  @Mutation(() => Boolean, { description: 'Connects the current user to the voice channel. Also sends, via group room, the info that user connected to the channel' })
   async connectToVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
@@ -43,7 +43,7 @@ export class VoiceChannelResolver {
     return await connectToVoiceChannelAction(id, ctx.user, ctx.io, em)
   }
 
-  @Mutation(() => Boolean, { description: 'Disconnects the current user from the voice channel' })
+  @Mutation(() => Boolean, { description: 'Disconnects the current user from the voice channel. Also sends, via group room, the info that user left the channel' })
   async disconnectFromVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
@@ -52,7 +52,9 @@ export class VoiceChannelResolver {
     return await disconnectFromVoiceChannelAction(id, ctx.user, ctx.io, em)
   }
 
-  @Mutation(() => Boolean, { description: 'Can only be used by owner of the group, and the user they\'re choosing has to be in the voice channel' })
+  @Mutation(() => Boolean, {
+    description: 'Can only be used by owner of the group, and the user they\'re choosing has to be in the voice channel. Also sends, via group room, the info that user left the channel'
+  })
   async disconnectOtherUser (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
