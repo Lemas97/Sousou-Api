@@ -7,7 +7,6 @@ import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
 import {
   connectToVoiceChannelAction,
   deleteFriendAction,
-  disconnectFromVoiceChatAction,
   getAvailableUsersToAddAction,
   getAvailableUsersToInviteAction,
   getFriendRequestsAction,
@@ -127,14 +126,6 @@ export class UserResolver {
       @Arg('voiceChannelId') voiceChannelId: string
   ): Promise<boolean> {
     return await connectToVoiceChannelAction(voiceChannelId, ctx.user, em)
-  }
-
-  @Mutation(() => Boolean)
-  async disconnectFromVoiceChat (
-    @Ctx('em') em: EntityManager,
-      @Ctx('ctx') ctx: AuthCustomContext
-  ): Promise<boolean> {
-    return await disconnectFromVoiceChatAction(ctx.user, em)
   }
 
   @Mutation(() => Boolean)

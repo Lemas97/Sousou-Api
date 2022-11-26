@@ -35,7 +35,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset: (paginationData.limit * paginationData.page) - paginationData.limit,
-    populate: ['groups', 'ownedGroups']
+    populate: ['groups', 'ownedGroups', 'connectedVoiceChannel']
 
   })
 
@@ -274,16 +274,6 @@ export async function connectToVoiceChannelAction (voiceChannelId: string, curre
   if (!currentUser.groups.contains(voiceChannel.group)) throw new ForbiddenError('NO_ACCESS')
 
   currentUser.connectedVoiceChannel = voiceChannel
-
-  await em.flush()
-
-  return true
-}
-
-export async function disconnectFromVoiceChatAction (currentUser: User, em: EntityManager): Promise<boolean> {
-  if (!currentUser.connectedVoiceChannel) throw new UserInputError('YOU_ARE_NOT_CONNECTED_TO_VOICE_CHANNEL')
-
-  currentUser.connectedVoiceChannel = undefined
 
   await em.flush()
 
