@@ -34,7 +34,7 @@ export class VoiceChannelResolver {
     return await deleteVoiceChannelAction(id, ctx.user, em)
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { description: 'Connects the current user to the voice channel' })
   async connectToVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
@@ -43,7 +43,7 @@ export class VoiceChannelResolver {
     return await connectToVoiceChannelAction(id, ctx.user, em)
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { description: 'Disconnects the current user from the voice channel' })
   async disconnectFromVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
@@ -52,7 +52,7 @@ export class VoiceChannelResolver {
     return await disconnectFromVoiceChannelAction(id, ctx.user, em)
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { description: 'Can only be used by owner of the group, and the user they\'re choosing has to be in the voice channel' })
   async disconnectOtherUser (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
