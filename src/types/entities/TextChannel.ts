@@ -34,6 +34,7 @@ export class TextChannel {
     group: Group
 
   @ManyToMany({ entity: () => User, pivotEntity: () => TextChannelUserPivot })
+  @Field(() => [User])
     users = new Collection<User>(this)
 
   @OneToMany(() => TextChannelMessage, message => message.textChannel)

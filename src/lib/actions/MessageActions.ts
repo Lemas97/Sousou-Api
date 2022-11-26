@@ -63,9 +63,9 @@ export async function deleteTextChannelMessageAction (data: DeleteMessageInputDa
 
 export async function sendMessageToFriendAction (messageInputData: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
   const personalChat = await em.findOneOrFail(PersonalChat, messageInputData.identifier, {
-    populate: ['users'],
+    populate: ['pivot.users'],
     populateWhere: {
-      users: { id: { $ne: currentUser.id } }
+      pivot: { users: { id: { $ne: currentUser.id } } }
     }
   })
 
@@ -78,13 +78,13 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
     state: MessageStateType.SENDED
   })
 
-  return { message, rooms: message.personalChat.users.getItems().map(pm => `user:${pm.id}`) }
+  return { message, rooms: message.personalChat.pivot ? message.personalChat?.pivot.users.getItems().map(pm => `user:${pm.id}`) : [] }
 }
 
 export async function deleteMessageFromPersonalConversationAction (data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
-  const message = await em.findOneOrFail(PersonalMessage, data.id, { populate: ['personalChat', 'personalChat.users'] })
+  const message = await em.findOneOrFail(PersonalMessage, data.id, { populate: ['personalChat.pivot.users'] })
 
-  if (!message.personalChat.users.contains(currentUser)) {
+  if (message.personalChat.pivot && !message.personalChat.pivot.users.contains(currentUser)) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
@@ -102,7 +102,7 @@ export async function deleteMessageFromPersonalConversationAction (data: DeleteM
     await em.flush()
   }
 
-  return { message, rooms: message.personalChat.users.getItems().map(user => `user:${user.id}`) }
+  return { message, rooms: message.personalChat.pivot ? message.personalChat.pivot.users.getItems().map(user => `user:${user.id}`) : [] }
 }
 
 export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketReadMessageRooms> {
@@ -111,12 +111,11 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
   let returnValue: PersonalChat | TextChannel
   if (data.personal) {
     message = await em.findOneOrFail(PersonalMessage, data.messageId, {
-      populate: ['personalChat', 'personalChat.users'],
-      populateWhere: { personalChat: { users: { id: { $ne: currentUser.id } } } }
+      populate: ['personalChat.pivot'],
+      populateWhere: { personalChat: { pivot: { users: { id: { $ne: currentUser.id } } } } }
     })
 
     const personalChatUserPivot = await em.findOneOrFail(PersonalChatUsersPivot, {
-      user: currentUser.id,
       personalChat: message.personalChat.id
     })
 

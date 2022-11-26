@@ -22,7 +22,8 @@ export async function getGroupInviteActions (paginationData: PaginatedInputData,
               { displayName: { $like: `%${paginationData.filter}%` } },
               { code: { $like: `%${paginationData.filter}%` } }
             ]
-          }
+          },
+          answer: null
         }
       : {
           fromUser: {
@@ -93,7 +94,7 @@ export async function cancelGroupInviteAction (id: string, currentUser: User, em
 }
 
 export async function answerGroupInviteAction (id: string, answer: boolean, currentUser: User, em: EntityManager): Promise<GroupInvite> {
-  const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser', 'group', 'group.members'] })
+  const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser', 'group.members'] })
 
   const group = await em.findOneOrFail(Group, groupInvite.group.id)
 

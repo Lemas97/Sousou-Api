@@ -7,7 +7,7 @@ export class TextChannelInputData {
   @IsString()
     name: string
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsNumber()
     slowMode?: number

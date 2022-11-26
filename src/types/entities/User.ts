@@ -20,7 +20,6 @@ import { AuthCustomContext } from '../interfaces/CustomContext'
 import { FriendRequest } from './FriendRequest'
 import { Group } from './Group'
 import { GroupInvite } from './GroupInvite'
-import { PersonalChat } from './PersonalChat'
 import { PersonalChatUsersPivot } from './PersonalChatUserPivot'
 import { VoiceChannel } from './VoiceChannel'
 
@@ -112,9 +111,9 @@ export class User {
   @Field(() => [GroupInvite])
     myGroupInvites = new Collection<GroupInvite>(this)
 
-  @ManyToMany(() => PersonalChat, personalChat => personalChat.users, { pivotEntity: () => PersonalChatUsersPivot })
-  @Field(() => [PersonalChat])
-    personalChats = new Collection<PersonalChat>(this)
+  @ManyToMany(() => PersonalChatUsersPivot, personalChat => personalChat.users)
+  @Field(() => [PersonalChatUsersPivot])
+    personalChats = new Collection<PersonalChatUsersPivot>(this)
 
   @Field(() => String, { nullable: true })
   pending (

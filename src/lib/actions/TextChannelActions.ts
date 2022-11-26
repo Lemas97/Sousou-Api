@@ -12,12 +12,12 @@ export async function createTextChannelAction (data: TextChannelInputData, curre
     throw new ForbiddenError('NO_ACCESS')
   }
 
-  const voiceChannel = em.create(TextChannel, {
+  const textChannel = em.create(TextChannel, {
     group: group.id,
     ...data
   })
 
-  await em.persistAndFlush(voiceChannel)
+  await em.persistAndFlush(textChannel)
 
   return true
 }

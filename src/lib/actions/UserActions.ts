@@ -9,7 +9,6 @@ import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputD
 import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
 import { VoiceChannel } from 'src/types/entities/VoiceChannel'
 import { User } from 'src/types/entities/User'
-import { PersonalChat } from 'src/types/entities/PersonalChat'
 import { FriendRequest } from 'src/types/entities/FriendRequest'
 import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
 import { Group } from 'src/types/entities/Group'
@@ -18,6 +17,7 @@ import { PRIVATE_KEY } from 'src/dependencies/config'
 import { changeEmail } from '../tasks/emails/EmailTexts'
 import { Server } from 'socket.io'
 import { updateUserEvent } from '../socket/SocketInitEvents'
+import { PersonalChatUsersPivot } from 'src/types/entities/PersonalChatUserPivot'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   const [users, count] = await em.findAndCount(User, {
@@ -44,6 +44,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 
 export async function getAvailableUsersToAddAction (paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   await em.populate(currentUser, ['friendList'])
+  console.log([...currentUser.friendList.getItems().map(fl => fl.id), currentUser.id])
   const [users, count] = await em.findAndCount(User, {
     $and: [
       {
@@ -112,21 +113,15 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
   const user = await em.findOneOrFail(User, currentUser.id, {
     populate: [
-      'connectedVoiceChannel',
       'connectedVoiceChannel.users',
       'connectedVoiceChannel.group',
-      'groupInvites',
       'groupInvites.fromUser',
-      'myGroupInvites',
       'myGroupInvites.toUser',
       'ownedGroups',
-      'friendRequests',
-      'myFriendRequests',
       'myFriendRequests.toUser',
       'friendList',
       'personalChats',
       'groups',
-      'friendRequests.fromUser',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups'
     ],
@@ -137,14 +132,15 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       },
       groupInvites: {
         answer: { $eq: undefined },
-        canceled: { $eq: undefined }
+        canceled: { $eq: undefined },
+        fromUser: { id: { $ne: currentUser.id } }
       }
     }
   })
 
-  const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChat> => {
-    const kati = await pC.messages.matching({ limit: 1, offset: 0 })
-    em.assign(pC, { messages: kati })
+  const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChatUsersPivot> => {
+    const kati = await pC.personalChat.messages.matching({ limit: 1, offset: 0 })
+    em.assign(pC.personalChat, { messages: kati })
 
     return pC
   }))

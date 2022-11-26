@@ -12,5 +12,6 @@ export class PersonalMessage extends Message {
     personalChat: PersonalChat
 
   @OneToMany(() => PersonalChatUsersPivot, pivot => pivot.lastReadMessage)
+  @Field(() => PersonalChatUsersPivot)
     readBy = new Collection<PersonalChatUsersPivot>(this)
 }

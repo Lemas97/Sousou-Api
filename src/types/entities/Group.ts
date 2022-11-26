@@ -17,6 +17,7 @@ import { v4 } from 'uuid'
 import { GroupPreferences } from '../embeddables/GroupPreferences'
 import { TextChannel } from './TextChannel'
 import { User } from './User'
+import { VoiceChannel } from './VoiceChannel'
 
 @Entity()
 @ObjectType()
@@ -58,5 +59,10 @@ export class Group {
     members = new Collection<User>(this)
 
   @OneToMany(() => TextChannel, textChannel => textChannel.group)
+  @Field(() => [TextChannel])
     textChannels = new Collection<TextChannel>(this)
+
+  @OneToMany(() => VoiceChannel, voiceChannel => voiceChannel.group)
+  @Field(() => [VoiceChannel])
+    voiceChannels = new Collection<VoiceChannel>(this)
 }

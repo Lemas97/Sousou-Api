@@ -1,10 +1,11 @@
 import { Collection, Entity, ManyToOne, OneToMany } from '@mikro-orm/core'
-import { Field } from 'type-graphql'
+import { Field, ObjectType } from 'type-graphql'
 import { Message } from './Message'
 import { TextChannel } from './TextChannel'
 import { TextChannelUserPivot } from './TextChannelUserPivot'
 
 @Entity()
+@ObjectType()
 export class TextChannelMessage extends Message {
   @ManyToOne(() => TextChannel)
   @Field(() => TextChannel)
