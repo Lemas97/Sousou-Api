@@ -21,8 +21,8 @@ WORKDIR /usr/src/app
 
 COPY package*.json .
 
-RUN yarn install
+RUN yarn install --production
 
 COPY --from=development /usr/src/app/dist .
 
-CMD [ "node", "dist/index.js"]
+CMD [ "node", "dist/main.js"]
