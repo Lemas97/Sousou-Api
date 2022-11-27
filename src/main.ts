@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+import {} from 'reflect-metadata'
 
 import { createServer } from 'http'
 import { ApolloServer } from 'apollo-server-koa'
