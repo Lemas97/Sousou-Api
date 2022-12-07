@@ -1,10 +1,10 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import { Server } from 'socket.io'
-import { VoiceChannelInputData } from 'src/types/classes/input-data/VoiceChannelInputData'
-import { Group } from 'src/types/entities/Group'
-import { User } from 'src/types/entities/User'
-import { VoiceChannel } from 'src/types/entities/VoiceChannel'
+import { VoiceChannelInputData } from '../..//types/classes/input-data/VoiceChannelInputData'
+import { Group } from '../..//types/entities/Group'
+import { User } from '../..//types/entities/User'
+import { VoiceChannel } from '../..//types/entities/VoiceChannel'
 import { connectedUserInVoiceChannel, disconnectUserInVoiceChannel } from '../socket/SocketInitEvents'
 
 export async function createVoiceChannelAction (data: VoiceChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {

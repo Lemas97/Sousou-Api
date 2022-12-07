@@ -1,11 +1,11 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
-import { GroupInviteInputData } from 'src/types/classes/input-data/GroupInviteInputData'
-import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
-import { PaginatedGroupInvites } from 'src/types/classes/pagination/GroupInvitePagination'
-import { Group } from 'src/types/entities/Group'
-import { GroupInvite } from 'src/types/entities/GroupInvite'
-import { User } from 'src/types/entities/User'
+import { GroupInviteInputData } from '../..//types/classes/input-data/GroupInviteInputData'
+import { PaginatedInputData } from '../..//types/classes/input-data/PaginatedInputData'
+import { PaginatedGroupInvites } from '../..//types/classes/pagination/GroupInvitePagination'
+import { Group } from '../..//types/entities/Group'
+import { GroupInvite } from '../..//types/entities/GroupInvite'
+import { User } from '../..//types/entities/User'
 
 export async function getGroupInviteActions (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedGroupInvites> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit

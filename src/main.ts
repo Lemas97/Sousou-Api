@@ -10,7 +10,7 @@ import { MikroORM } from '@mikro-orm/core'
 
 import { buildSchema } from 'type-graphql'
 
-import { ENVIRONMENT, HOST, PORT, PRIVATE_KEY } from 'src/dependencies/config'
+import { ENVIRONMENT, HOST, PORT, PRIVATE_KEY } from './dependencies/config'
 
 import { FriendRequestResolver } from './lib/resolvers/FriendRequestResolver'
 import { GroupResolver } from './lib/resolvers/GroupResolver'

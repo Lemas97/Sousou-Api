@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { EMAIL_ADDRESS, EMAIL_HOST, EMAIL_NAME, USER_EMAIL, USER_EMAIL_PWD } from 'src/dependencies/config'
+import { EMAIL_ADDRESS, EMAIL_HOST, EMAIL_NAME, USER_EMAIL, USER_EMAIL_PWD } from '../../../dependencies/config'
 import * as Sentry from '@sentry/node'
 
 export default async function sendEmail (to: string, subject: string, text: string): Promise<void> {

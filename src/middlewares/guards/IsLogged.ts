@@ -1,5 +1,5 @@
 import { ForbiddenError } from 'apollo-server-koa'
-import { CustomContext } from 'src/types/interfaces/CustomContext'
+import { CustomContext } from '../../types/interfaces/CustomContext'
 import { MiddlewareFn } from 'type-graphql'
 
 export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {

@@ -12,8 +12,8 @@ export async function getConnection (): Promise<MikroORM> {
       password: '',
       dbName: 'test',
       entities: [
-        'src/types/entities/*.ts',
-        'src/types/embeddables/*.ts'
+        '../../types/entities/*.ts',
+        '../../types/embeddables/*.ts'
       ]
     })
 

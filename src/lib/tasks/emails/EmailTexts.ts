@@ -1,5 +1,5 @@
-import { FRONT_PORT, FRONT_URL } from 'src/dependencies/config'
-import { User } from 'src/types/entities/User'
+import { FRONT_PORT, FRONT_URL } from '../../../dependencies/config'
+import { User } from '../../../types/entities/User'
 import sendEmail from './SendEmail'
 
 export async function emailTexts (user: User): Promise<void> {

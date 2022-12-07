@@ -16,23 +16,14 @@ services:
   api:
     build:
       context: .
-      target: development
+      target: production
+    ports:
+      - 3399:9999
     depends_on:
       - db
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - 3399:3399
     links:
       - db
-    environment:
-      - DB_DATABASE=sousou
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_HOST=db
-      - DB_PORT=3306
-    command: yarn dev-migrate
+    # command: yarn migrate
 volumes:
   db:
     driver: local

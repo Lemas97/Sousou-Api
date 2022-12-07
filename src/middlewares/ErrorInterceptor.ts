@@ -4,7 +4,7 @@ import { NotFoundError } from '@mikro-orm/core'
 
 import * as Sentry from '@sentry/node'
 
-import { CustomContext } from 'src/types/interfaces/CustomContext'
+import { CustomContext } from '../types/interfaces/CustomContext'
 
 export const ErrorInterceptor: MiddlewareFn<CustomContext> = async (_ctx, next) => {
   try {

@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core'
-import { TextChannelInputData } from 'src/types/classes/input-data/TextChannelInputData'
-import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
+import { TextChannelInputData } from '../../types/classes/input-data/TextChannelInputData'
+import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
 import { createTextChannelAction, deleteTextChannelAction, updateTextChannelAction } from '../actions/TextChannelActions'
 

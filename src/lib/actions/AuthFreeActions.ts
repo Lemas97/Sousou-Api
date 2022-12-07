@@ -1,15 +1,16 @@
 import { ForbiddenError, UserInputError, ValidationError } from 'apollo-server-koa'
-import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
-import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
-import { User } from 'src/types/entities/User'
-import { v4 } from 'uuid'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-import { emailTexts } from '../tasks/emails/EmailTexts'
-import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
-import { ENVIRONMENT, PRIVATE_KEY } from 'src/dependencies/config'
-import { EntityManager } from '@mikro-orm/core'
 import { PersistedQueryNotFoundError } from 'apollo-server-errors'
+import { EntityManager } from '@mikro-orm/core'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import { v4 } from 'uuid'
+
+import { UserPreferencesInputData } from '../..//types/classes/input-data/json-input-data/UserPreferencesInputData'
+import { UserRegisterInputData } from '../..//types/classes/input-data/UserRegisterInputData'
+import { User } from '../..//types/entities/User'
+import { emailTexts } from '../tasks/emails/EmailTexts'
+import { LoginUserInputData } from '../..//types/classes/input-data/LoginUserInputData'
+import { ENVIRONMENT, PRIVATE_KEY } from '../..//dependencies/config'
 
 export async function usernameExistsAction (username: string, em: EntityManager): Promise<boolean> {
   const user = await em.findOne(User, { username })

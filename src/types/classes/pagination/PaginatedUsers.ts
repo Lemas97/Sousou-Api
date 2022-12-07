@@ -1,4 +1,4 @@
-import { User } from 'src/types/entities/User'
+import { User } from '../../../types/entities/User'
 import { Field, ObjectType } from 'type-graphql'
 
 @ObjectType()

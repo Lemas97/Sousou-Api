@@ -1,8 +1,8 @@
 /* eslint-disable no-template-curly-in-string */
 import { EntityManager } from '@mikro-orm/core'
-import { LoginUserInputData } from 'src/types/classes/input-data/LoginUserInputData'
-import { UserRegisterInputData } from 'src/types/classes/input-data/UserRegisterInputData'
-import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
+import { LoginUserInputData } from '../..//types/classes/input-data/LoginUserInputData'
+import { UserRegisterInputData } from '../..//types/classes/input-data/UserRegisterInputData'
+import { AuthCustomContext } from '../..//types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction, confirmChangeEmailAction, usernameExistsAction } from '../actions/AuthFreeActions'
 

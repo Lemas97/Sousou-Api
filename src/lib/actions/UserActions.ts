@@ -3,21 +3,21 @@ import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
-import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
+import { UserPreferencesInputData } from '../..//types/classes/input-data/json-input-data/UserPreferencesInputData'
+import { PaginatedInputData } from '../..//types/classes/input-data/PaginatedInputData'
 
-import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
-import { VoiceChannel } from 'src/types/entities/VoiceChannel'
-import { User } from 'src/types/entities/User'
-import { FriendRequest } from 'src/types/entities/FriendRequest'
-import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
-import { Group } from 'src/types/entities/Group'
-import { UpdateUserInputData } from 'src/types/classes/input-data/UpdateUserInputData'
-import { PRIVATE_KEY } from 'src/dependencies/config'
+import { PaginatedUsers } from '../..//types/classes/pagination/PaginatedUsers'
+import { VoiceChannel } from '../..//types/entities/VoiceChannel'
+import { User } from '../..//types/entities/User'
+import { FriendRequest } from '../..//types/entities/FriendRequest'
+import { PaginatedFriendRequests } from '../..//types/classes/pagination/PaginatedFriendRequests'
+import { Group } from '../..//types/entities/Group'
+import { UpdateUserInputData } from '../..//types/classes/input-data/UpdateUserInputData'
+import { PRIVATE_KEY } from '../..//dependencies/config'
 import { changeEmail } from '../tasks/emails/EmailTexts'
 import { Server } from 'socket.io'
 import { updateUserEvent } from '../socket/SocketInitEvents'
-import { PersonalChatUsersPivot } from 'src/types/entities/PersonalChatUserPivot'
+import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   const [users, count] = await em.findAndCount(User, {
@@ -120,7 +120,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'ownedGroups',
       'myFriendRequests.toUser',
       'friendList',
-      'personalChats',
+      'personalChats.personalChat',
       'groups',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups'
@@ -137,7 +137,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     }
   })
-
+  console.log(user.personalChats)
   const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChatUsersPivot> => {
     const kati = await pC.personalChat.messages.matching({ limit: 1, offset: 0 })
     em.assign(pC.personalChat, { messages: kati })

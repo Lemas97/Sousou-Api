@@ -1,8 +1,8 @@
 import { EntityManager } from '@mikro-orm/core'
 import { Next } from 'koa'
-import { CustomContext } from 'src/types/interfaces/CustomContext'
+import { CustomContext } from '../types/interfaces/CustomContext'
 
-import { User } from 'src/types/entities/User'
+import { User } from '../types/entities/User'
 export function authAndSettStateUser (em: EntityManager): (ctx: CustomContext, next: Next) => Promise<void> {
   return async (ctx: CustomContext, next: Next) => {
     if (ctx.state.user !== undefined) {

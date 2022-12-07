@@ -1,10 +1,10 @@
 import { EntityManager } from '@mikro-orm/core'
-import { GroupInputData } from 'src/types/classes/input-data/GroupInputData'
-import { GroupPreferencesInputData } from 'src/types/classes/input-data/json-input-data/GroupPreferencesInputData'
-import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
-import { PaginatedGroups } from 'src/types/classes/pagination/PaginatedGroups'
-import { Group } from 'src/types/entities/Group'
-import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
+import { GroupInputData } from '../../types/classes/input-data/GroupInputData'
+import { GroupPreferencesInputData } from '../../types/classes/input-data/json-input-data/GroupPreferencesInputData'
+import { PaginatedInputData } from '../../types/classes/input-data/PaginatedInputData'
+import { PaginatedGroups } from '../../types/classes/pagination/PaginatedGroups'
+import { Group } from '../../types/entities/Group'
+import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Publisher, PubSub, Query, Resolver } from 'type-graphql'
 import {
   createGroupAction,

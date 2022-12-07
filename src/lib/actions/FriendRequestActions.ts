@@ -1,10 +1,10 @@
 import { EntityManager } from '@mikro-orm/core'
 import { UserInputError } from 'apollo-server-koa'
-import { FriendRequestInputData } from 'src/types/classes/input-data/FriendRequestInputData'
-import { FriendRequest } from 'src/types/entities/FriendRequest'
-import { PersonalChat } from 'src/types/entities/PersonalChat'
-import { PersonalChatUsersPivot } from 'src/types/entities/PersonalChatUserPivot'
-import { User } from 'src/types/entities/User'
+import { FriendRequestInputData } from '../..//types/classes/input-data/FriendRequestInputData'
+import { FriendRequest } from '../..//types/entities/FriendRequest'
+import { PersonalChat } from '../..//types/entities/PersonalChat'
+import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
+import { User } from '../..//types/entities/User'
 
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
   if (data.toUserId === currentUser.id) {
@@ -112,6 +112,7 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
       mute: false,
       personalChat: personalChat.id
     })
+    personalChat.pivot = personalChatUserPivot
 
     await em.persistAndFlush(personalChatUserPivot)
   }

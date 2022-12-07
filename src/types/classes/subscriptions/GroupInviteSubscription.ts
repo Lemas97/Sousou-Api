@@ -1,4 +1,4 @@
-import { GroupInvite } from 'src/types/entities/GroupInvite'
+import { GroupInvite } from '../../../types/entities/GroupInvite'
 import { Field, ObjectType } from 'type-graphql'
 
 @ObjectType()

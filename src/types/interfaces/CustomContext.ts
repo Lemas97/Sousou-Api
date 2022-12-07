@@ -1,7 +1,7 @@
 import { Context } from 'koa'
 import { EntityManager } from '@mikro-orm/core'
 
-import { User } from 'src/types/entities/User'
+import { User } from '../../types/entities/User'
 import { Server } from 'socket.io'
 
 export interface CustomContext {

@@ -1,9 +1,9 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
-import { TextChannelInputData } from 'src/types/classes/input-data/TextChannelInputData'
-import { Group } from 'src/types/entities/Group'
-import { TextChannel } from 'src/types/entities/TextChannel'
-import { User } from 'src/types/entities/User'
+import { TextChannelInputData } from '../..//types/classes/input-data/TextChannelInputData'
+import { Group } from '../..//types/entities/Group'
+import { TextChannel } from '../..//types/entities/TextChannel'
+import { User } from '../..//types/entities/User'
 
 export async function createTextChannelAction (data: TextChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = await em.findOneOrFail(Group, data.groupId)

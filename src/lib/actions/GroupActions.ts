@@ -1,14 +1,14 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 
-import { PaginatedGroups } from 'src/types/classes/pagination/PaginatedGroups'
-import { Group } from 'src/types/entities/Group'
-import { User } from 'src/types/entities/User'
+import { PaginatedGroups } from '../..//types/classes/pagination/PaginatedGroups'
+import { Group } from '../..//types/entities/Group'
+import { User } from '../..//types/entities/User'
 
-import { GroupPreferencesInputData } from 'src/types/classes/input-data/json-input-data/GroupPreferencesInputData'
-import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
-import { GroupInputData } from 'src/types/classes/input-data/GroupInputData'
-import { TextChannel } from 'src/types/entities/TextChannel'
+import { GroupPreferencesInputData } from '../..//types/classes/input-data/json-input-data/GroupPreferencesInputData'
+import { PaginatedInputData } from '../..//types/classes/input-data/PaginatedInputData'
+import { GroupInputData } from '../..//types/classes/input-data/GroupInputData'
+import { TextChannel } from '../..//types/entities/TextChannel'
 
 export async function getGroupsAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedGroups> {
   if (!paginationData.filter) paginationData.filter = ''

@@ -1,12 +1,12 @@
 import { EntityManager } from '@mikro-orm/core'
 import jwt from 'jsonwebtoken'
 import { Server } from 'socket.io'
-import { PRIVATE_KEY } from 'src/dependencies/config'
-import { DeleteMessageInputData } from 'src/types/classes/input-data/DeleteMessageInputData'
-import { SendMessageInputData } from 'src/types/classes/input-data/PersonalMessageInputData'
-import { ReadMessageInputData } from 'src/types/classes/input-data/ReadMessageInputData'
-import { User } from 'src/types/entities/User'
-import { VoiceChannel } from 'src/types/entities/VoiceChannel'
+import { PRIVATE_KEY } from '../../dependencies/config'
+import { DeleteMessageInputData } from '../../types/classes/input-data/DeleteMessageInputData'
+import { SendMessageInputData } from '../../types/classes/input-data/PersonalMessageInputData'
+import { ReadMessageInputData } from '../../types/classes/input-data/ReadMessageInputData'
+import { User } from '../../types/entities/User'
+import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { deleteMessageFromPersonalConversationAction, deleteTextChannelMessageAction, readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
 
 export async function initSocketEvents (io: Server, em: EntityManager): Promise<void> {

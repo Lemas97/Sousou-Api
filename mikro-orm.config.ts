@@ -16,6 +16,8 @@ export default {
   },
   entities: [
     './src/types/embeddables/*.ts',
-    './src/types/entities/*.ts'
+    './src/types/embeddables/*.js',
+    './src/types/entities/*.ts',
+    './src/types/entities/*.js'
   ]
 }

@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core'
-import { VoiceChannelInputData } from 'src/types/classes/input-data/VoiceChannelInputData'
-import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
+import { VoiceChannelInputData } from '../../types/classes/input-data/VoiceChannelInputData'
+import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
 import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, disconnectOtherUserAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
 

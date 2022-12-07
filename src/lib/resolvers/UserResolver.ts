@@ -2,8 +2,8 @@
 import { EntityManager } from '@mikro-orm/core'
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
-import { PaginatedInputData } from 'src/types/classes/input-data/PaginatedInputData'
-import { PaginatedUsers } from 'src/types/classes/pagination/PaginatedUsers'
+import { PaginatedInputData } from '../../types/classes/input-data/PaginatedInputData'
+import { PaginatedUsers } from '../../types/classes/pagination/PaginatedUsers'
 import {
   connectToVoiceChannelAction,
   deleteFriendAction,
@@ -19,11 +19,11 @@ import {
   updateUserPasswordAction,
   updateUserPreferencesAction
 } from '../actions/UserActions'
-import { UserPreferencesInputData } from 'src/types/classes/input-data/json-input-data/UserPreferencesInputData'
-import { User } from 'src/types/entities/User'
-import { AuthCustomContext } from 'src/types/interfaces/CustomContext'
-import { PaginatedFriendRequests } from 'src/types/classes/pagination/PaginatedFriendRequests'
-import { UpdateUserInputData } from 'src/types/classes/input-data/UpdateUserInputData'
+import { UserPreferencesInputData } from '../../types/classes/input-data/json-input-data/UserPreferencesInputData'
+import { User } from '../../types/entities/User'
+import { AuthCustomContext } from '../../types/interfaces/CustomContext'
+import { PaginatedFriendRequests } from '../../types/classes/pagination/PaginatedFriendRequests'
+import { UpdateUserInputData } from '../../types/classes/input-data/UpdateUserInputData'
 import { Server } from 'socket.io'
 
 @Resolver()
