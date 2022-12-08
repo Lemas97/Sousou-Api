@@ -7,6 +7,17 @@ import { User } from '../..//types/entities/User'
 import { VoiceChannel } from '../..//types/entities/VoiceChannel'
 import { connectedUserInVoiceChannel, disconnectUserInVoiceChannel } from '../socket/SocketInitEvents'
 
+export async function getVoiceChannelByIdAction (id: string, currentUser: User, em: EntityManager): Promise<VoiceChannel> {
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, {
+    populate: [
+      'group.members'
+    ]
+  })
+  if (!voiceChannel.group.members.getItems().map(me => me.id).includes(currentUser.id)) throw new ForbiddenError('You have no access on this voice channel')
+
+  return voiceChannel
+}
+
 export async function createVoiceChannelAction (data: VoiceChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = await em.findOneOrFail(Group, data.groupId)
 

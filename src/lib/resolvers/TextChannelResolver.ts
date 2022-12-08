@@ -1,11 +1,21 @@
 import { EntityManager } from '@mikro-orm/core'
 import { TextChannelInputData } from '../../types/classes/input-data/TextChannelInputData'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { createTextChannelAction, deleteTextChannelAction, updateTextChannelAction } from '../actions/TextChannelActions'
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { createTextChannelAction, deleteTextChannelAction, getTextChannelByIdAction, updateTextChannelAction } from '../actions/TextChannelActions'
+import { TextChannel } from '../../types/entities/TextChannel'
 
 @Resolver()
 export class TextChannelResolver {
+  @Query(() => TextChannel)
+  async getTextChannelById (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('id') id: string
+  ): Promise<TextChannel> {
+    return await getTextChannelByIdAction(id, ctx.user, em)
+  }
+
   @Mutation(() => Boolean)
   async createTextChannel (
     @Ctx('em') em: EntityManager,

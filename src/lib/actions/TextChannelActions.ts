@@ -1,9 +1,20 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
-import { TextChannelInputData } from '../..//types/classes/input-data/TextChannelInputData'
-import { Group } from '../..//types/entities/Group'
-import { TextChannel } from '../..//types/entities/TextChannel'
-import { User } from '../..//types/entities/User'
+import { TextChannelInputData } from '../../types/classes/input-data/TextChannelInputData'
+import { Group } from '../../types/entities/Group'
+import { TextChannel } from '../../types/entities/TextChannel'
+import { User } from '../../types/entities/User'
+
+export async function getTextChannelByIdAction (id: string, currentUser: User, em: EntityManager): Promise<TextChannel> {
+  const textChannel = await em.findOneOrFail(TextChannel, id, {
+    populate: [
+      'group.members'
+    ]
+  })
+  if (!textChannel.group.members.getItems().map(me => me.id).includes(currentUser.id)) throw new ForbiddenError('You have no access on this voice channel')
+
+  return textChannel
+}
 
 export async function createTextChannelAction (data: TextChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
   const group = await em.findOneOrFail(Group, data.groupId)

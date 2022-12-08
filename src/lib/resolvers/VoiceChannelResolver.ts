@@ -2,10 +2,21 @@ import { EntityManager } from '@mikro-orm/core'
 import { VoiceChannelInputData } from '../../types/classes/input-data/VoiceChannelInputData'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, disconnectOtherUserAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
+import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, disconnectOtherUserAction, getVoiceChannelByIdAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
+import { Query } from 'graphql-composer-decorators'
+import { VoiceChannel } from '../../types/entities/VoiceChannel'
 
 @Resolver()
 export class VoiceChannelResolver {
+  @Query(() => VoiceChannel)
+  async getVoiceChannelById (
+    @Ctx('em') em: EntityManager,
+      @Ctx('ctx') ctx: AuthCustomContext,
+      @Arg('id') id: string
+  ): Promise<VoiceChannel> {
+    return await getVoiceChannelByIdAction(id, ctx.user, em)
+  }
+
   @Mutation(() => Boolean)
   async createVoiceChannel (
     @Ctx('em') em: EntityManager,
