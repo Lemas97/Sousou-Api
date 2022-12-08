@@ -215,6 +215,13 @@ export async function updateUserAction (data: UpdateUserInputData, currentUser: 
   return true
 }
 
+export async function getUserByIdAction (id: string, _currentUser: User, em: EntityManager): Promise<User> {
+  // todo add permission populating
+  const user = await em.findOneOrFail(User, id)
+
+  return user
+}
+
 export async function updateUserEmailAction (newEmail: string, currentUser: User, em: EntityManager): Promise<boolean> {
   const user = await em.findOneOrFail(User, currentUser.id)
   if (user.email === newEmail) throw new UserInputError('You are already using this email')
