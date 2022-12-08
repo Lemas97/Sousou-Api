@@ -116,6 +116,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'connectedVoiceChannel.users',
       'connectedVoiceChannel.group',
       'groupInvites.fromUser',
+      'groupInvites.group.members',
       'myGroupInvites.toUser',
       'ownedGroups',
       'myFriendRequests.toUser',
