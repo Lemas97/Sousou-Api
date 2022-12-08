@@ -137,7 +137,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     }
   })
-  console.log(user.personalChats)
+
   const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChatUsersPivot> => {
     const kati = await pC.personalChat.messages.matching({ limit: 1, offset: 0 })
     em.assign(pC.personalChat, { messages: kati })

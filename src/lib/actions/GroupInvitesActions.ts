@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
-import { GroupInviteInputData } from '../..//types/classes/input-data/GroupInviteInputData'
-import { PaginatedInputData } from '../..//types/classes/input-data/PaginatedInputData'
+import { GroupInviteInputData } from '../../types/classes/input-data/GroupInviteInputData'
+import { PaginatedInputData } from '../../types/classes/input-data/PaginatedInputData'
 import { PaginatedGroupInvites } from '../..//types/classes/pagination/GroupInvitePagination'
 import { Group } from '../..//types/entities/Group'
 import { GroupInvite } from '../..//types/entities/GroupInvite'
@@ -104,8 +104,10 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   em.assign(groupInvite, { answer: answer })
 
-  await em.populate(currentUser, ['groups'])
-  em.assign(group, { members: [...group.members.getItems(), currentUser] })
+  if (answer) {
+    await em.populate(currentUser, ['groups'])
+    em.assign(group, { members: [...group.members.getItems(), currentUser] })
+  }
 
   await em.flush()
 

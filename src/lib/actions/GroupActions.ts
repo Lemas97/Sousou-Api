@@ -28,7 +28,7 @@ export async function getGroupByIdAction (id: string, currentUser: User, em: Ent
     id,
     members: { id: { $in: [currentUser.id] } }
   }, {
-    populate: ['members']
+    populate: ['members', 'textChannels', 'voiceChannels']
   })
 
   return group
