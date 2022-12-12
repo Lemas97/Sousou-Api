@@ -263,7 +263,8 @@ export async function updateUserPasswordAction (newPassword: string, currentUser
 }
 
 export async function logoutUserAction (currentUser: User, em: EntityManager): Promise<boolean> {
-  em.assign(currentUser, {
+  const user = await em.findOneOrFail(User, currentUser.id)
+  em.assign(user, {
     jwtToken: undefined,
     isLoggedIn: false
   })
