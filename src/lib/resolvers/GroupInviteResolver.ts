@@ -1,13 +1,11 @@
-import { EntityManager } from '@mikro-orm/core'
-import { PayloadGeneric } from '../../types/classes/generics/PayloadGeneric'
 import { GroupInviteInputData } from '../../types/classes/input-data/GroupInviteInputData'
 import { PaginatedInputData } from '../../types/classes/input-data/PaginatedInputData'
 import { PaginatedGroupInvites } from '../../types/classes/pagination/GroupInvitePagination'
-import { GroupInviteSubscription } from '../../types/classes/subscriptions/GroupInviteSubscription'
-import { GroupInvite } from '../../types/entities/GroupInvite'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
-import { Arg, Ctx, Mutation, Publisher, PubSub, Query, Resolver, Root, Subscription } from 'type-graphql'
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { answerGroupInviteAction, cancelGroupInviteAction, createGroupInviteAction, getGroupInviteActions } from '../actions/GroupInvitesActions'
+import { EntityManager } from '@mikro-orm/core'
+import { Server } from 'socket.io'
 
 @Resolver()
 export class GroupInviteResolver {
@@ -23,49 +21,34 @@ export class GroupInviteResolver {
 
   @Mutation(() => Boolean)
   async createGroupInvite (
-    @PubSub('GROUP_INVITE_CREATE') publish: Publisher<PayloadGeneric<GroupInvite>>,
-      @Ctx('em') em: EntityManager,
+    @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('data') data: GroupInviteInputData
   ): Promise<boolean> {
-    const groupInvite = await createGroupInviteAction(data, ctx.user, em)
-    await publish({ data: groupInvite, event: 'create' })
+    await createGroupInviteAction(data, ctx.user, io, em)
     return true
   }
 
   @Mutation(() => Boolean)
   async cancelGroupInvite (
-    @PubSub('GROUP_INVITE_UPDATE') publish: Publisher<PayloadGeneric<GroupInvite>>,
-      @Ctx('em') em: EntityManager,
+    @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string
   ): Promise<boolean> {
-    const groupInvite = await cancelGroupInviteAction(id, ctx.user, em)
-    await publish({ data: groupInvite, event: 'cancel' })
+    await cancelGroupInviteAction(id, ctx.user, em)
     return true
   }
 
   @Mutation(() => Boolean)
   async answerGroupInvite (
-    @PubSub('GROUP_INVITE_ANSWER') publish: Publisher<PayloadGeneric<GroupInvite>>,
-      @Ctx('em') em: EntityManager,
+    @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('id') id: string,
       @Arg('answer') answer: boolean
   ): Promise<boolean> {
-    const groupInvite = await answerGroupInviteAction(id, answer, ctx.user, em)
-    await publish({ data: groupInvite, event: 'answer' })
+    await answerGroupInviteAction(id, answer, ctx.user, io, em)
     return true
-  }
-
-  @Subscription(() => GroupInviteSubscription, {
-    topics: ['GROUP_INVITE_CREATE', 'GROUP_INVITE_UPDATE', 'GROUP_INVITE_ANSWER'],
-    filter: ({ payload, args }) => {
-      console.log(args)
-      return (args.userId === (payload.data as GroupInvite).fromUser.id || (payload.data as GroupInvite).toUser.id === args.userId)
-    }
-  })
-  onGroupInviteActions (@Root() payload: PayloadGeneric<GroupInvite>, @Arg('userId') _: string): GroupInviteSubscription {
-    return { group: payload.data, event: payload.event }
   }
 }

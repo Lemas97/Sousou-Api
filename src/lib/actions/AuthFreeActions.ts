@@ -78,8 +78,7 @@ export async function loginUserAction (data: LoginUserInputData, em: EntityManag
     code: user.code
   }, PRIVATE_KEY, { expiresIn: '1h' })
 
-  user.jwtToken = token
-  user.isLoggedIn = true
+  em.assign(user, { jwtToken: token, isLoggedIn: true })
 
   await em.flush()
 

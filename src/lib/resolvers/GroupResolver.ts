@@ -15,6 +15,7 @@ import {
   updateGroupAction,
   updateGroupPreferencesAction
 } from '../actions/GroupActions'
+import { Server } from 'socket.io'
 
 @Resolver()
 export class GroupResolver {
@@ -52,10 +53,11 @@ export class GroupResolver {
     @PubSub('GROUP_UPDATED') publish: Publisher<Group>,
       @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('id') id: string,
       @Arg('data') data: GroupInputData
   ): Promise<boolean> {
-    const group = await updateGroupAction(id, data, ctx.user, em)
+    const group = await updateGroupAction(id, data, ctx.user, io, em)
     await publish(group)
     return true
   }

@@ -5,6 +5,7 @@ import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
 import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, disconnectOtherUserAction, getVoiceChannelByIdAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
 import { Query } from 'graphql-composer-decorators'
 import { VoiceChannel } from '../../types/entities/VoiceChannel'
+import { Server } from 'socket.io'
 
 @Resolver()
 export class VoiceChannelResolver {
@@ -49,18 +50,20 @@ export class VoiceChannelResolver {
   async connectToVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('id') id: string
   ): Promise<boolean> {
-    return await connectToVoiceChannelAction(id, ctx.user, ctx.io, em)
+    return await connectToVoiceChannelAction(id, ctx.user, io, em)
   }
 
   @Mutation(() => Boolean, { description: 'Disconnects the current user from the voice channel. Also sends, via group room, the info that user left the channel' })
   async disconnectFromVoiceChannel (
     @Ctx('em') em: EntityManager,
+      @Ctx('io') io: Server,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string
   ): Promise<boolean> {
-    return await disconnectFromVoiceChannelAction(id, ctx.user, ctx.io, em)
+    return await disconnectFromVoiceChannelAction(id, ctx.user, io, em)
   }
 
   @Mutation(() => Boolean, {
@@ -68,10 +71,11 @@ export class VoiceChannelResolver {
   })
   async disconnectOtherUser (
     @Ctx('em') em: EntityManager,
+      @Ctx('io') io: Server,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string,
       @Arg('userId') userId: string
   ): Promise<boolean> {
-    return await disconnectOtherUserAction(id, userId, ctx.user, ctx.io, em)
+    return await disconnectOtherUserAction(id, userId, ctx.user, io, em)
   }
 }

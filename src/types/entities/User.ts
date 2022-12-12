@@ -48,7 +48,7 @@ export class User {
   @Field()
     code: string
 
-  @Property()
+  @Property({ hidden: true })
     password: string
 
   @Property()

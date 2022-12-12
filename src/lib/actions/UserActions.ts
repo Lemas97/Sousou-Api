@@ -194,7 +194,14 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
 }
 
 export async function updateUserAction (data: UpdateUserInputData, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
-  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['groups', 'friendList'] })
+  const user = await em.findOneOrFail(User, currentUser.id, {
+    populate: ['groups', 'friendList'],
+    populateWhere: {
+      friendList: {
+        isLoggedIn: true
+      }
+    }
+  })
   if (data.username) {
     const usernameOrEmailExist = await em.findOne(User, {
       $or: [
@@ -210,6 +217,7 @@ export async function updateUserAction (data: UpdateUserInputData, currentUser: 
 
   await em.flush()
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   updateUserEvent(user, io)
 
   return true
@@ -255,7 +263,10 @@ export async function updateUserPasswordAction (newPassword: string, currentUser
 }
 
 export async function logoutUserAction (currentUser: User, em: EntityManager): Promise<boolean> {
-  currentUser.jwtToken = undefined
+  em.assign(currentUser, {
+    jwtToken: undefined,
+    isLoggedIn: false
+  })
 
   await em.flush()
   return true

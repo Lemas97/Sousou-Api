@@ -6,6 +6,8 @@ import { PaginatedGroupInvites } from '../..//types/classes/pagination/GroupInvi
 import { Group } from '../..//types/entities/Group'
 import { GroupInvite } from '../..//types/entities/GroupInvite'
 import { User } from '../..//types/entities/User'
+import { Server } from 'socket.io'
+import { newInviteOnCreateGroupInvite, updateGroup } from '../socket/SocketInitEvents'
 
 export async function getGroupInviteActions (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedGroupInvites> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
@@ -48,7 +50,7 @@ export async function getGroupInviteActions (paginationData: PaginatedInputData,
   }
 }
 
-export async function createGroupInviteAction (groupInviteInputData: GroupInviteInputData, currentUser: User, em: EntityManager): Promise<GroupInvite> {
+export async function createGroupInviteAction (groupInviteInputData: GroupInviteInputData, currentUser: User, io: Server, em: EntityManager): Promise<GroupInvite> {
   if (currentUser.id === groupInviteInputData.toUserId) throw new UserInputError('You cannot invite yourself to a group')
 
   const group = await em.findOneOrFail(Group, groupInviteInputData.groupId)
@@ -77,6 +79,9 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   await em.populate(currentUser, ['groups'])
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  newInviteOnCreateGroupInvite(toUser, groupInvite, io)
+
   return groupInvite
 }
 
@@ -93,7 +98,7 @@ export async function cancelGroupInviteAction (id: string, currentUser: User, em
   return groupInvite
 }
 
-export async function answerGroupInviteAction (id: string, answer: boolean, currentUser: User, em: EntityManager): Promise<GroupInvite> {
+export async function answerGroupInviteAction (id: string, answer: boolean, currentUser: User, io: Server, em: EntityManager): Promise<GroupInvite> {
   const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser', 'group.members'] })
 
   const group = await em.findOneOrFail(Group, groupInvite.group.id)
@@ -110,6 +115,9 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
   }
 
   await em.flush()
+
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  updateGroup(currentUser, group, io)
 
   return groupInvite
 }

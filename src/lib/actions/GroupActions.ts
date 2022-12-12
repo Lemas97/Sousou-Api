@@ -9,6 +9,8 @@ import { GroupPreferencesInputData } from '../..//types/classes/input-data/json-
 import { PaginatedInputData } from '../..//types/classes/input-data/PaginatedInputData'
 import { GroupInputData } from '../..//types/classes/input-data/GroupInputData'
 import { TextChannel } from '../..//types/entities/TextChannel'
+import { updateGroup } from '../socket/SocketInitEvents'
+import { Server } from 'socket.io'
 
 export async function getGroupsAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedGroups> {
   if (!paginationData.filter) paginationData.filter = ''
@@ -63,7 +65,7 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
   return group
 }
 
-export async function updateGroupAction (id: string, data: GroupInputData, currentUser: User, em: EntityManager): Promise<Group> {
+export async function updateGroupAction (id: string, data: GroupInputData, currentUser: User, io: Server, em: EntityManager): Promise<Group> {
   const group = await em.findOneOrFail(Group, id)
 
   if (group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
@@ -71,6 +73,9 @@ export async function updateGroupAction (id: string, data: GroupInputData, curre
   em.assign(group, { ...data })
 
   await em.flush()
+
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  updateGroup(currentUser, group, io)
 
   return group
 }
