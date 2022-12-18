@@ -5,7 +5,7 @@ import { VoiceChannelInputData } from '../..//types/classes/input-data/VoiceChan
 import { Group } from '../..//types/entities/Group'
 import { User } from '../..//types/entities/User'
 import { VoiceChannel } from '../..//types/entities/VoiceChannel'
-import { connectedUserInVoiceChannel, disconnectUserInVoiceChannel } from '../socket/SocketInitEvents'
+import { connectedUserInVoiceChannel, disconnectUserInVoiceChannel as disconnectUserFromVoiceChannel, kickFromVoiceChannel } from '../socket/SocketInitEvents'
 
 export async function getVoiceChannelByIdAction (id: string, currentUser: User, em: EntityManager): Promise<VoiceChannel> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, {
@@ -89,26 +89,25 @@ export async function disconnectFromVoiceChannelAction (id: string, currentUser:
 
   await em.flush()
 
-  disconnectUserInVoiceChannel(voiceChannel, io)
+  disconnectUserFromVoiceChannel(voiceChannel, io)
 
   return true
 }
 
-export async function disconnectOtherUserAction (id: string, userId: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, id, { populate: ['group.owner', 'users'] })
-  const userToDisconnect = await em.findOneOrFail(User, userId)
+export async function kickFromVoiceChannelAction (id: string, voiceChannelId: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, id)
 
-  if (currentUser.id !== voiceChannel.group.owner.id) throw new ForbiddenError('You cannot disconnect another user from a voice channel')
+  if (!user.connectedVoiceChannel || user.connectedVoiceChannel.id !== voiceChannelId) throw new UserInputError('USER_IS_NOT_CONNECTED_TO_THIS_VOICE_CHANNEL')
 
-  if (!voiceChannel.users.getItems().map(u => u.id).includes(userToDisconnect.id)) {
-    throw new UserInputError('This User is not connected to this voice channel')
-  }
+  const voiceChannel = await em.findOneOrFail(VoiceChannel, voiceChannelId, { populate: ['group', 'group.owner'] })
 
-  voiceChannel.users.remove(userToDisconnect)
+  if (voiceChannel.group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
+
+  user.connectedVoiceChannel = undefined
 
   await em.flush()
 
-  disconnectUserInVoiceChannel(voiceChannel, io)
+  kickFromVoiceChannel(voiceChannel, user, io)
 
   return true
 }

@@ -79,7 +79,6 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   await em.populate(currentUser, ['groups'])
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   newInviteOnCreateGroupInvite(toUser, groupInvite, io)
 
   return groupInvite
@@ -116,7 +115,6 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   await em.flush()
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   updateGroup(currentUser, group, io)
 
   return groupInvite

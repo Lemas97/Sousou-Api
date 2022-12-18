@@ -16,7 +16,7 @@ import { UpdateUserInputData } from '../..//types/classes/input-data/UpdateUserI
 import { PRIVATE_KEY } from '../..//dependencies/config'
 import { changeEmail } from '../tasks/emails/EmailTexts'
 import { Server } from 'socket.io'
-import { updateUserEvent } from '../socket/SocketInitEvents'
+import { deletedUserFromFriendList, updateUserEvent } from '../socket/SocketInitEvents'
 import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
@@ -217,7 +217,6 @@ export async function updateUserAction (data: UpdateUserInputData, currentUser: 
 
   await em.flush()
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   updateUserEvent(user, io)
 
   return true
@@ -300,23 +299,7 @@ export async function connectToVoiceChannelAction (voiceChannelId: string, curre
   return true
 }
 
-export async function kickFromVoiceChannelAction (id: string, voiceChannelId: string, currentUser: User, em: EntityManager): Promise<boolean> {
-  const user = await em.findOneOrFail(User, id)
-
-  if (!user.connectedVoiceChannel || user.connectedVoiceChannel.id !== voiceChannelId) throw new UserInputError('USER_IS_NOT_CONNECTED_TO_THIS_VOICE_CHANNEL')
-
-  const voiceChannel = await em.findOneOrFail(VoiceChannel, voiceChannelId, { populate: ['group', 'group.owner'] })
-
-  if (voiceChannel.group.owner.id !== currentUser.id) throw new ForbiddenError('NO_ACCESS')
-
-  user.connectedVoiceChannel = undefined
-
-  await em.flush()
-
-  return true
-}
-
-export async function deleteFriendAction (id: string, currentUser: User, em: EntityManager): Promise<boolean> {
+export async function deleteFriendAction (id: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
   if (id === currentUser.id) throw new UserInputError('You cannot delete yourself')
 
   const userToDelete = await em.findOneOrFail(User, id, { populate: ['friendList'] })
@@ -328,6 +311,8 @@ export async function deleteFriendAction (id: string, currentUser: User, em: Ent
   user.friendList.remove(userToDelete)
 
   await em.flush()
+
+  deletedUserFromFriendList(userToDelete, io)
 
   return true
 }

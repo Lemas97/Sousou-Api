@@ -2,7 +2,7 @@ import { EntityManager } from '@mikro-orm/core'
 import { VoiceChannelInputData } from '../../types/classes/input-data/VoiceChannelInputData'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
-import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, disconnectOtherUserAction, getVoiceChannelByIdAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
+import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, getVoiceChannelByIdAction, kickFromVoiceChannelAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
 import { Query } from 'graphql-composer-decorators'
 import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { Server } from 'socket.io'
@@ -69,13 +69,13 @@ export class VoiceChannelResolver {
   @Mutation(() => Boolean, {
     description: 'Can only be used by owner of the group, and the user they\'re choosing has to be in the voice channel. Also sends, via group room, the info that user left the channel'
   })
-  async disconnectOtherUser (
+  async kickFromVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('io') io: Server,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string,
       @Arg('userId') userId: string
   ): Promise<boolean> {
-    return await disconnectOtherUserAction(id, userId, ctx.user, io, em)
+    return await kickFromVoiceChannelAction(id, userId, ctx.user, io, em)
   }
 }

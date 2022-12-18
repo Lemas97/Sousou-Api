@@ -74,7 +74,6 @@ export async function updateGroupAction (id: string, data: GroupInputData, curre
 
   await em.flush()
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   updateGroup(currentUser, group, io)
 
   return group

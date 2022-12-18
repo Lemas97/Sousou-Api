@@ -71,7 +71,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
   })
 }
 
-export async function updateUserEvent (user: User, io: Server): Promise<void> {
+export function updateUserEvent (user: User, io: Server): void {
   const roomsToSeeTheChange = [...user.friendList.getItems().map(friend => `user:${friend.id}`, ...user.groups.getItems().map(group => `group:${group.id}`))]
 
   io.to(roomsToSeeTheChange).emit('something-changed', user)
@@ -82,17 +82,28 @@ export function emitMessageEvents (io: Server, event: string, data: SocketMessag
 }
 
 export function connectedUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
-  io.to([`group:${voiceChannel.group.id}`]).emit('connectedUserInVoiceChannel', voiceChannel)
+  io.to([`group:${voiceChannel.group.id}`]).emit('connected-user-in-voiceChannel', voiceChannel)
 }
 
 export function disconnectUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
-  io.to([`group:${voiceChannel.group.id}`]).emit('disconnectUserInVoiceChannel', voiceChannel)
+  io.to([`group:${voiceChannel.group.id}`]).emit('disconnect-user-from-voiceChannel', voiceChannel)
 }
 
-export async function updateGroup (user: User, group: Group, io: Server): Promise<void> {
-  io.to([`user:${user.id}`, `group:${group.id}`]).emit('updateGroup', group)
+export function updateGroup (user: User, group: Group, io: Server): void {
+  io.to([`user:${user.id}`, `group:${group.id}`]).emit('update-group', group)
 }
 
-export async function newInviteOnCreateGroupInvite (user: User, groupInvite: GroupInvite, io: Server): Promise<void> {
-  io.to([`user:${user.id}`]).emit('newInvite', groupInvite)
+export function newInviteOnCreateGroupInvite (user: User, groupInvite: GroupInvite, io: Server): void {
+  io.to([`user:${user.id}`]).emit('new-invite', groupInvite)
+}
+
+export function deletedUserFromFriendList (deletedUser: User, io: Server): void {
+  io.to([`user:${deletedUser.id}`]).emit('update-friend-list', deletedUser.friendList.getItems())
+}
+
+export function kickFromVoiceChannel (voiceChannel: VoiceChannel, user: User, io: Server): void {
+  io.to([`group:${voiceChannel.group.id}`]).emit('kick-user-from-voiceChannel', {
+    user,
+    voiceChannel
+  })
 }
