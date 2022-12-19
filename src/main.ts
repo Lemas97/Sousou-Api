@@ -1,4 +1,4 @@
-import {} from 'reflect-metadata'
+import 'reflect-metadata'
 
 import { createServer } from 'http'
 import { ApolloServer } from 'apollo-server-koa'
@@ -22,7 +22,7 @@ import { isLogged } from './middlewares/guards/IsLogged'
 import { authAndSettStateUser } from './middlewares/SetStateUser'
 import { ErrorInterceptor } from './middlewares/ErrorInterceptor'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
-import { AuthResolver } from './lib/resolvers/AuthResolver'
+import { AuthFreeResolver } from './lib/resolvers/AuthFreeResolver'
 import { initSocketEvents } from './lib/socket/SocketInitEvents'
 import { TextChannelResolver } from './lib/resolvers/TextChannelResolver'
 import { VoiceChannelResolver } from './lib/resolvers/VoiceChannelResolver'
@@ -39,7 +39,7 @@ async function main (): Promise<void> {
       FriendRequestResolver,
       GroupResolver,
       GroupInviteResolver,
-      AuthResolver,
+      AuthFreeResolver,
       TextChannelResolver,
       VoiceChannelResolver
     ],

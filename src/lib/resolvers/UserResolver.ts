@@ -12,7 +12,6 @@ import {
   getFriendRequestsAction,
   getLoggedUserAction,
   getUsersAction,
-  kickFromVoiceChannelAction,
   logoutUserAction,
   updateUserAction,
   updateUserEmailAction,
@@ -25,6 +24,7 @@ import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { PaginatedFriendRequests } from '../../types/classes/pagination/PaginatedFriendRequests'
 import { UpdateUserInputData } from '../../types/classes/input-data/UpdateUserInputData'
 import { Server } from 'socket.io'
+import { kickFromVoiceChannelAction } from '../actions/VoiceChannelAction'
 
 @Resolver()
 export class UserResolver {
@@ -132,18 +132,20 @@ export class UserResolver {
   async kickFromVoiceChannel (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('id') id: string,
       @Arg('voiceChannelId') voiceChannelId: string
   ): Promise<boolean> {
-    return await kickFromVoiceChannelAction(id, voiceChannelId, ctx.user, em)
+    return await kickFromVoiceChannelAction(id, voiceChannelId, ctx.user, io, em)
   }
 
   @Mutation(() => Boolean)
   async deleteFriend (
     @Ctx('em') em: EntityManager,
+      @Ctx('io') io: Server,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('id') id: string
   ): Promise<boolean> {
-    return await deleteFriendAction(id, ctx.user, em)
+    return await deleteFriendAction(id, ctx.user, io, em)
   }
 }
