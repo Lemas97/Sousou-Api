@@ -14,6 +14,7 @@ import { MessageStateType } from '../..//types/enums/MessageStateType'
 
 // todo check on resolver type of message
 export async function sendMessageToTextChannelAction (data: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
+  em.clear()
   const channel = await em.findOneOrFail(TextChannel, {
     $and: [
       { id: data.identifier },
@@ -24,6 +25,12 @@ export async function sendMessageToTextChannelAction (data: SendMessageInputData
       'group',
       'group.members'
     ]
+  })
+
+  await em.populate(channel.group, ['members'], {
+    where: {
+      members: { id: { $ne: currentUser.id } }
+    }
   })
 
   const message = em.create(TextChannelMessage, {
@@ -62,13 +69,19 @@ export async function deleteTextChannelMessageAction (data: DeleteMessageInputDa
 }
 
 export async function sendMessageToFriendAction (messageInputData: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
+  console.log(currentUser.id)
+  em.clear()
   const personalChat = await em.findOneOrFail(PersonalChat, messageInputData.identifier, {
-    populate: ['pivot.users'],
-    populateWhere: {
-      pivot: { users: { id: { $ne: currentUser.id } } }
-    }
+    populate: ['pivot']
   })
 
+  if (personalChat.pivot) {
+    await em.populate(personalChat.pivot, ['users'], {
+      where: {
+        users: { id: { $ne: currentUser.id } }
+      }
+    })
+  }
   const message = em.create(PersonalMessage, {
     createdAt: new Date(),
     personalChat: personalChat,
@@ -77,8 +90,10 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
     file: messageInputData.file,
     state: MessageStateType.SENDED
   })
+  console.log(message)
+  await em.persistAndFlush(message)
 
-  return { message, rooms: message.personalChat.pivot ? message.personalChat?.pivot.users.getItems().map(pm => `user:${pm.id}`) : [] }
+  return { message, rooms: message.personalChat.pivot ? message.personalChat.pivot.users.getItems().map(pm => `user:${pm.id}`) : [] }
 }
 
 export async function deleteMessageFromPersonalConversationAction (data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {

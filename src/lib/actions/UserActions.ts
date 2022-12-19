@@ -35,7 +35,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset: (paginationData.limit * paginationData.page) - paginationData.limit,
-    populate: ['groups', 'ownedGroups', 'connectedVoiceChannel']
+    populate: ['groups', 'ownedGroups', 'connectedVoiceChannel', 'personalChats.personalChat.messages']
 
   })
 
@@ -66,7 +66,8 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
   {
     populate: [
       'friendRequests',
-      'friendRequests.fromUser'
+      'friendRequests.fromUser',
+      'personalChats.personalChat'
     ]
   })
 
@@ -121,10 +122,10 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'ownedGroups',
       'myFriendRequests.toUser',
       'friendList',
-      'personalChats.personalChat',
       'groups',
       'friendRequests.fromUser.groups',
-      'friendRequests.fromUser.ownedGroups'
+      'friendRequests.fromUser.ownedGroups',
+      'personalChats.personalChat.messages'
     ],
     populateWhere: {
       friendRequests: {
