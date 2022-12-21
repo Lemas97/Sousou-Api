@@ -16,7 +16,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     io.on('connection', async (socket) => {
       let user: User
       try {
-        user = jwt.verify(socket.handshake.headers.authorization as string, PRIVATE_KEY) as User
+        user = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
         user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats'] })
       } catch (e) {
         console.log(e)
