@@ -26,6 +26,7 @@ import { AuthFreeResolver } from './lib/resolvers/AuthFreeResolver'
 import { initSocketEvents } from './lib/socket/SocketInitEvents'
 import { TextChannelResolver } from './lib/resolvers/TextChannelResolver'
 import { VoiceChannelResolver } from './lib/resolvers/VoiceChannelResolver'
+import { PersonalMessagesResolver } from './lib/resolvers/PersonalMessagesResolver'
 
 async function main (): Promise<void> {
   console.log(`ENVIRONMENT: ${ENVIRONMENT}`)
@@ -41,7 +42,8 @@ async function main (): Promise<void> {
       GroupInviteResolver,
       AuthFreeResolver,
       TextChannelResolver,
-      VoiceChannelResolver
+      VoiceChannelResolver,
+      PersonalMessagesResolver
     ],
     globalMiddlewares: [isLogged, ErrorInterceptor]
   })

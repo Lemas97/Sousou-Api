@@ -125,7 +125,8 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'groups',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups',
-      'personalChats.personalChat.messages'
+      'personalChats.personalChat.messages',
+      'personalChats.users'
     ],
     populateWhere: {
       friendRequests: {
