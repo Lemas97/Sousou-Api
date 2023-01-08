@@ -79,6 +79,8 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
 
   const group = await em.findOneOrFail(Group, groupId, { populate: ['members'] })
 
+  console.log([...group.members.getItems().map(me => me.id), currentUser.id])
+
   const [users, count] = await em.findAndCount(User, {
     $and: [
       {

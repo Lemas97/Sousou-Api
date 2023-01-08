@@ -86,10 +86,9 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
     file: messageInputData.file,
     state: MessageStateType.SENDED
   })
-  console.log(message)
   await em.persistAndFlush(message)
 
-  return { message, rooms: message.personalChat.pivot ? message.personalChat.pivot.users.getItems().map(pm => `user:${pm.id}`) : [] }
+  return { message, rooms: message.personalChat ? [`personal-chat:${message.personalChat.id}`] : [] }
 }
 
 export async function deleteMessageFromPersonalConversationAction (data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
