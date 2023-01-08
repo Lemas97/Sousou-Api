@@ -1,6 +1,6 @@
 import { Field, ObjectType } from 'type-graphql'
 
-import { FriendRequest } from '../../../types/entities/FriendRequest'
+import { FriendRequest } from '../../entities/FriendRequest'
 
 @ObjectType()
 export class PaginatedFriendRequests {

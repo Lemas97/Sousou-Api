@@ -76,11 +76,7 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
   })
 
   if (personalChat.pivot) {
-    await em.populate(personalChat.pivot, ['users'], {
-      where: {
-        users: { id: { $ne: currentUser.id } }
-      }
-    })
+    await em.populate(personalChat.pivot, ['users'])
   }
   const message = em.create(PersonalMessage, {
     createdAt: new Date(),

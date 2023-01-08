@@ -1,6 +1,6 @@
 import { Field, ObjectType } from 'type-graphql'
 
-import { GroupInvite } from '../../../types/entities/GroupInvite'
+import { GroupInvite } from '../../entities/GroupInvite'
 
 @ObjectType()
 export class PaginatedGroupInvites {

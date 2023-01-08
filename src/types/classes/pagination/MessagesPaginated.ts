@@ -1,6 +1,6 @@
 import { Field, ObjectType } from 'type-graphql'
 
-import { PersonalMessage } from '../../../types/entities/PersonalMessage'
+import { PersonalMessage } from '../../entities/PersonalMessage'
 
 @ObjectType()
 export class PaginatedPersonalMessages {

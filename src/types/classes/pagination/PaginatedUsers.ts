@@ -1,5 +1,6 @@
-import { User } from '../../../types/entities/User'
 import { Field, ObjectType } from 'type-graphql'
+
+import { User } from '../../entities/User'
 
 @ObjectType()
 export class PaginatedUsers {

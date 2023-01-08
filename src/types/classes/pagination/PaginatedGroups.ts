@@ -1,4 +1,4 @@
-import { Group } from '../../../types/entities/Group'
+import { Group } from '../../entities/Group'
 import { Field, ObjectType } from 'type-graphql'
 
 @ObjectType()
