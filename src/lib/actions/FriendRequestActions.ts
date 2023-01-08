@@ -108,11 +108,12 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
     em.persist(personalChat)
 
     const personalChatUserPivot = em.create(PersonalChatUsersPivot, {
-      users: [user.id, currentUser.id],
       mute: false,
       personalChat: personalChat.id
     })
     personalChat.pivot = personalChatUserPivot
+    personalChatUserPivot.users.add(user)
+    personalChatUserPivot.users.add(friendRequest.fromUser)
 
     await em.persistAndFlush(personalChatUserPivot)
   }
