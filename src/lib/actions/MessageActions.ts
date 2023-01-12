@@ -4,13 +4,13 @@ import { DeleteMessageInputData } from '../..//types/classes/input-data/DeleteMe
 import { SendMessageInputData } from '../..//types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from '../..//types/classes/input-data/ReadMessageInputData'
 import { PersonalChat } from '../..//types/entities/PersonalChat'
-import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
 import { PersonalMessage } from '../..//types/entities/PersonalMessage'
 import { TextChannel } from '../..//types/entities/TextChannel'
 import { TextChannelMessage } from '../..//types/entities/TextChannelMessage'
 import { TextChannelUserPivot } from '../..//types/entities/TextChannelUserPivot'
 import { User } from '../..//types/entities/User'
 import { MessageStateType } from '../..//types/enums/MessageStateType'
+import { LastReadMessagePivot } from '../../types/entities/LastReadMessagePivot'
 
 // todo check on resolver type of message
 export async function sendMessageToTextChannelAction (data: SendMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
@@ -125,11 +125,12 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
       populateWhere: { personalChat: { pivot: { users: { id: { $ne: currentUser.id } } } } }
     })
 
-    const personalChatUserPivot = await em.findOneOrFail(PersonalChatUsersPivot, {
-      personalChat: message.personalChat.id
+    const lastReadPivot = await em.findOneOrFail(LastReadMessagePivot, {
+      user: currentUser.id,
+      personalChat: data.personalChatId
     })
 
-    em.assign(personalChatUserPivot, { lastReadMessage: message })
+    em.assign(lastReadPivot, { lastReadMessage: message })
 
     returnValue = message.personalChat
 
