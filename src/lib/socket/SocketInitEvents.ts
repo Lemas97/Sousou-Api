@@ -12,36 +12,33 @@ import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { deleteMessageFromPersonalConversationAction, deleteTextChannelMessageAction, readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
 
 export async function initSocketEvents (io: Server, em: EntityManager): Promise<void> {
-  try {
-    io.on('connection', async (socket) => {
-      let user: User
-      socket.on('error', (e) => {
-        console.log(e)
-      })
+  io.on('connection', async (socket) => {
+    let user: User
+    try {
+      user = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
+      user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats.personalChat'] })
+    } catch (e) {
+      console.log(e)
+      socket.emit('authorization', 'failed')
+      socket.disconnect()
+      return
+    }
+
+    socket.emit('authorization', 'success')
+    console.log(`User ${user.username} logged in`)
+
+    await socket.join(`user:${user.id}`)
+    const groupsRooms = user.groups.getItems().map(group => `group:${group.id}`)
+    await socket.join(groupsRooms)
+    const personalChatRooms = user.personalChats.getItems().map(personalChat => `personal-chat:${personalChat.personalChat.id}`)
+    await socket.join(personalChatRooms)
+
+    console.log('rooms', socket.rooms)
+
+    io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-in')
+
+    socket.on('message-send', async (data: SendMessageInputData) => {
       try {
-        user = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
-        user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats.personalChat'] })
-      } catch (e) {
-        console.log(e)
-        socket.emit('authorization', 'failed')
-        socket.disconnect()
-        return
-      }
-
-      socket.emit('authorization', 'success')
-      console.log(`User ${user.username} logged in`)
-
-      await socket.join(`user:${user.id}`)
-      const groupsRooms = user.groups.getItems().map(group => `group:${group.id}`)
-      await socket.join(groupsRooms)
-      const personalChatRooms = user.personalChats.getItems().map(personalChat => `personal-chat:${personalChat.personalChat.id}`)
-      await socket.join(personalChatRooms)
-
-      console.log('rooms', socket.rooms)
-
-      io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-in')
-
-      socket.on('message-send', async (data: SendMessageInputData) => {
         let socketMessageRooms: SocketMessageRooms
         if (data.personal) {
           socketMessageRooms = await sendMessageToFriendAction(data, user, em)
@@ -49,15 +46,23 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
           socketMessageRooms = await sendMessageToTextChannelAction(data, user, em)
         }
         io.to(socketMessageRooms.rooms).emit('message-receive', socketMessageRooms.message)
-      })
+      } catch (e) {
+        console.log(e)
+      }
+    })
 
-      socket.on('message-read', async (data: ReadMessageInputData) => {
+    socket.on('message-read', async (data: ReadMessageInputData) => {
+      try {
         const result = await readMessageAction(data, user, em)
 
         io.to(result.rooms).emit('message-read', result.channel)
-      })
+      } catch (e) {
+        console.log(e)
+      }
+    })
 
-      socket.on('message-delete', async (data: DeleteMessageInputData) => {
+    socket.on('message-delete', async (data: DeleteMessageInputData) => {
+      try {
         let result: SocketMessageRooms
         if (data.personal) {
           result = await deleteMessageFromPersonalConversationAction(data, user, em)
@@ -65,16 +70,20 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
           result = await deleteTextChannelMessageAction(data, user, em)
         }
         emitMessageEvents(io, 'message-deleted', result)
-      })
+      } catch (e) {
+        console.log(e)
+      }
+    })
 
-      socket.on('disconnect', async () => {
+    socket.on('disconnect', async () => {
+      try {
         console.log(`User ${user.username} logged out`)
         io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
-      })
+      } catch (e) {
+        console.log(e)
+      }
     })
-  } catch (e) {
-    console.log(e)
-  }
+  })
 }
 
 export function updateUserEvent (user: User, io: Server): void {
