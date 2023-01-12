@@ -127,7 +127,7 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
 
     const lastReadPivot = await em.findOneOrFail(LastReadMessagePivot, {
       user: currentUser.id,
-      personalChat: message.personalChat.id
+      personalChat: message.personalChat.pivot?.id ?? ''
     })
 
     em.assign(lastReadPivot, { lastReadMessage: message })
