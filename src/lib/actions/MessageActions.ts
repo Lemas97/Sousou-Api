@@ -161,11 +161,12 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
   }
   await em.flush()
 
-  return { rooms, channel: returnValue }
+  return { rooms, except: [`user:${currentUser.id}`], channel: returnValue }
 }
 
 export class SocketReadMessageRooms {
   rooms: string[]
+  except: string[]
   channel: TextChannel | LastReadMessagePivot
 }
 

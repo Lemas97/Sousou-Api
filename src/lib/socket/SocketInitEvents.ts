@@ -55,7 +55,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       try {
         const result = await readMessageAction(data, user, em)
 
-        io.to(result.rooms).emit('message-read', result.channel)
+        io.to(result.rooms).except(result.except).emit('message-read', result.channel)
       } catch (e) {
         console.log(e)
       }
