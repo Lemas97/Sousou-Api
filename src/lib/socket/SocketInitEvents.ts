@@ -100,7 +100,7 @@ export function connectedUserInVoiceChannel (voiceChannel: VoiceChannel, io: Ser
   io.to([`group:${voiceChannel.group.id}`]).emit('connected-user-in-voice-channel', voiceChannel)
 }
 
-export function disconnectUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
+export function disconnectUserFromVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
   io.to([`group:${voiceChannel.group.id}`]).emit('disconnect-user-from-voice-channel', voiceChannel)
 }
 

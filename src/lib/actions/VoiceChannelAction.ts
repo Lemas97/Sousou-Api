@@ -5,7 +5,7 @@ import { VoiceChannelInputData } from '../..//types/classes/input-data/VoiceChan
 import { Group } from '../..//types/entities/Group'
 import { User } from '../..//types/entities/User'
 import { VoiceChannel } from '../..//types/entities/VoiceChannel'
-import { connectedUserInVoiceChannel, disconnectUserInVoiceChannel as disconnectUserFromVoiceChannel, kickFromVoiceChannel } from '../socket/SocketInitEvents'
+import { connectedUserInVoiceChannel, disconnectUserFromVoiceChannel, kickFromVoiceChannel } from '../socket/SocketInitEvents'
 
 export async function getVoiceChannelByIdAction (id: string, currentUser: User, em: EntityManager): Promise<VoiceChannel> {
   const voiceChannel = await em.findOneOrFail(VoiceChannel, id, {

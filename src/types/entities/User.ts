@@ -132,4 +132,8 @@ export class User {
       return null
     }
   }
+
+  @Property({ persist: false })
+  @Field()
+    lastReadMessage: string
 }

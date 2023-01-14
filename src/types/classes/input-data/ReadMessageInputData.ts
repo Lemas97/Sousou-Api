@@ -6,7 +6,7 @@ export class ReadMessageInputData {
     messageId: string
 
   @Field()
-    personalChatId: string
+    identifier: string
 
   @Field()
     personal: boolean

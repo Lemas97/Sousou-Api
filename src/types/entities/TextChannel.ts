@@ -40,4 +40,8 @@ export class TextChannel {
   @OneToMany(() => TextChannelMessage, message => message.textChannel)
   @Field(() => [TextChannelMessage])
     messages = new Collection<TextChannelMessage>(this)
+
+  @Property({ persist: false, nullable: true }) // can place properties into pivot
+  @Field(() => TextChannelUserPivot, { nullable: true })
+    lastReadMessages?: TextChannelUserPivot
 }
