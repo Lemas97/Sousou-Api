@@ -15,7 +15,7 @@ export class LastReadMessagePivot {
   @Field(() => PersonalChatUsersPivot)
     personalChat: PersonalChatUsersPivot
 
-  @ManyToOne(() => PersonalMessage)
+  @ManyToOne(() => PersonalMessage, { nullable: true })
   @Field(() => PersonalMessage)
     lastReadMessage = new Collection<PersonalMessage>(this)
 }
