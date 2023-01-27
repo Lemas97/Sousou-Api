@@ -11,7 +11,7 @@ export async function emailTexts (user: User): Promise<void> {
       Please click on the following link to confirm your email:
       <br>
       <br>
-      <a href="${FRONT_URL}:${FRONT_PORT}/confirm-email/${user.confirmEmailToken}">Confirm your email</a>
+      <a href="${FRONT_URL}/auth/confirm-email/${user.confirmEmailToken}">Confirm your email</a>
     </p>
   `)
 }
