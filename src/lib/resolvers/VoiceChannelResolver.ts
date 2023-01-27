@@ -1,9 +1,8 @@
 import { EntityManager } from '@mikro-orm/core'
 import { VoiceChannelInputData } from '../../types/classes/input-data/VoiceChannelInputData'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
+import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql'
 import { connectToVoiceChannelAction, createVoiceChannelAction, deleteVoiceChannelAction, disconnectFromVoiceChannelAction, getVoiceChannelByIdAction, kickFromVoiceChannelAction, updateVoiceChannelAction } from '../actions/VoiceChannelAction'
-import { Query } from 'graphql-composer-decorators'
 import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { Server } from 'socket.io'
 
