@@ -15,9 +15,9 @@ export class TextChannelUserPivot {
   @Field(() => User)
     user: User
 
-  @ManyToOne(() => TextChannelMessage)
-  @Field(() => TextChannelMessage)
-    lastReadMessage: TextChannelMessage
+  @ManyToOne(() => TextChannelMessage, { nullable: true })
+  @Field(() => TextChannelMessage, { nullable: true })
+    lastReadMessage?: TextChannelMessage
 
   @Property() // can place properties into pivot
   @Field()
