@@ -43,6 +43,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
     icon: '',
     createdAt: new Date(),
     password: hash,
+    lastReadMessage: '',
     code,
     displayName: data.username,
     preferences: preferences,

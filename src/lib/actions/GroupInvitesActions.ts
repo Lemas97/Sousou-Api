@@ -7,7 +7,8 @@ import { Group } from '../..//types/entities/Group'
 import { GroupInvite } from '../..//types/entities/GroupInvite'
 import { User } from '../..//types/entities/User'
 import { Server } from 'socket.io'
-import { newInviteOnCreateGroupInvite, updateGroup } from '../socket/SocketInitEvents'
+import { disconnectUserFromVoiceChannel, newInviteOnCreateGroupInvite, updateGroup } from '../socket/SocketInitEvents'
+import { VoiceChannel } from '../../types/entities/VoiceChannel'
 
 export async function getGroupInviteActions (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedGroupInvites> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
@@ -99,18 +100,22 @@ export async function cancelGroupInviteAction (id: string, currentUser: User, em
 
 export async function answerGroupInviteAction (id: string, answer: boolean, currentUser: User, io: Server, em: EntityManager): Promise<GroupInvite> {
   const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser', 'group.members'] })
+  const user = await em.findOneOrFail(User, currentUser.id)
 
-  const group = await em.findOneOrFail(Group, groupInvite.group.id)
+  const group = await em.findOneOrFail(Group, groupInvite.group.id, { populate: ['textChannels'] })
 
-  if (currentUser.id !== groupInvite.toUser.id) throw new UserInputError('NO_ACCESS')
+  if (user.id !== groupInvite.toUser.id) throw new UserInputError('NO_ACCESS')
 
   if (groupInvite.answer !== null) throw new UserInputError('Cannot answer invite that has already been answered')
 
   em.assign(groupInvite, { answer: answer })
 
   if (answer) {
-    await em.populate(currentUser, ['groups'])
-    em.assign(group, { members: [...group.members.getItems(), currentUser] })
+    await em.populate(user, ['groups'])
+    group.members.add(user)
+    for (const textChannel of group.textChannels) {
+      textChannel.users.add(user)
+    }
   }
 
   await em.flush()
@@ -118,4 +123,28 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
   updateGroup(currentUser, group, io)
 
   return groupInvite
+}
+
+export async function leaveGroupAction (id: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
+  const group = await em.findOneOrFail(Group, id, { populate: ['members', 'textChannels', 'voiceChannels'] })
+
+  if (!group.members.getItems().map(member => member.id).includes(currentUser.id)) throw new UserInputError('You are not a member of this group')
+  const user = await em.findOneOrFail(User, currentUser.id)
+
+  group.members.remove(user)
+  for (const textChannel of group.textChannels) {
+    textChannel.users.remove(user)
+  }
+  if (user.connectedVoiceChannel && group.voiceChannels.getItems().map(voiceChannel => voiceChannel.id).includes(user.connectedVoiceChannel.id)) {
+    const voiceChannel = await em.findOneOrFail(VoiceChannel, user.connectedVoiceChannel.id)
+    em.assign(user, { connectedVoiceChannel: null })
+    await em.flush()
+    disconnectUserFromVoiceChannel(voiceChannel, io)
+  }
+
+  await em.flush()
+
+  updateGroup(user, group, io)
+
+  return true
 }

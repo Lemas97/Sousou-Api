@@ -55,7 +55,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       try {
         const result = await readMessageAction(data, user, em)
 
-        io.to(result.rooms).emit('message-read', result.channel)
+        io.to(result.rooms).except(result.except).emit('message-read', result.channel)
       } catch (e) {
         console.log(e)
       }
@@ -100,7 +100,7 @@ export function connectedUserInVoiceChannel (voiceChannel: VoiceChannel, io: Ser
   io.to([`group:${voiceChannel.group.id}`]).emit('connected-user-in-voice-channel', voiceChannel)
 }
 
-export function disconnectUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
+export function disconnectUserFromVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
   io.to([`group:${voiceChannel.group.id}`]).emit('disconnect-user-from-voice-channel', voiceChannel)
 }
 
