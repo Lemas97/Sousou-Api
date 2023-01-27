@@ -139,7 +139,7 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
     rooms = [`personal-chat:${message.personalChat.id}`]
   } else {
     message = await em.findOneOrFail(TextChannelMessage, data.messageId, {
-      populate: ['textChannel.group']
+      populate: ['textChannel.group', 'textChannel.users']
     })
     if (message.textChannel.users.contains(currentUser)) {
       message.textChannel.users.add(currentUser)
