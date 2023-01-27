@@ -23,13 +23,10 @@ export const REGISTER_ROLE = process.env.REGISTER_ROLE as string
 export const JWKSURI = process.env.JWKSURI as string
 export const ISSUER = process.env.ISSUER as string
 
-export const USER_EMAIL = process.env.USER_EMAIL as string ?? ''
-export const USER_EMAIL_PWD = process.env.USER_PASSWORD as string ?? ''
-export const EMAIL_NAME = process.env.EMAIL_NAME as string ?? ''
-export const EMAIL_ADDRESS = process.env.EMAIL as string ?? ''
-
-export const EMAIL_HOST = (process.env.EMAIL_HOST !== '' && process.env.EMAIL_HOST != null) ? process.env.EMAIL_HOST : 'smtp.ethereal.email'
-export const EMAIL_PORT = (process.env.EMAIL_PORT !== '' && process.env.EMAIL_PORT != null) ? process.env.EMAIL_PORT : 587
+export const EMAIL_PORT = process.env.EMAIL_PORT && process.env.EMAIL_PORT !== '' ? parseInt(process.env.EMAIL_PORT) : 587
+export const EMAIL_HOST = process.env.EMAIL_HOST as string ?? ''
+export const EMAIL_USERNAME = process.env.EMAIL_USERNAME as string ?? ''
+export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD as string ?? ''
 
 export const FRONT_URL = (process.env.FRONT_URL !== '' && process.env.FRONT_URL != null) ? process.env.FRONT_URL : 'http://localhost'
 export const FRONT_PORT = (process.env.FRONT_PORT !== '' && process.env.FRONT_PORT != null) ? process.env.FRONT_PORT : 9000

@@ -52,7 +52,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
   })
 
   await em.persistAndFlush(user)
-  if (ENVIRONMENT !== 'test') await emailTexts(user)
+  await emailTexts(user)
 
   return user.confirmEmailToken
 }
