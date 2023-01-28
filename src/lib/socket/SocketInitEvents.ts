@@ -81,12 +81,10 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
     socket.on('disconnect', async () => {
       try {
-        console.log(`User ${user.username} logged out`)
-        em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
-        io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
-
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         disconnectAction = setTimeout(async (user: User, em: EntityManager) => {
+          console.log(`User ${user.username} logged out`)
+          io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
           em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
           await em.flush()
         }, 5000)
