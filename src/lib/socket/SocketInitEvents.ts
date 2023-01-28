@@ -86,7 +86,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
           io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
           em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
           await em.flush()
-        }, 5000)
+        }, 30 * 1000) // 30 seconds
       } catch (e) {
         console.log(e)
       }
