@@ -76,6 +76,10 @@ export class User {
   @Field(() => Boolean)
     isLoggedIn: boolean
 
+  @Property({ type: Date, nullable: true })
+  @Field(() => Date, { nullable: true })
+    lastLoggedInDate?: Date
+
   @Embedded({ entity: () => UserPreferences, object: true })
   @Field(() => GraphQLJSONObject)
     preferences: UserPreferences

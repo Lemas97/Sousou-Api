@@ -17,6 +17,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     try {
       user = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
       user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats.personalChat'] })
+      user.isLoggedIn && em.assign(user, { isLoggedIn: true })
     } catch (e) {
       console.log(e)
       socket.emit('authorization', 'failed')
@@ -78,6 +79,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     socket.on('disconnect', async () => {
       try {
         console.log(`User ${user.username} logged out`)
+        em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
         io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
       } catch (e) {
         console.log(e)

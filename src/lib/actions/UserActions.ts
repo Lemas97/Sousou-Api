@@ -269,7 +269,8 @@ export async function logoutUserAction (currentUser: User, em: EntityManager): P
   const user = await em.findOneOrFail(User, currentUser.id)
   em.assign(user, {
     jwtToken: undefined,
-    isLoggedIn: false
+    isLoggedIn: false,
+    lastLoggedInDate: new Date()
   })
 
   await em.flush()

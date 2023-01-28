@@ -19,7 +19,7 @@ export class TextChannelUserPivot {
   @Field(() => TextChannelMessage, { nullable: true })
     lastReadMessage?: TextChannelMessage
 
-  @Property() // can place properties into pivot
+  @Property({ default: false }) // can place properties into pivot
   @Field()
     mute: boolean
 }

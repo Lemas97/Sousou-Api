@@ -20,7 +20,7 @@ export class PersonalChatUsersPivot {
   @Field(() => [User])
     users = new Collection<User>(this)
 
-  @Property()
+  @Property({ default: false })
   @Field()
     mute: boolean
 }
