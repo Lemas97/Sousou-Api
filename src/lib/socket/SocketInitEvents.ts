@@ -12,11 +12,14 @@ import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { deleteMessageFromPersonalConversationAction, deleteTextChannelMessageAction, readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
 
 export async function initSocketEvents (io: Server, em: EntityManager): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  let disconnectAction: undefined | number
   io.on('connection', async (socket) => {
     let user: User
     try {
       user = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
       user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats.personalChat'] })
+      disconnectAction && clearTimeout(disconnectAction)
       user.isLoggedIn && em.assign(user, { isLoggedIn: true })
     } catch (e) {
       console.log(e)
@@ -81,6 +84,12 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
         console.log(`User ${user.username} logged out`)
         em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
         io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
+
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        disconnectAction = setTimeout(async (user: User, em: EntityManager) => {
+          em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
+          await em.flush()
+        }, 5000)
       } catch (e) {
         console.log(e)
       }
