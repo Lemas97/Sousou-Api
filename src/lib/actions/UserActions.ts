@@ -132,12 +132,12 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
     ],
     populateWhere: {
       friendRequests: {
-        answer: { $eq: undefined },
-        canceled: { $eq: undefined }
+        answer: null,
+        canceled: null
       },
       groupInvites: {
-        answer: { $eq: undefined },
-        canceled: { $eq: undefined },
+        answer: null,
+        canceled: null,
         fromUser: { id: { $ne: currentUser.id } }
       }
     }
