@@ -12,8 +12,7 @@ import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { deleteMessageFromPersonalConversationAction, deleteTextChannelMessageAction, readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
 
 export async function initSocketEvents (io: Server, em: EntityManager): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  let disconnectAction: undefined | number
+  let disconnectAction: undefined | ReturnType<typeof setTimeout>
   io.on('connection', async (socket) => {
     let user: User
     try {
@@ -82,7 +81,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     socket.on('disconnect', async () => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        disconnectAction = setTimeout(async (user: User, em: EntityManager) => {
+        disconnectAction = setTimeout(async () => {
           console.log(`User ${user.username} logged out`)
           io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
           em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
