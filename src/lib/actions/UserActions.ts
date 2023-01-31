@@ -20,14 +20,17 @@ import { deletedUserFromFriendList, updateUserEvent } from '../socket/SocketInit
 import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
+  const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
+
   const [users, count] = await em.findAndCount(User, {
     $or: [
-      paginationData.filter
+      search
         ? {
             $or: [
-              { displayName: { $like: `%${paginationData.filter}%` } },
-              { email: { $like: `%${paginationData.filter}%` } },
-              { username: { $like: `%${paginationData.filter}%` } }
+              { displayName: search },
+              { email: search },
+              { username: search },
+              { code: search }
             ]
           }
         : {}
@@ -44,7 +47,8 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 
 export async function getAvailableUsersToAddAction (paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   await em.populate(currentUser, ['friendList'])
-  console.log([...currentUser.friendList.getItems().map(fl => fl.id), currentUser.id])
+  const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
+
   const [users, count] = await em.findAndCount(User, {
     $and: [
       {
@@ -52,9 +56,10 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
           paginationData.filter
             ? {
                 $or: [
-                  { displayName: { $like: `%${paginationData.filter}%` } },
-                  { email: { $like: `%${paginationData.filter}%` } },
-                  { username: { $like: `%${paginationData.filter}%` } }
+                  { displayName: search },
+                  { email: search },
+                  { username: search },
+                  { code: search }
                 ]
               }
             : {}
@@ -76,9 +81,9 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
 
 export async function getAvailableUsersToInviteAction (paginationData: PaginatedInputData, groupId: string, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
+  const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
 
   const group = await em.findOneOrFail(Group, groupId, { populate: ['members'] })
-
   console.log([...group.members.getItems().map(me => me.id), currentUser.id])
 
   const [users, count] = await em.findAndCount(User, {
@@ -88,9 +93,10 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
           paginationData.filter
             ? {
                 $or: [
-                  { displayName: { $like: `%${paginationData.filter}%` } },
-                  { email: { $like: `%${paginationData.filter}%` } },
-                  { username: { $ilike: `%${paginationData.filter}%` } }
+                  { displayName: search },
+                  { email: search },
+                  { username: search },
+                  { code: search }
                 ]
               }
             : {}
@@ -161,30 +167,43 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
 
 export async function getFriendRequestsAction (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedFriendRequests> {
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
-  paginationData.filter = paginationData.filter ?? ''
+  const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
 
   const [friendRequests, count] = await em.findAndCount(FriendRequest,
     forMe
       ? {
-          toUser: {
-            $and: [
-              { id: currentUser.id },
-              { username: { $like: `%${paginationData.filter}%` } },
-              { email: { $like: `%${paginationData.filter}%` } },
-              { displayName: { $like: `%${paginationData.filter}%` } },
-              { code: { $like: `%${paginationData.filter}%` } }
-            ]
-          },
+          toUser:
+                {
+                  $and: [
+                    { id: currentUser.id },
+                    search
+                      ? {
+                          $or: [
+                            { displayName: search },
+                            { email: search },
+                            { username: search },
+                            { code: search }
+                          ]
+                        }
+                      : {}
+                  ]
+                },
           answer: { $eq: undefined }
         }
       : {
           fromUser: {
             $and: [
               { id: currentUser.id },
-              { username: { $like: `%${paginationData.filter}%` } },
-              { email: { $like: `%${paginationData.filter}%` } },
-              { displayName: { $like: `%${paginationData.filter}%` } },
-              { code: { $like: `%${paginationData.filter}%` } }
+              search
+                ? {
+                    $or: [
+                      { displayName: search },
+                      { email: search },
+                      { username: search },
+                      { code: search }
+                    ]
+                  }
+                : {}
             ]
           }
         }

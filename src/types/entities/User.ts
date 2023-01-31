@@ -25,6 +25,7 @@ import { PersonalChatUsersPivot } from './PersonalChatUserPivot'
 import { VoiceChannel } from './VoiceChannel'
 
 @Entity()
+@Unique({ properties: ['username', 'code'] })
 @ObjectType()
 export class User {
   @PrimaryKey()
@@ -32,7 +33,6 @@ export class User {
     id: string = v4()
 
   @Property()
-  @Unique()
   @Field()
     username: string
 
@@ -40,8 +40,7 @@ export class User {
   @Field()
     displayName: string
 
-  @Property()
-  @Unique()
+  @Property({ unique: true })
   @Field()
     email: string
 
