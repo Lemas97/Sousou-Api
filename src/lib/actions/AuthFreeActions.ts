@@ -45,7 +45,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
     password: hash,
     lastReadMessage: '',
     code,
-    displayName: data.username,
+    displayName: data.displayName ?? '',
     preferences: preferences,
     // make it token with expiration
     confirmEmailToken: v4()
