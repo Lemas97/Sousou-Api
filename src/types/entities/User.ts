@@ -21,7 +21,7 @@ import { FriendRequest } from './FriendRequest'
 import { Group } from './Group'
 import { GroupInvite } from './GroupInvite'
 import { LastReadMessagePivot } from './LastReadMessagePivot'
-import { PersonalChatUsersPivot } from './PersonalChatUserPivot'
+import { PersonalChat } from './PersonalChat'
 import { VoiceChannel } from './VoiceChannel'
 
 @Entity()
@@ -115,9 +115,9 @@ export class User {
   @Field(() => [GroupInvite])
     myGroupInvites = new Collection<GroupInvite>(this)
 
-  @ManyToMany({ entity: () => PersonalChatUsersPivot, mappedBy: 'users', pivotEntity: () => LastReadMessagePivot })
-  @Field(() => [PersonalChatUsersPivot])
-    personalChats = new Collection<PersonalChatUsersPivot>(this)
+  @ManyToMany({ entity: () => PersonalChat, mappedBy: 'users', pivotEntity: () => LastReadMessagePivot })
+  @Field(() => [PersonalChat])
+    personalChats = new Collection<PersonalChat>(this)
 
   @Field(() => String, { nullable: true })
   pending (

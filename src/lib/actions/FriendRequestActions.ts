@@ -3,7 +3,6 @@ import { UserInputError } from 'apollo-server-koa'
 import { FriendRequestInputData } from '../..//types/classes/input-data/FriendRequestInputData'
 import { FriendRequest } from '../..//types/entities/FriendRequest'
 import { PersonalChat } from '../..//types/entities/PersonalChat'
-import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
 import { User } from '../..//types/entities/User'
 
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
@@ -103,19 +102,14 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
     user.friendList.add(friendRequest.fromUser)
     friendRequest.fromUser.friendList.add(user)
 
-    const personalChat = em.create(PersonalChat, {})
+    const personalChat = em.create(PersonalChat, {
+      mute: false
+    })
 
     em.persist(personalChat)
 
-    const personalChatUserPivot = em.create(PersonalChatUsersPivot, {
-      mute: false,
-      personalChat: personalChat.id
-    })
-    personalChat.pivot = personalChatUserPivot
-    personalChatUserPivot.users.add(user)
-    personalChatUserPivot.users.add(friendRequest.fromUser)
-
-    await em.persistAndFlush(personalChatUserPivot)
+    personalChat.users.add(user)
+    personalChat.users.add(friendRequest.fromUser)
   }
 
   em.assign(friendRequest, { answer })

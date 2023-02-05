@@ -11,9 +11,7 @@ export async function getPersonalMessagesActionByPersonalChatIdAction (personalC
 
   await em.findOneOrFail(PersonalChat, {
     id: personalChatId,
-    pivot: {
-      users: currentUser
-    }
+    users: currentUser
   })
 
   const [messages, count] = await em.findAndCount(PersonalMessage, {

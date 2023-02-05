@@ -1,6 +1,6 @@
 import { Collection, Entity, ManyToOne } from '@mikro-orm/core'
 import { Field, ObjectType } from 'type-graphql'
-import { PersonalChatUsersPivot } from './PersonalChatUserPivot'
+import { PersonalChat } from './PersonalChat'
 import { PersonalMessage } from './PersonalMessage'
 import { User } from './User'
 
@@ -11,9 +11,9 @@ export class LastReadMessagePivot {
   @Field(() => User)
     user: User
 
-  @ManyToOne({ entity: () => PersonalChatUsersPivot, primary: true })
-  @Field(() => PersonalChatUsersPivot)
-    personalChat: PersonalChatUsersPivot
+  @ManyToOne({ entity: () => PersonalChat, primary: true })
+  @Field(() => PersonalChat)
+    personalChat: PersonalChat
 
   @ManyToOne(() => PersonalMessage, { nullable: true })
   @Field(() => PersonalMessage)

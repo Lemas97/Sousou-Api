@@ -17,7 +17,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     let user: User
     try {
       user = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
-      user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats.personalChat'] })
+      user = await em.findOneOrFail(User, user.id, { populate: ['groups', 'friendList', 'personalChats'] })
       disconnectAction && clearTimeout(disconnectAction)
       user.isLoggedIn && em.assign(user, { isLoggedIn: true })
     } catch (e) {
@@ -33,7 +33,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     await socket.join(`user:${user.id}`)
     const groupsRooms = user.groups.getItems().map(group => `group:${group.id}`)
     await socket.join(groupsRooms)
-    const personalChatRooms = user.personalChats.getItems().map(personalChat => `personal-chat:${personalChat.personalChat.id}`)
+    const personalChatRooms = user.personalChats.getItems().map(personalChat => `personal-chat:${personalChat.id}`)
     await socket.join(personalChatRooms)
 
     console.log('rooms', socket.rooms)

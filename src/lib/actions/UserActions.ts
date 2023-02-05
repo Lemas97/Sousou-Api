@@ -17,7 +17,7 @@ import { PRIVATE_KEY } from '../..//dependencies/config'
 import { changeEmail } from '../tasks/emails/EmailTexts'
 import { Server } from 'socket.io'
 import { deletedUserFromFriendList, updateUserEvent } from '../socket/SocketInitEvents'
-import { PersonalChatUsersPivot } from '../..//types/entities/PersonalChatUserPivot'
+import { PersonalChat } from '../../types/entities/PersonalChat'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
@@ -38,7 +38,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset: (paginationData.limit * paginationData.page) - paginationData.limit,
-    populate: ['groups', 'ownedGroups', 'connectedVoiceChannel', 'personalChats.personalChat.messages']
+    populate: ['groups', 'ownedGroups', 'connectedVoiceChannel', 'personalChats.messages']
 
   })
 
@@ -72,7 +72,7 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
     populate: [
       'friendRequests',
       'friendRequests.fromUser',
-      'personalChats.personalChat'
+      'personalChats'
     ]
   })
 
@@ -133,7 +133,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'groups',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups',
-      'personalChats.personalChat.messages',
+      'personalChats.messages',
       'personalChats.users'
     ],
     populateWhere: {
@@ -149,9 +149,9 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
     }
   })
 
-  const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChatUsersPivot> => {
-    const kati = await pC.personalChat.messages.matching({ limit: 1, offset: 0 })
-    em.assign(pC.personalChat, { messages: kati })
+  const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChat> => {
+    const kati = await pC.messages.matching({ limit: 1, offset: 0 })
+    em.assign(pC, { messages: kati })
 
     return pC
   }))

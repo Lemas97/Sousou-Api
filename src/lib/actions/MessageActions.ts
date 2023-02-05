@@ -72,11 +72,11 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
   console.log(currentUser.id)
   em.clear()
   const personalChat = await em.findOneOrFail(PersonalChat, messageInputData.identifier, {
-    populate: ['pivot']
+    populate: []
   })
 
-  if (personalChat.pivot) {
-    await em.populate(personalChat.pivot, ['users'])
+  if (personalChat) {
+    await em.populate(personalChat, ['users'])
   }
   const message = em.create(PersonalMessage, {
     createdAt: new Date(),
@@ -92,9 +92,9 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
 }
 
 export async function deleteMessageFromPersonalConversationAction (data: DeleteMessageInputData, currentUser: User, em: EntityManager): Promise<SocketMessageRooms> {
-  const message = await em.findOneOrFail(PersonalMessage, data.id, { populate: ['personalChat.pivot.users'] })
+  const message = await em.findOneOrFail(PersonalMessage, data.id, { populate: ['personalChat.users'] })
 
-  if (message.personalChat.pivot && !message.personalChat.pivot.users.contains(currentUser)) {
+  if (message.personalChat && !message.personalChat.users.contains(currentUser)) {
     throw new ForbiddenError('NO_ACCESS')
   }
 
@@ -112,7 +112,7 @@ export async function deleteMessageFromPersonalConversationAction (data: DeleteM
     await em.flush()
   }
 
-  return { message, rooms: message.personalChat.pivot ? message.personalChat.pivot.users.getItems().map(user => `user:${user.id}`) : [] }
+  return { message, rooms: message.personalChat ? message.personalChat.users.getItems().map(user => `user:${user.id}`) : [] }
 }
 
 export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketReadMessageRooms> {
@@ -121,13 +121,13 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
   let returnValue: LastReadMessagePivot | TextChannel
   if (data.personal) {
     message = await em.findOneOrFail(PersonalMessage, data.messageId, {
-      populate: ['personalChat.pivot'],
-      populateWhere: { personalChat: { pivot: { users: { id: { $ne: currentUser.id } } } } }
+      populate: ['personalChat'],
+      populateWhere: { personalChat: { users: { id: { $ne: currentUser.id } } } }
     })
 
     const lastReadPivot = await em.findOneOrFail(LastReadMessagePivot, {
       user: currentUser.id,
-      personalChat: message.personalChat.pivot?.id ?? ''
+      personalChat: message.personalChat.id ?? ''
     }, {
       populate: ['user']
     })

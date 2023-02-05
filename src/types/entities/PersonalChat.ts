@@ -1,9 +1,10 @@
-import { Collection, Entity, OneToMany, OneToOne, PrimaryKey } from '@mikro-orm/core'
+import { Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { Field, ObjectType } from 'type-graphql'
 import { v4 } from 'uuid'
-import { PersonalChatUsersPivot } from './PersonalChatUserPivot'
+import { LastReadMessagePivot } from './LastReadMessagePivot'
 
 import { PersonalMessage } from './PersonalMessage'
+import { User } from './User'
 
 @Entity()
 @ObjectType()
@@ -12,9 +13,13 @@ export class PersonalChat {
   @Field()
     id: string = v4()
 
-  @OneToOne({ entity: () => PersonalChatUsersPivot, nullable: true })
-  @Field(() => PersonalChatUsersPivot, { nullable: true })
-    pivot?: PersonalChatUsersPivot
+  @ManyToMany({ entity: () => User, pivotEntity: () => LastReadMessagePivot })
+  @Field(() => [User])
+    users = new Collection<User>(this)
+
+  @Property({ default: false })
+  @Field()
+    mute: boolean
 
   @OneToMany(() => PersonalMessage, message => message.personalChat)
   @Field(() => [PersonalMessage])
