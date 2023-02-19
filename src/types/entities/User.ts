@@ -63,6 +63,10 @@ export class User {
   @Field()
     confirmEmailToken: string
 
+  @Property({ nullable: true })
+  @Field({ nullable: true })
+    resetPasswordToken?: string
+
   @Property({ type: Boolean })
   @Field(() => Boolean)
     emailConfirm: boolean

@@ -8,7 +8,7 @@ import { v4 } from 'uuid'
 import { UserPreferencesInputData } from '../..//types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { UserRegisterInputData } from '../..//types/classes/input-data/UserRegisterInputData'
 import { User } from '../..//types/entities/User'
-import { emailTexts } from '../tasks/emails/EmailTexts'
+import { confirmEmail } from '../tasks/emails/EmailTexts'
 import { LoginUserInputData } from '../..//types/classes/input-data/LoginUserInputData'
 import { ENVIRONMENT, PRIVATE_KEY } from '../..//dependencies/config'
 
@@ -52,7 +52,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
   })
 
   await em.persistAndFlush(user)
-  await emailTexts(user)
+  await confirmEmail(user)
 
   return user.confirmEmailToken
 }
@@ -108,9 +108,36 @@ export async function resendEmailConfirmationAction (email: string, em: EntityMa
   user.confirmEmailToken = v4()
   await em.flush()
 
-  if (ENVIRONMENT !== 'test') await emailTexts(user)
+  if (ENVIRONMENT !== 'test') await confirmEmail(user)
 
   return user.confirmEmailToken
+}
+
+export async function forgotPasswordAction (email: string, em: EntityManager): Promise<string> {
+  const user = await em.findOneOrFail(User, { email })
+
+  user.resetPasswordToken = v4()
+  await em.flush()
+
+  if (ENVIRONMENT !== 'test') await confirmEmail(user)
+
+  return user.resetPasswordToken
+}
+
+export async function resetPasswordAction (resetPasswordToken: string, newPassword: string, em: EntityManager): Promise<boolean> {
+  const user = await em.findOneOrFail(User, {
+    $and: [
+      { resetPasswordToken },
+      { resetPasswordToken: { $ne: null } }
+
+    ]
+  })
+  const hash = bcrypt.hashSync(newPassword, 12)
+
+  em.assign(user, { password: hash, resetPasswordToken: null })
+  await em.flush()
+
+  return true
 }
 
 export async function refreshTokenAction (currentUser: User, em: EntityManager): Promise<string> {

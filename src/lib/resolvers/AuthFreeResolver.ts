@@ -4,7 +4,7 @@ import { LoginUserInputData } from '../../types/classes/input-data/LoginUserInpu
 import { UserRegisterInputData } from '../../types/classes/input-data/UserRegisterInputData'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
-import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction, confirmChangeEmailAction, usernameExistsAction } from '../actions/AuthFreeActions'
+import { confirmEmailAction, loginUserAction, resendEmailConfirmationAction, refreshTokenAction, registerUserAction, confirmChangeEmailAction, usernameExistsAction, forgotPasswordAction, resetPasswordAction } from '../actions/AuthFreeActions'
 
 @Resolver()
 export class AuthFreeResolver {
@@ -41,12 +41,29 @@ export class AuthFreeResolver {
     return await resendEmailConfirmationAction(email, em)
   }
 
+  @Mutation(() => String)
+  async forgotPassword (
+    @Ctx('em') em: EntityManager,
+      @Arg('email') email: string
+  ): Promise<string> {
+    return await forgotPasswordAction(email, em)
+  }
+
   @Mutation(() => Boolean)
   async confirmEmail (
     @Ctx('em') em: EntityManager,
       @Arg('confirmEmailToken') confirmEmailToken: string
   ): Promise<boolean> {
     return await confirmEmailAction(confirmEmailToken, em)
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword (
+    @Ctx('em') em: EntityManager,
+      @Arg('resetPasswordToken') resetPasswordToken: string,
+      @Arg('newPassword') newPassword: string
+  ): Promise<boolean> {
+    return await resetPasswordAction(resetPasswordToken, newPassword, em)
   }
 
   @Mutation(() => String)
