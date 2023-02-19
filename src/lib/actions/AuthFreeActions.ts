@@ -8,7 +8,7 @@ import { v4 } from 'uuid'
 import { UserPreferencesInputData } from '../..//types/classes/input-data/json-input-data/UserPreferencesInputData'
 import { UserRegisterInputData } from '../..//types/classes/input-data/UserRegisterInputData'
 import { User } from '../..//types/entities/User'
-import { confirmEmail } from '../tasks/emails/EmailTexts'
+import { confirmEmail, forgotPasswordMail } from '../tasks/emails/EmailTexts'
 import { LoginUserInputData } from '../..//types/classes/input-data/LoginUserInputData'
 import { ENVIRONMENT, PRIVATE_KEY } from '../..//dependencies/config'
 
@@ -119,7 +119,7 @@ export async function forgotPasswordAction (email: string, em: EntityManager): P
   user.resetPasswordToken = v4()
   await em.flush()
 
-  if (ENVIRONMENT !== 'test') await confirmEmail(user)
+  if (ENVIRONMENT !== 'test') await forgotPasswordMail(user)
 
   return user.resetPasswordToken
 }

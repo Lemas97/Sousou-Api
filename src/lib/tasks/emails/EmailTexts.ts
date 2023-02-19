@@ -21,7 +21,7 @@ export async function confirmEmail (user: User): Promise<void> {
   `)
 }
 
-export async function forgotPassword (user: User): Promise<void> {
+export async function forgotPasswordMail (user: User): Promise<void> {
   await sendEmail(user.email, 'Reset Your Password', `
     <p>
       We
