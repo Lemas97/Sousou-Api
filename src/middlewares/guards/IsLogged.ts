@@ -16,7 +16,9 @@ export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {
     'resendEmailConfirmation',
     'confirmEmail',
     'refreshToken',
-    'confirmChangeEmail'
+    'confirmChangeEmail',
+    'forgotPassword',
+    'resetPassword'
   ].includes(ctx.info.fieldName)
   ) {
     return await next()
