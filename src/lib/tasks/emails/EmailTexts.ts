@@ -24,7 +24,6 @@ export async function confirmEmail (user: User): Promise<void> {
 export async function forgotPasswordMail (user: User): Promise<void> {
   await sendEmail(user.email, 'Reset Your Password', `
     <p>
-      We
       <br>
       <br>
       <p>
@@ -36,7 +35,7 @@ export async function forgotPasswordMail (user: User): Promise<void> {
       </p>
       <br>
       <br>
-      <a href="${FRONT_URL}/auth/reset-password/${user.resetPasswordToken!}"></a>
+      <a href="${FRONT_URL}/auth/reset-password/${user.resetPasswordToken!}">${FRONT_URL}/auth/reset-password/${user.resetPasswordToken!}</a>
     </p>
   `)
 }
