@@ -150,8 +150,12 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
   })
 
   const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChat> => {
-    const kati = await pC.messages.matching({ limit: 1, offset: 0 })
-    em.assign(pC, { messages: kati })
+    const messages = await pC.messages.matching({ limit: 1, offset: 0 })
+    em.assign(pC, { messages })
+    const users = await pC.users.matching({ limit: 1, offset: 0, where: {
+      id: { $ne: currentUser.id }
+    } })
+    em.assign(pC, { users })
 
     return pC
   }))
