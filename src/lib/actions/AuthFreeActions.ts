@@ -1,6 +1,5 @@
 import { ForbiddenError, UserInputError, ValidationError } from 'apollo-server-koa'
-import { PersistedQueryNotFoundError } from 'apollo-server-errors'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager, NotFoundError } from '@mikro-orm/core'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { v4 } from 'uuid'
@@ -103,7 +102,7 @@ export async function confirmEmailAction (confirmEmailToken: string, em: EntityM
 export async function resendEmailConfirmationAction (email: string, em: EntityManager): Promise<string> {
   const user = await em.findOneOrFail(User, { email })
 
-  if (user.emailConfirm) throw new PersistedQueryNotFoundError()
+  if (user.emailConfirm) throw new NotFoundError('User\' email is already confirmed')
 
   user.confirmEmailToken = v4()
   await em.flush()
