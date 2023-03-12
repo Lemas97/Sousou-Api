@@ -158,8 +158,6 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     })
 
-    console.log('edwwwwwwwwwwwwwwwww', messages[0]?.createdAt, messages[0]?.text)
-
     pC.sortMessageValue = (messages[0]?.createdAt ?? (await em.findOneOrFail(FriendRequest, {
       $or: [
         {
@@ -184,7 +182,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
     return pC
   }))
 
-  personalChats.sort((a, b) => a.sortMessageValue! - b.sortMessageValue!)
+  personalChats.sort((a, b) => b.sortMessageValue! - a.sortMessageValue!)
 
   em.assign(user, {
     personalChats: personalChats
