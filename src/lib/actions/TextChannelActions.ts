@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import { PaginatedInputData } from '../../types/classes/input-data/PaginatedInputData'
 import { TextChannelInputData } from '../../types/classes/input-data/TextChannelInputData'
+import { PaginatedTextChannelMessages } from '../../types/classes/pagination/PaginatedTextChannelMessages'
 import { Group } from '../../types/entities/Group'
 import { TextChannel } from '../../types/entities/TextChannel'
 import { TextChannelMessage } from '../../types/entities/TextChannelMessage'
@@ -19,7 +20,7 @@ export async function getTextChannelByIdAction (id: string, currentUser: User, e
   return textChannel
 }
 
-export async function getTextChannelWithPaginatedMessagesAction (textChannelId: string, paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<TextChannel> {
+export async function getTextChannelWithPaginatedMessagesAction (textChannelId: string, paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedTextChannelMessages> {
   if (!paginationData.filter) paginationData.filter = ''
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
 
@@ -35,7 +36,7 @@ export async function getTextChannelWithPaginatedMessagesAction (textChannelId: 
     textChannel
   })
 
-  const [messages] = await em.findAndCount(TextChannelMessage, {
+  const [messages, total] = await em.findAndCount(TextChannelMessage, {
     textChannel: textChannelId
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
@@ -46,7 +47,7 @@ export async function getTextChannelWithPaginatedMessagesAction (textChannelId: 
   textChannel.messages.set(messages)
   textChannel.lastReadMessages = lastReadPivot
   em.clear()
-  return textChannel
+  return { total, data: messages }
 }
 
 export async function createTextChannelAction (data: TextChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {

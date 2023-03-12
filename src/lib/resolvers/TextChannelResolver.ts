@@ -2,9 +2,10 @@ import { EntityManager } from '@mikro-orm/core'
 import { TextChannelInputData } from '../../types/classes/input-data/TextChannelInputData'
 import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
-import { createTextChannelAction, deleteTextChannelAction, getTextChannelByIdAction, getTextChannelWithPaginatedMessagesAction, updateTextChannelAction } from '../actions/TextChannelActions'
+import { createTextChannelAction, deleteTextChannelAction, getTextChannelByIdAction, getTextChannelWithPaginatedMessagesAction as getPaginatedTextChannelMessagesByTextChannelIdAction, updateTextChannelAction } from '../actions/TextChannelActions'
 import { TextChannel } from '../../types/entities/TextChannel'
 import { PaginatedInputData } from '../../types/classes/input-data/PaginatedInputData'
+import { PaginatedTextChannelMessages } from '../../types/classes/pagination/PaginatedTextChannelMessages'
 
 @Resolver()
 export class TextChannelResolver {
@@ -17,14 +18,14 @@ export class TextChannelResolver {
     return await getTextChannelByIdAction(id, ctx.user, em)
   }
 
-  @Query(() => TextChannel)
-  async getTextChannelWithPaginatedMessages (
+  @Query(() => PaginatedTextChannelMessages)
+  async getPaginatedTextChannelMessagesByTextChannelId (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
       @Arg('paginationInputData') paginationInputData: PaginatedInputData,
       @Arg('id') id: string
-  ): Promise<TextChannel> {
-    return await getTextChannelWithPaginatedMessagesAction(id, paginationInputData, ctx.user, em)
+  ): Promise<PaginatedTextChannelMessages> {
+    return await getPaginatedTextChannelMessagesByTextChannelIdAction(id, paginationInputData, ctx.user, em)
   }
 
   @Mutation(() => Boolean)
