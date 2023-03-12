@@ -158,6 +158,8 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     })
 
+    console.log(messages[0]?.createdAt)
+
     pC.sortMessageValue = (messages[0]?.createdAt ?? (await em.findOneOrFail(FriendRequest, {
       $or: [
         {
@@ -171,6 +173,10 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
           answer: true
         }
       ]
+    }, {
+      orderBy: {
+        updatedAt: 'DESC'
+      }
     })).updatedAt!).valueOf()
 
     em.assign(pC, { messages, users })
