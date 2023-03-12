@@ -158,7 +158,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     })
 
-    pC.sortMessageValue = (pC.messages[0]?.createdAt ?? (await em.findOneOrFail(FriendRequest, {
+    pC.sortMessageValue = (messages[0]?.createdAt ?? (await em.findOneOrFail(FriendRequest, {
       $or: [
         {
           fromUser: currentUser.id,
