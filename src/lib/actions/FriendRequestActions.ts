@@ -78,7 +78,7 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
     throw new UserInputError('This friend request has already been answered')
   }
 
-  em.assign(friendRequest, { canceled: true })
+  em.assign(friendRequest, { canceled: true, updatedAt: new Date() })
 
   await em.flush()
 
@@ -117,7 +117,7 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
     personalChat.users.add(friendRequest.fromUser)
   }
 
-  em.assign(friendRequest, { answer })
+  em.assign(friendRequest, { answer, updatedAt: new Date() })
 
   await em.flush()
 

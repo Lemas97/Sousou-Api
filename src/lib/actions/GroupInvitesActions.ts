@@ -92,7 +92,7 @@ export async function cancelGroupInviteAction (id: string, currentUser: User, em
 
   if (groupInvite.answer !== null) throw new UserInputError('Cannot cancel invite that has already been answered')
 
-  em.assign(groupInvite, { canceled: true })
+  em.assign(groupInvite, { canceled: true, updatedAt: new Date() })
   await em.flush()
 
   return groupInvite
@@ -108,7 +108,7 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   if (groupInvite.answer !== null) throw new UserInputError('Cannot answer invite that has already been answered')
 
-  em.assign(groupInvite, { answer: answer })
+  em.assign(groupInvite, { answer: answer, updatedAt: new Date() })
 
   if (answer) {
     await em.populate(user, ['groups'])
