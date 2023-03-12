@@ -70,7 +70,6 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
   },
   {
     populate: [
-      'friendRequests',
       'friendRequests.fromUser',
       'personalChats'
     ]
@@ -158,10 +157,28 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
         id: { $ne: currentUser.id }
       }
     })
+
+    pC.sortMessageValue = (pC.messages[0]?.createdAt ?? (await em.findOneOrFail(FriendRequest, {
+      $or: [
+        {
+          fromUser: currentUser.id,
+          toUser: pC.users.getItems().find(user => user.id !== currentUser.id),
+          answer: true
+        },
+        {
+          fromUser: pC.users.getItems().find(user => user.id !== currentUser.id),
+          toUser: currentUser.id,
+          answer: true
+        }
+      ]
+    })).updatedAt!).valueOf()
+
     em.assign(pC, { messages, users })
 
     return pC
   }))
+
+  personalChats.sort((a, b) => a.sortMessageValue! - b.sortMessageValue!)
 
   em.assign(user, {
     personalChats: personalChats

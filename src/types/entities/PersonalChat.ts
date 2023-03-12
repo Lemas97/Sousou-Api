@@ -25,6 +25,9 @@ export class PersonalChat {
   @Field(() => [PersonalMessage])
     messages = new Collection<PersonalMessage>(this)
 
+  @Property({ persist: false, nullable: true })
+    sortMessageValue?: number
+
   // @Field(() => Number, { nullable: true })
   // unreadMessages (
   //   @Ctx('ctx') ctx: AuthCustomContext
