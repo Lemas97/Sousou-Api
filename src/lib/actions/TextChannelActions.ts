@@ -20,7 +20,7 @@ export async function getTextChannelByIdAction (id: string, currentUser: User, e
   return textChannel
 }
 
-export async function getTextChannelWithPaginatedMessagesAction (textChannelId: string, paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedTextChannelMessages> {
+export async function getPaginatedTextChannelMessagesByTextChannelIdAction (textChannelId: string, paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedTextChannelMessages> {
   if (!paginationData.filter) paginationData.filter = ''
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
 

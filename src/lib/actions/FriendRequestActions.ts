@@ -9,12 +9,13 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
   if (data.toUserId === currentUser.id) {
     throw new UserInputError('You cannot send a friend request to yourself')
   }
+  const user = await em.findOneOrFail(User, currentUser.id, {
+    populate: ['friendList']
+  })
 
   const toUser = await em.findOneOrFail(User, data.toUserId)
 
-  await em.populate(currentUser, ['friendList'])
-
-  if (currentUser.friendList.contains(toUser)) {
+  if (user.friendList.contains(toUser)) {
     throw new UserInputError('You are already friends with this user')
   }
 
@@ -22,7 +23,7 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
     $or: [
       {
         $and: [
-          { fromUser: currentUser },
+          { fromUser: user },
           { toUser: toUser },
           { canceled: { $eq: null } },
           { answer: { $eq: null } }
@@ -31,7 +32,7 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
       {
         $and: [
           { fromUser: toUser },
-          { toUser: currentUser },
+          { toUser: user },
           { canceled: { $eq: null } },
           { answer: { $eq: null } }
         ]
@@ -46,7 +47,7 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
   const friendRequest = em.create(FriendRequest, {
     message: data.message,
     createdAt: new Date(),
-    fromUser: currentUser,
+    fromUser: user,
     toUser: toUser
   })
 
@@ -58,10 +59,14 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
 }
 
 export async function cancelFriendRequestAction (id: string, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+  const user = await em.findOneOrFail(User, currentUser.id, {
+    populate: ['friendList']
+  })
+
   const friendRequest = await em.findOneOrFail(FriendRequest, {
     $and: [
       { id: { $eq: id } },
-      { fromUser: { $eq: currentUser } }
+      { fromUser: { $eq: user } }
     ]
   })
 
@@ -69,7 +74,7 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
     throw new UserInputError('This friend request has already been canceled')
   }
 
-  if (friendRequest.answer !== undefined) {
+  if ((!friendRequest.answer && friendRequest.answer === false) || friendRequest.answer) {
     throw new UserInputError('This friend request has already been answered')
   }
 

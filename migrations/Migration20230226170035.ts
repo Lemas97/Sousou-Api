@@ -1,19 +1,17 @@
-import { MikroORM } from '@mikro-orm/core';
-import { Migration } from '@mikro-orm/migrations';
-import { LastReadMessagePivot } from '../src/types/entities/LastReadMessagePivot';
-import { PersonalChat } from '../src/types/entities/PersonalChat';
-import { PersonalMessage } from '../src/types/entities/PersonalMessage';
-import { User } from '../src/types/entities/User';
+import { MikroORM } from '@mikro-orm/core'
+import { Migration } from '@mikro-orm/migrations'
+import { LastReadMessagePivot } from '../src/types/entities/LastReadMessagePivot'
+import { PersonalChat } from '../src/types/entities/PersonalChat'
+import { PersonalMessage } from '../src/types/entities/PersonalMessage'
+import { User } from '../src/types/entities/User'
 
 export class Migration20230226170035 extends Migration {
-
-  async up(): Promise<void> {
+  async up (): Promise<void> {
     const connection = await MikroORM.init()
 
     const em = connection.em.fork()
 
     const users = await em.find(User, {}, { populate: ['friendList'] })
-
 
     await em.nativeDelete(PersonalMessage, {})
     await em.nativeDelete(LastReadMessagePivot, {})
@@ -44,5 +42,4 @@ export class Migration20230226170035 extends Migration {
       }
     }
   }
-
 }
