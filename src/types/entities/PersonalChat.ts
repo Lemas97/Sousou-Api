@@ -21,6 +21,14 @@ export class PersonalChat {
   @Field()
     mute: boolean
 
+  @Property({ default: false })
+  @Field()
+    disabled?: boolean
+
+  @Property({ default: false })
+  @Field()
+    isGroupPersonalChat?: boolean
+
   @OneToMany(() => PersonalMessage, message => message.personalChat)
   @Field(() => [PersonalMessage])
     messages = new Collection<PersonalMessage>(this)

@@ -16,7 +16,7 @@ import { UpdateUserInputData } from '../..//types/classes/input-data/UpdateUserI
 import { PRIVATE_KEY } from '../..//dependencies/config'
 import { changeEmail } from '../tasks/emails/EmailTexts'
 import { Server } from 'socket.io'
-import { deletedUserFromFriendList, updateUserEvent } from '../socket/SocketInitEvents'
+import { updatePersonalChatEvent, updateUserEvent } from '../socket/SocketInitEvents'
 import { PersonalChat } from '../../types/entities/PersonalChat'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
@@ -354,8 +354,8 @@ export async function connectToVoiceChannelAction (voiceChannelId: string, curre
 export async function deleteFriendAction (id: string, currentUser: User, io: Server, em: EntityManager): Promise<boolean> {
   if (id === currentUser.id) throw new UserInputError('You cannot delete yourself')
 
-  const userToDelete = await em.findOneOrFail(User, id, { populate: ['friendList'] })
-  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList'] })
+  const userToDelete = await em.findOneOrFail(User, id, { populate: ['friendList', 'personalChats'] })
+  const user = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList', 'personalChats'] })
 
   if (!user.friendList.getItems().map(fl => fl.id).includes(userToDelete.id)) throw new UserInputError('This user is not in your friendlist')
 
@@ -364,7 +364,17 @@ export async function deleteFriendAction (id: string, currentUser: User, io: Ser
 
   await em.flush()
 
-  deletedUserFromFriendList(userToDelete, io)
+  const personalChatId = userToDelete.personalChats.getItems().map(pC => pC.id).find(pC1 => user.personalChats.getItems().find(pC2 => pC2.id === pC1 && !pC2.isGroupPersonalChat))
+  await em.nativeUpdate(PersonalChat, {
+    id: personalChatId
+  }, {
+    disabled: true
+  })
+
+  const personalChat = user.personalChats.getItems().find(pC2 => pC2.id === personalChatId)
+  personalChat!.disabled = true
+
+  updatePersonalChatEvent([currentUser.id, userToDelete.id], personalChat!, io)
 
   return true
 }

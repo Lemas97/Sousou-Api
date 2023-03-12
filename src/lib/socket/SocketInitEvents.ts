@@ -7,6 +7,7 @@ import { SendMessageInputData } from '../../types/classes/input-data/PersonalMes
 import { ReadMessageInputData } from '../../types/classes/input-data/ReadMessageInputData'
 import { Group } from '../../types/entities/Group'
 import { GroupInvite } from '../../types/entities/GroupInvite'
+import { PersonalChat } from '../../types/entities/PersonalChat'
 import { User } from '../../types/entities/User'
 import { VoiceChannel } from '../../types/entities/VoiceChannel'
 import { deleteMessageFromPersonalConversationAction, deleteTextChannelMessageAction, readMessageAction, sendMessageToFriendAction, sendMessageToTextChannelAction, SocketMessageRooms } from '../actions/MessageActions'
@@ -120,8 +121,8 @@ export function newInviteOnCreateGroupInvite (user: User, groupInvite: GroupInvi
   io.to([`user:${user.id}`]).emit('new-invite', groupInvite)
 }
 
-export function deletedUserFromFriendList (deletedUser: User, io: Server): void {
-  io.to([`user:${deletedUser.id}`]).emit('update-friend-list', deletedUser.friendList.getItems())
+export function updatePersonalChatEvent (usersIds: string[], personalChat: PersonalChat, io: Server): void {
+  io.to(usersIds.map(userId => `user:${userId}`)).emit('update-personal-chat', personalChat)
 }
 
 export function kickFromVoiceChannel (voiceChannel: VoiceChannel, user: User, io: Server): void {
