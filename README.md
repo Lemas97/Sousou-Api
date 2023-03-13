@@ -1,3 +1,10 @@
+
+Table of Contents
+=================
+* [Socket Documentation](#socket-documentation)
+  * [UI's Events](#socket-documentation-ui-events)
+  * [API's Events](#socket-documentation-api-events)
+
 # Sousou-Back
 Sousou's API
 
@@ -10,7 +17,11 @@ Run:
 
 Otherwise, if you use docker, run `docker-compose -f docker-compose.dev.yml up`
 
+<a name="socket-documentation"></a>
 # Socket Documentation
+
+<a name="socket-documentation-ui-events"></a>
+## UI
 | Events (From UI)      | Description                    | Response Event | Input |
 | ----------- | ------------------------------ | -------- | -------- |
 | 'connection'  | Checks if the authentication token is valid. If token is valid, sets User as logged and the socket joins into the proper rooms. Otherwise, automatically disconnects the socket. |'authorization'| Authorization token |
@@ -19,6 +30,8 @@ Otherwise, if you use docker, run `docker-compose -f docker-compose.dev.yml up`
 | 'message-delete'| Deletes a User's message and informs proper rooms. | 'message-deleted'| DeleteMessageInputData |
 | 'disconnect'| Sets a 30 seconds timeout that can be cleared when User re-connect in time. If it hasn't been cleared, sets User as logged out and keeps the timestamp. |  | |
 
+<a name="socket-documentation-api-events"></a>
+## API
 | Events (From API)     | Description                    | Response Type |
 | ----------- | ------------------------------ | -------- |
 | 'authorization' | Informs the User for the result of connection. | 'succeeded' \| 'failed' |
