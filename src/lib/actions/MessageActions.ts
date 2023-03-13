@@ -122,7 +122,8 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
   if (data.personal) {
     message = await em.findOneOrFail(PersonalMessage, data.messageId, {
       populate: ['personalChat'],
-      populateWhere: { personalChat: { users: { id: { $ne: currentUser.id } } } }
+      populateWhere: { personalChat: { users: { id: { $ne: currentUser.id } } } },
+      orderBy: { createdAt: 'DESC' }
     })
 
     const lastReadPivot = await em.findOneOrFail(LastReadMessagePivot, {
@@ -139,7 +140,8 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
     rooms = [`personal-chat:${message.personalChat.id}`]
   } else {
     message = await em.findOneOrFail(TextChannelMessage, data.messageId, {
-      populate: ['textChannel.group', 'textChannel.users']
+      populate: ['textChannel.group', 'textChannel.users'],
+      orderBy: { createdAt: 'DESC' }
     })
     if (message.textChannel.users.contains(currentUser)) {
       message.textChannel.users.add(currentUser)
