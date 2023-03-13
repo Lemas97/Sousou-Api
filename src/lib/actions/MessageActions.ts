@@ -118,7 +118,6 @@ export async function deleteMessageFromPersonalConversationAction (data: DeleteM
 export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketReadMessageRooms> {
   let message: TextChannelMessage | PersonalMessage
   let rooms: string[]
-  let returnValue: LastReadMessagePivot | TextChannel
   if (data.personal) {
     message = await em.findOneOrFail(PersonalMessage, data.messageId, {
       populate: ['personalChat'],
@@ -134,8 +133,6 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
     })
 
     em.assign(lastReadPivot, { lastReadMessage: message })
-
-    returnValue = lastReadPivot
 
     rooms = [`personal-chat:${message.personalChat.id}`]
   } else {
@@ -157,19 +154,17 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
       lastReadMessage: message
     })
 
-    returnValue = message.textChannel
-
     rooms = [`group:${message.textChannel.group.id}`]
   }
   await em.flush()
 
-  return { rooms, except: [`user:${currentUser.id}`], channel: returnValue }
+  return { rooms, except: [`user:${currentUser.id}`], channel: message }
 }
 
 export class SocketReadMessageRooms {
   rooms: string[]
   except: string[]
-  channel: TextChannel | LastReadMessagePivot
+  channel: TextChannelMessage | PersonalMessage
 }
 
 export class SocketMessageRooms {
