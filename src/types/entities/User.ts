@@ -20,7 +20,7 @@ import { AuthCustomContext } from '../interfaces/CustomContext'
 import { FriendRequest } from './FriendRequest'
 import { Group } from './Group'
 import { GroupInvite } from './GroupInvite'
-import { LastReadMessagePivot } from './LastReadMessagePivot'
+import { PersonalChatUserPivot } from './LastReadMessagePivot'
 import { PersonalChat } from './PersonalChat'
 import { VoiceChannel } from './VoiceChannel'
 
@@ -119,7 +119,7 @@ export class User {
   @Field(() => [GroupInvite])
     myGroupInvites = new Collection<GroupInvite>(this)
 
-  @ManyToMany({ entity: () => PersonalChat, mappedBy: 'users', pivotEntity: () => LastReadMessagePivot })
+  @ManyToMany({ entity: () => PersonalChat, mappedBy: 'users', pivotEntity: () => PersonalChatUserPivot })
   @Field(() => [PersonalChat])
     personalChats = new Collection<PersonalChat>(this)
 

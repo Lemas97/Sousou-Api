@@ -6,7 +6,7 @@ import { User } from './User'
 
 @Entity({ tableName: 'personal_chat_users_pivot_users' })
 @ObjectType()
-export class LastReadMessagePivot {
+export class PersonalChatUserPivot {
   @ManyToOne({ entity: () => User, primary: true })
   @Field(() => User)
     user: User

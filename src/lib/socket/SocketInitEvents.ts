@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/core'
 import jwt from 'jsonwebtoken'
 import { Server } from 'socket.io'
-import { PRIVATE_KEY } from '../../dependencies/config'
+import { PRIVATE_KEY, SECONDS_FOR_LOGOUT } from '../../dependencies/config'
 import { DeleteMessageInputData } from '../../types/classes/input-data/DeleteMessageInputData'
 import { SendMessageInputData } from '../../types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from '../../types/classes/input-data/ReadMessageInputData'
@@ -28,7 +28,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       return
     }
 
-    socket.emit('authorization', 'success')
+    socket.emit('authorization', 'succeeded')
     console.log(`User ${user.username} logged in`)
 
     await socket.join(`user:${user.id}`)
@@ -81,13 +81,14 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
     socket.on('disconnect', async () => {
       try {
+        const secondsOfTimeout = SECONDS_FOR_LOGOUT
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         disconnectAction = setTimeout(async () => {
           console.log(`User ${user.username} logged out`)
           io.to([...user.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', user)
-          em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date() })
+          em.assign(user, { isLoggedIn: false, lastLoggedInDate: new Date(new Date().valueOf() - secondsOfTimeout) })
           await em.flush()
-        }, 30 * 1000) // 30 seconds
+        }, secondsOfTimeout)
       } catch (e) {
         console.log(e)
       }

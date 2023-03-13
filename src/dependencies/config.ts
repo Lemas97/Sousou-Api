@@ -27,6 +27,7 @@ export const EMAIL_PORT = process.env.EMAIL_PORT && process.env.EMAIL_PORT !== '
 export const EMAIL_HOST = process.env.EMAIL_HOST as string ?? ''
 export const EMAIL_USERNAME = process.env.EMAIL_USERNAME as string ?? ''
 export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD as string ?? ''
+export const SECONDS_FOR_LOGOUT = process.env.SECONDS_FOR_LOGOUT ? Number(process.env.SECONDS_FOR_LOGOUT) : 30 * 1000
 
 export const FRONT_URL = (process.env.FRONT_URL !== '' && process.env.FRONT_URL != null) ? process.env.FRONT_URL : 'http://localhost'
 export const FRONT_PORT = (process.env.FRONT_PORT !== '' && process.env.FRONT_PORT != null) ? process.env.FRONT_PORT : 9000

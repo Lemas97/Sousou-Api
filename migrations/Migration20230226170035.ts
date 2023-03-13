@@ -1,6 +1,6 @@
 import { MikroORM } from '@mikro-orm/core'
 import { Migration } from '@mikro-orm/migrations'
-import { LastReadMessagePivot } from '../src/types/entities/LastReadMessagePivot'
+import { PersonalChatUserPivot } from '../src/types/entities/LastReadMessagePivot'
 import { PersonalChat } from '../src/types/entities/PersonalChat'
 import { PersonalMessage } from '../src/types/entities/PersonalMessage'
 import { User } from '../src/types/entities/User'
@@ -14,7 +14,7 @@ export class Migration20230226170035 extends Migration {
     const users = await em.find(User, {}, { populate: ['friendList'] })
 
     await em.nativeDelete(PersonalMessage, {})
-    await em.nativeDelete(LastReadMessagePivot, {})
+    await em.nativeDelete(PersonalChatUserPivot, {})
     await em.nativeDelete(PersonalChat, {})
 
     for (const user of users) {
