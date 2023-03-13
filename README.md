@@ -22,7 +22,7 @@ Otherwise, if you use docker, run `docker-compose -f docker-compose.dev.yml up`
 
 <a name="socket-documentation-ui-events"></a>
 ## UI
-| Events (From UI)      | Description                    | Response Event | Input |
+| Event Name     | Description                    | Response Event | Input |
 | ----------- | ------------------------------ | -------- | -------- |
 | 'connection'  | Checks if the authentication token is valid. If token is valid, sets User as logged and the socket joins into the proper rooms. Otherwise, automatically disconnects the socket. |'authorization'| Authorization token |
 | 'message-send'| Sends message to PersonalChat or TextChannel of a shared Group.   | 'message-receive'| SendMessageInputData |
@@ -32,7 +32,7 @@ Otherwise, if you use docker, run `docker-compose -f docker-compose.dev.yml up`
 
 <a name="socket-documentation-api-events"></a>
 ## API
-| Events (From API)     | Description                    | Response Type |
+| Event Name     | Description                    | Response Type |
 | ----------- | ------------------------------ | -------- |
 | 'authorization' | Informs the User for the result of connection. | 'succeeded' \| 'failed' |
 | 'message-receive' | Informs Users for incoming message from another User on either, PersonalChat or TextChannel of a shared Group. | PersonalChatMessage \| TextChannelMessage |
