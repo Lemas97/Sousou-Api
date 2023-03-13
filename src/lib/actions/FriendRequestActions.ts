@@ -1,9 +1,9 @@
 import { EntityManager } from '@mikro-orm/core'
 import { UserInputError } from 'apollo-server-koa'
-import { FriendRequestInputData } from '../..//types/classes/input-data/FriendRequestInputData'
-import { FriendRequest } from '../..//types/entities/FriendRequest'
-import { PersonalChat } from '../..//types/entities/PersonalChat'
-import { User } from '../..//types/entities/User'
+import { FriendRequestInputData } from '../../types/classes/input-data/FriendRequestInputData'
+import { FriendRequest } from '../../types/entities/FriendRequest'
+import { PersonalChat } from '../../types/entities/PersonalChat'
+import { User } from '../../types/entities/User'
 
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
   if (data.toUserId === currentUser.id) {

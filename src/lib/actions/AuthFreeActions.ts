@@ -4,12 +4,12 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { v4 } from 'uuid'
 
-import { UserPreferencesInputData } from '../..//types/classes/input-data/json-input-data/UserPreferencesInputData'
-import { UserRegisterInputData } from '../..//types/classes/input-data/UserRegisterInputData'
-import { User } from '../..//types/entities/User'
+import { UserPreferencesInputData } from '../../types/classes/input-data/json-input-data/UserPreferencesInputData'
+import { UserRegisterInputData } from '../../types/classes/input-data/UserRegisterInputData'
+import { User } from '../../types/entities/User'
 import { confirmEmail, forgotPasswordMail } from '../tasks/emails/EmailTexts'
-import { LoginUserInputData } from '../..//types/classes/input-data/LoginUserInputData'
-import { ENVIRONMENT, PRIVATE_KEY } from '../..//dependencies/config'
+import { LoginUserInputData } from '../../types/classes/input-data/LoginUserInputData'
+import { ENVIRONMENT, PRIVATE_KEY } from '../../dependencies/config'
 
 export async function usernameExistsAction (username: string, em: EntityManager): Promise<boolean> {
   const user = await em.findOne(User, { username })

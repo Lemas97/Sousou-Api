@@ -1,5 +1,5 @@
 import { FilterQuery } from '@mikro-orm/core'
-import { User } from '../..//types/entities/User'
+import { User } from '../../types/entities/User'
 
 export function usersSearchFilter (stringFilter?: string): FilterQuery<User> {
   const filter: FilterQuery<User> = {

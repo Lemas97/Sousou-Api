@@ -1,8 +1,8 @@
 import { EntityManager } from '@mikro-orm/core'
 import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql'
-import { FriendRequestInputData } from '../..//types/classes/input-data/FriendRequestInputData'
-import { FriendRequest } from '../..//types/entities/FriendRequest'
-import { AuthCustomContext } from '../..//types/interfaces/CustomContext'
+import { FriendRequestInputData } from '../../types/classes/input-data/FriendRequestInputData'
+import { FriendRequest } from '../../types/entities/FriendRequest'
+import { AuthCustomContext } from '../../types/interfaces/CustomContext'
 import { answerFriendRequestAction, cancelFriendRequestAction, sendFriendRequestAction } from '../actions/FriendRequestActions'
 
 @Resolver()
