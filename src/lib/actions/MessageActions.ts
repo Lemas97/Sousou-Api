@@ -118,6 +118,7 @@ export async function deleteMessageFromPersonalConversationAction (data: DeleteM
 export async function readMessageAction (data: ReadMessageInputData, currentUser: User, em: EntityManager): Promise<SocketReadMessageRooms> {
   let message: TextChannelMessage | PersonalMessage
   let rooms: string[]
+  let returnValue: LastReadMessagePivot | TextChannelUserPivot
   if (data.personal) {
     message = await em.findOneOrFail(PersonalMessage, data.messageId, {
       populate: ['personalChat'],
@@ -134,6 +135,8 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
 
     em.assign(lastReadPivot, { lastReadMessage: message })
 
+    returnValue = lastReadPivot
+
     rooms = [`personal-chat:${message.personalChat.id}`]
   } else {
     message = await em.findOneOrFail(TextChannelMessage, data.messageId, {
@@ -148,23 +151,27 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
     const textChannelUserPivot = await em.findOneOrFail(TextChannelUserPivot, {
       user: currentUser.id,
       textChannel: message.textChannel
+    }, {
+      populate: ['textChannel.group']
     })
 
     em.assign(textChannelUserPivot, {
       lastReadMessage: message
     })
 
+    returnValue = textChannelUserPivot
+
     rooms = [`group:${message.textChannel.group.id}`]
   }
   await em.flush()
 
-  return { rooms, except: [`user:${currentUser.id}`], channel: message }
+  return { rooms, except: [`user:${currentUser.id}`], channel: returnValue }
 }
 
 export class SocketReadMessageRooms {
   rooms: string[]
   except: string[]
-  channel: TextChannelMessage | PersonalMessage
+  channel: LastReadMessagePivot | TextChannelUserPivot
 }
 
 export class SocketMessageRooms {
