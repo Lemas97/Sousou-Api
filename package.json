@@ -11,6 +11,7 @@
     "dev": "ts-node-dev -r tsconfig-paths/register --poll ./src/main.ts",
     "dev-migrate": "npx mikro-orm migration:up; ts-node-dev -r tsconfig-paths/register --poll ./src/main.ts",
     "migration": "npx mikro-orm migration:create",
+    "migration:b": "npx mikro-orm migration:create -b",
     "migrate": "npx mikro-orm migration:up",
     "test": "cross-env NODE_ENV=test mikro-orm migration:up && jest --runInBand --detectOpenHandles"
   },
