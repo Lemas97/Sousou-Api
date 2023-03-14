@@ -85,7 +85,6 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
 
   const group = await em.findOneOrFail(Group, groupId, { populate: ['members'] })
-  console.log([...group.members.getItems().map(me => me.id), currentUser.id])
 
   const [users, count] = await em.findAndCount(User, {
     $and: [
@@ -146,18 +145,17 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     }
   })
-  const kati = user.personalChats.getItems()
+  const prePersonaChats = user.personalChats.getItems()
 
-  await em.populate(kati, ['users'], {
+  await em.populate(prePersonaChats, ['users'], {
     where: {
       users: { id: { $ne: currentUser.id } }
     }
   })
 
-  const personalChats = await Promise.all(kati.map(async (pC): Promise<PersonalChat> => {
+  const personalChats = await Promise.all(prePersonaChats.map(async (pC): Promise<PersonalChat> => {
     const messages = await pC.messages.matching({ limit: 1, offset: 0, orderBy: { createdAt: 'DESC' } })
     const users = pC.users.getItems()
-    // console.log(users)
     const personalChatUserPivot = await em.findOneOrFail(PersonalChatUserPivot, { user: currentUser.id, personalChat: pC.id }, {
       populate: ['lastReadMessage']
     })
@@ -198,7 +196,6 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
   Object.assign(user, {
     personalChats: personalChats
   })
-  console.log(personalChats.map(k => k.users.getItems()))
 
   em.clear()
 

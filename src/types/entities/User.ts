@@ -60,11 +60,9 @@ export class User {
     createdAt: Date
 
   @Property()
-  @Field()
     confirmEmailToken: string
 
   @Property({ nullable: true })
-  @Field({ nullable: true })
     resetPasswordToken?: string
 
   @Property({ type: Boolean })
@@ -72,7 +70,6 @@ export class User {
     emailConfirm: boolean
 
   @Property({ hidden: true, type: 'text', nullable: true })
-  @Field({ nullable: true })
     jwtToken?: string
 
   @Property({ type: Boolean })
