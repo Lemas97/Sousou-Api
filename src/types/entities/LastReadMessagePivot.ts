@@ -1,4 +1,4 @@
-import { Collection, Entity, ManyToOne } from '@mikro-orm/core'
+import { Entity, ManyToOne } from '@mikro-orm/core'
 import { Field, ObjectType } from 'type-graphql'
 import { PersonalChat } from './PersonalChat'
 import { PersonalMessage } from './PersonalMessage'
@@ -17,5 +17,5 @@ export class PersonalChatUserPivot {
 
   @ManyToOne(() => PersonalMessage, { nullable: true })
   @Field(() => PersonalMessage)
-    lastReadMessage = new Collection<PersonalMessage>(this)
+    lastReadMessage: PersonalMessage
 }

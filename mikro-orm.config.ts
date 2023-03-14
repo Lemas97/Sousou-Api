@@ -1,4 +1,3 @@
-import { LoadStrategy } from '@mikro-orm/core'
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './src/dependencies/config'
 
 export default {
@@ -9,7 +8,6 @@ export default {
   port: DB_PORT,
   password: DB_PASSWORD,
   debug: true,
-  loadStrategy: LoadStrategy.JOINED,
   migrations: {
     glob: '!(*.d).{js,ts}',
     pathTs: './migrations',
