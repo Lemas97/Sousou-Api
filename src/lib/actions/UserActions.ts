@@ -18,6 +18,8 @@ import { changeEmail } from '../tasks/emails/EmailTexts'
 import { Server } from 'socket.io'
 import { updatePersonalChatEvent, updateUserEvent } from '../socket/SocketInitEvents'
 import { PersonalChat } from '../../types/entities/PersonalChat'
+import { PersonalMessage } from '../../types/entities/PersonalMessage'
+import { PersonalChatUserPivot } from '../../types/entities/LastReadMessagePivot'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
@@ -121,8 +123,6 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
 export async function getLoggedUserAction (currentUser: User, em: EntityManager): Promise<User> {
   const user = await em.findOneOrFail(User, currentUser.id, {
     populate: [
-      'connectedVoiceChannel.users',
-      'connectedVoiceChannel.group',
       'groupInvites.fromUser',
       'groupInvites.group.members',
       'myGroupInvites.toUser',
@@ -132,8 +132,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       'groups',
       'friendRequests.fromUser.groups',
       'friendRequests.fromUser.ownedGroups',
-      'personalChats.messages',
-      'personalChats.users'
+      'personalChats'
     ],
     populateWhere: {
       friendRequests: {
@@ -147,15 +146,27 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     }
   })
+  const kati = user.personalChats.getItems()
 
-  const personalChats = await Promise.all(user.personalChats.getItems().map(async (pC): Promise<PersonalChat> => {
+  await em.populate(kati, ['users'], {
+    where: {
+      users: { id: { $ne: currentUser.id } }
+    }
+  })
+
+  const personalChats = await Promise.all(kati.map(async (pC): Promise<PersonalChat> => {
     const messages = await pC.messages.matching({ limit: 1, offset: 0, orderBy: { createdAt: 'DESC' } })
-    const users = await pC.users.matching({
-      limit: 1,
-      offset: 0,
-      where: {
-        id: { $ne: currentUser.id }
-      }
+    const users = pC.users.getItems()
+    // console.log(users)
+    const personalChatUserPivot = await em.findOneOrFail(PersonalChatUserPivot, { user: currentUser.id, personalChat: pC.id }, {
+      populate: ['lastReadMessage']
+    })
+
+    const totalUnreadMessages = await em.count(PersonalMessage, {
+      $and: [
+        { personalChat: pC.id },
+        personalChatUserPivot.lastReadMessage ? { createdAt: { $gt: personalChatUserPivot.lastReadMessage.createdAt } } : {}
+      ]
     })
 
     pC.sortMessageValue = (messages[0]?.createdAt ?? (await em.findOneOrFail(FriendRequest, {
@@ -177,16 +188,17 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     })).updatedAt!).valueOf()
 
-    em.assign(pC, { messages, users })
+    em.assign(pC, { messages, users, totalUnreadMessages })
 
     return pC
   }))
 
   personalChats.sort((a, b) => b.sortMessageValue! - a.sortMessageValue!)
 
-  em.assign(user, {
+  Object.assign(user, {
     personalChats: personalChats
   })
+  console.log(personalChats.map(k => k.users.getItems()))
 
   em.clear()
 

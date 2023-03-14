@@ -36,6 +36,10 @@ export class PersonalChat {
   @Property({ persist: false, nullable: true })
     sortMessageValue?: number
 
+  @Property({ persist: false })
+  @Field({ nullable: true })
+    totalUnreadMessages?: number
+
   // @Field(() => Number, { nullable: true })
   // unreadMessages (
   //   @Ctx('ctx') ctx: AuthCustomContext
