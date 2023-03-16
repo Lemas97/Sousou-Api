@@ -196,6 +196,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
   Object.assign(user, {
     personalChats: personalChats
   })
+  console.log(personalChats.map(k => k.users.getItems()))
 
   em.clear()
 

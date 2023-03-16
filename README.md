@@ -25,8 +25,8 @@ Otherwise, if you use docker, run `docker-compose -f docker-compose.dev.yml up`
 | Event Name     | Description                    | Response Event | Input |
 | ----------- | ------------------------------ | -------- | -------- |
 | 'connection'  | Checks if the authentication token is valid. If token is valid, sets User as logged and the socket joins into the proper rooms. Otherwise, automatically disconnects the socket. |'authorization'| Authorization token |
-| 'message-send'| Sends message to PersonalChat or TextChannel of a shared Group.   | 'message-receive'| SendMessageInputData |
-| 'message-read'| Sets on PersonalChat or TextChannel of a shared Group the last message the User has read | 'message-read'| ReadMessageInputData |
+| 'message-send'| Sends message to PersonalChat or TextChannel of a Group.   | 'message-receive'| SendMessageInputData |
+| 'message-read'| Sets as read the last message the User has read on PersonalChat or TextChannel of a Group. | 'message-read'| ReadMessageInputData |
 | 'message-delete'| Deletes a User's message and informs proper rooms. | 'message-deleted'| DeleteMessageInputData |
 | 'disconnect'| Sets a 30 seconds timeout that can be cleared when User re-connect in time. If it hasn't been cleared, sets User as logged out and keeps the timestamp. |  | |
 
