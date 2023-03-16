@@ -73,7 +73,7 @@ export class User {
     emailConfirm: boolean
 
   @Property({ type: 'text', nullable: true })
-  @Field()
+  @Field({ nullable: true })
     jwtToken?: string
 
   @Property({ type: Boolean })
