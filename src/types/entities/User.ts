@@ -49,6 +49,7 @@ export class User {
     code: string
 
   @Property({ hidden: true })
+  @Field()
     password: string
 
   @Property()
@@ -60,9 +61,11 @@ export class User {
     createdAt: Date
 
   @Property()
+  @Field()
     confirmEmailToken: string
 
   @Property({ nullable: true })
+  @Field()
     resetPasswordToken?: string
 
   @Property({ type: Boolean })
