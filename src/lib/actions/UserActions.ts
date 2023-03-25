@@ -135,12 +135,11 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
     ],
     populateWhere: {
       friendRequests: {
-        answer: null,
-        canceled: null
+        updatedAt: null,
+        fromUser: { id: { $ne: currentUser.id } }
       },
       groupInvites: {
-        answer: null,
-        canceled: null,
+        updatedAt: null,
         fromUser: { id: { $ne: currentUser.id } }
       }
     }
@@ -152,6 +151,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       users: { id: { $ne: currentUser.id } }
     }
   })
+  em.clear()
 
   const personalChats = await Promise.all(prePersonaChats.map(async (pC): Promise<PersonalChat> => {
     const messages = await pC.messages.matching({ limit: 1, offset: 0, orderBy: { createdAt: 'DESC' } })
@@ -186,7 +186,7 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
       }
     })).updatedAt!).valueOf()
 
-    em.assign(pC, { messages, users, totalUnreadMessages })
+    Object.assign(pC, { messages, users, totalUnreadMessages })
 
     return pC
   }))
@@ -196,7 +196,6 @@ export async function getLoggedUserAction (currentUser: User, em: EntityManager)
   Object.assign(user, {
     personalChats: personalChats
   })
-  console.log(personalChats.map(k => k.users.getItems()))
 
   em.clear()
 
@@ -225,8 +224,7 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
                         }
                       : {}
                   ]
-                },
-          answer: { $eq: undefined }
+                }
         }
       : {
           fromUser: {
