@@ -224,7 +224,8 @@ export async function getFriendRequestsAction (paginationData: PaginatedInputDat
                         }
                       : {}
                   ]
-                }
+                },
+          updatedAt: null
         }
       : {
           fromUser: {
