@@ -12,7 +12,8 @@ import { User } from '../../types/entities/User'
 export async function getTextChannelByIdAction (id: string, currentUser: User, em: EntityManager): Promise<TextChannel> {
   const textChannel = await em.findOneOrFail(TextChannel, id, {
     populate: [
-      'group.members'
+      'group.members',
+      'users'
     ]
   })
   if (!textChannel.group.members.getItems().map(me => me.id).includes(currentUser.id)) throw new ForbiddenError('You have no access on this voice channel')
