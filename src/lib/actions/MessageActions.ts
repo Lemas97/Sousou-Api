@@ -152,7 +152,7 @@ export async function readMessageAction (data: ReadMessageInputData, currentUser
       user: currentUser.id,
       textChannel: message.textChannel
     }, {
-      populate: ['textChannel.group']
+      populate: ['textChannel.group', 'user']
     })
 
     em.assign(textChannelUserPivot, {
