@@ -19,7 +19,8 @@ export async function getPersonalMessagesActionByPersonalChatIdAction (personalC
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset,
-    orderBy: { createdAt: 'DESC' }
+    orderBy: { createdAt: 'DESC' },
+    populate: ['readBy.user']
   })
 
   return { data: messages, total: count }
