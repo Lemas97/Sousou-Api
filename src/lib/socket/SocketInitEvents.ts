@@ -91,6 +91,10 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       io.to(`user:${data.toUserId}`).emit('receive-candidate', { fromUserId: user.id, candidate: data.candidate })
     })
 
+    socket.on('end-call-one-to-one', async (data: { toUserId: string }) => {
+      io.to(`user:${data.toUserId}`).emit('end-call-one-to-one')
+    })
+
     socket.on('disconnect', async () => {
       try {
         const secondsOfTimeout = SECONDS_FOR_LOGOUT
