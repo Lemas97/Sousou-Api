@@ -79,6 +79,14 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       }
     })
 
+    socket.on('1st-send-voice-one-to-one', async (data: { toUserId: string, description: RTCSessionDescriptionInit }) => {
+      io.to(`user:${data.toUserId}`).emit('answer-call-one-to-one', { fromUserId: user.id, description: data.description })
+    })
+
+    socket.on('answered-one-to-one', async (data: { toUserId: string, description: RTCSessionDescriptionInit }) => {
+      io.to(`user:${data.toUserId}`).emit('call-accepted-one-to-one', { fromUserId: user.id, description: data.description })
+    })
+
     socket.on('disconnect', async () => {
       try {
         const secondsOfTimeout = SECONDS_FOR_LOGOUT
