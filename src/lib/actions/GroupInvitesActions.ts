@@ -54,7 +54,7 @@ export async function getGroupInviteActions (paginationData: PaginatedInputData,
 export async function createGroupInviteAction (groupInviteInputData: GroupInviteInputData, currentUser: User, io: Server, em: EntityManager): Promise<GroupInvite> {
   if (currentUser.id === groupInviteInputData.toUserId) throw new UserInputError('You cannot invite yourself to a group')
 
-  const group = await em.findOneOrFail(Group, groupInviteInputData.groupId)
+  const group = await em.findOneOrFail(Group, groupInviteInputData.groupId, { populate: ['members'] })
   if (!group.invitationPermissionUsers && group.owner.id !== currentUser.id) {
     throw new ForbiddenError('Invitations are forbidden in this group')
   }
@@ -80,7 +80,7 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   await em.populate(currentUser, ['groups'])
 
-  sendReceiveFriendRequest(io, undefined, groupInvite)
+  sendReceiveFriendRequest(io, undefined, groupInvite, group)
 
   return groupInvite
 }
@@ -120,15 +120,15 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   await em.flush()
 
-  const sockets = await io.fetchSockets()
+  // const sockets = await io.fetchSockets()
 
-  console.log(sockets)
+  // console.log(sockets)
 
-  const socketIndex = sockets.findIndex(s => s.handshake.auth.token === currentUser.jwtToken)
+  // const socketIndex = sockets.findIndex(s => s.handshake.auth.token === currentUser.jwtToken)
 
-  console.log(socketIndex, sockets[socketIndex])
+  // console.log(socketIndex, sockets[socketIndex])
 
-  sockets[socketIndex].join(`group:${group.id}`)
+  // sockets[socketIndex].join(`group:${group.id}`)
 
   if (answer) {
     sendReceiveAnswerFriendRequest(io, undefined, undefined, groupInvite, group)

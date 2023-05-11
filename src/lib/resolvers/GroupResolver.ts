@@ -41,10 +41,9 @@ export class GroupResolver {
     @PubSub('GROUP_CREATED') publish: Publisher<Group>,
       @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
-      @Ctx('io') io: Server,
       @Arg('data') data: GroupInputData
   ): Promise<boolean> {
-    const group = await createGroupAction(data, ctx.user, io, em)
+    const group = await createGroupAction(data, ctx.user, em)
     await publish(group)
     return true
   }
