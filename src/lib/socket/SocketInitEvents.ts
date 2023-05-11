@@ -125,7 +125,7 @@ export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: Frie
     type: personalChat ? 'PERSONAL_CHAT' : 'GROUP'
   })
 
-  io.to(friendRequest?.toUser.id ? `user:${friendRequest?.toUser.id}` : `group ${group!.id}`).emit('invitation-answer-receive', {
+  io.to([`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`, group ? `group:${group.id}` : '']).emit('invitation-answer-receive', {
     identifier: friendRequest?.id ?? groupInvite?.id,
     personalChat,
     group,
