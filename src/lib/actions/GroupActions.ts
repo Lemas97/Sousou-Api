@@ -36,7 +36,7 @@ export async function getGroupByIdAction (id: string, currentUser: User, em: Ent
   return group
 }
 
-export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<Group> {
+export async function createGroupAction (data: GroupInputData, currentUser: User, io: Server, em: EntityManager): Promise<Group> {
   const group = em.create(Group, {
     ...data,
     preferences: {
@@ -53,6 +53,8 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
     users: currentUser.id,
     group: group.id
   })
+
+  console.log(io.sockets.sockets)
 
   await em.persistAndFlush(generalTextChannel)
 
