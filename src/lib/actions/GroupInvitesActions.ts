@@ -124,7 +124,7 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   console.log(sockets)
 
-  const socketIndex = sockets.findIndex(s => s.handshake.auth.token === user.jwtToken)
+  const socketIndex = sockets.findIndex(s => s.handshake.auth.token === currentUser.jwtToken)
 
   console.log(socketIndex, sockets[socketIndex])
 
