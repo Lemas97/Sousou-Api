@@ -33,6 +33,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     console.log(`User ${user.username} logged in`)
 
     await socket.join(`user:${user.id}`)
+    console.log('edwwwwwwwwwwwwwwwwwwww', user.groups.getItems())
     const groupsRooms = user.groups.getItems().map(group => `group:${group.id}`)
     await socket.join(groupsRooms)
     const personalChatRooms = user.personalChats.getItems().map(personalChat => `personal-chat:${personalChat.id}`)
