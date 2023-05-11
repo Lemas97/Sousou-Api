@@ -54,7 +54,15 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
     group: group.id
   })
 
-  console.log(io.sockets.sockets)
+  const sockets = await io.fetchSockets()
+
+  console.log(sockets)
+
+  const socketIndex = sockets.findIndex(s => s.id === user.socketId)
+
+  console.log(socketIndex, sockets[socketIndex])
+
+  sockets[socketIndex].join(`group:${group.id}`)
 
   await em.persistAndFlush(generalTextChannel)
 

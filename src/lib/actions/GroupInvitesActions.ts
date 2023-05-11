@@ -120,6 +120,16 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   await em.flush()
 
+  const sockets = await io.fetchSockets()
+
+  console.log(sockets)
+
+  const socketIndex = sockets.findIndex(s => s.id === user.socketId)
+
+  console.log(socketIndex, sockets[socketIndex])
+
+  sockets[socketIndex].join(`group:${group.id}`)
+
   if (answer) {
     sendReceiveAnswerFriendRequest(io, undefined, undefined, groupInvite, group)
   }

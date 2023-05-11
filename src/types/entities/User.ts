@@ -44,6 +44,9 @@ export class User {
   @Field()
     email: string
 
+  @Property({ unique: true })
+    socketId: string
+
   @Property()
   @Field()
     code: string
