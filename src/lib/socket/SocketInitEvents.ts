@@ -117,6 +117,11 @@ export function sendReceiveFriendRequest (friendRequest: FriendRequest, io: Serv
   io.to(`user:${friendRequest.toUser.id}`).emit('friend-request-receive', { friendRequest })
 }
 
+export function sendReceiveAnswerFriendRequest (friendRequest: FriendRequest, io: Server): void {
+  io.to(`user:${friendRequest.toUser.id}`).emit('friend-request-answer-receive', { friendRequest, userToAdd: friendRequest.fromUser })
+  io.to(`user:${friendRequest.fromUser.id}`).emit('friend-request-answer-receive', { friendRequest, userToAdd: friendRequest.toUser })
+}
+
 export function updateUserEvent (user: User, io: Server): void {
   const roomsToSeeTheChange = [...user.friendList.getItems().map(friend => `user:${friend.id}`, ...user.groups.getItems().map(group => `group:${group.id}`))]
 

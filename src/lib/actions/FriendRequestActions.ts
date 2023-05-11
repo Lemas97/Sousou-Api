@@ -7,7 +7,7 @@ import { FriendRequest } from '../../types/entities/FriendRequest'
 import { PersonalChat } from '../../types/entities/PersonalChat'
 import { User } from '../../types/entities/User'
 
-import { sendReceiveFriendRequest } from '../socket/SocketInitEvents'
+import { sendReceiveAnswerFriendRequest, sendReceiveFriendRequest } from '../socket/SocketInitEvents'
 
 export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, io: Server, em: EntityManager): Promise<FriendRequest> {
   if (data.toUserId === currentUser.id) {
@@ -91,7 +91,7 @@ export async function cancelFriendRequestAction (id: string, currentUser: User, 
   return friendRequest
 }
 
-export async function answerFriendRequestAction (id: string, answer: boolean, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+export async function answerFriendRequestAction (id: string, answer: boolean, currentUser: User, io: Server, em: EntityManager): Promise<FriendRequest> {
   const user = await em.findOneOrFail(User, currentUser.id, { populate: ['friendList'] })
   const friendRequest = await em.findOneOrFail(FriendRequest, {
     $and: [
@@ -126,6 +126,9 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   em.assign(friendRequest, { answer, updatedAt: new Date() })
 
   await em.flush()
+  if (answer) {
+    sendReceiveAnswerFriendRequest(friendRequest, io)
+  }
 
   return friendRequest
 }

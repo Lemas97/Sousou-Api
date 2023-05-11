@@ -1,4 +1,6 @@
 import { EntityManager } from '@mikro-orm/core'
+import { Server } from 'socket.io'
+
 import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql'
 import { FriendRequestInputData } from '../../types/classes/input-data/FriendRequestInputData'
 import { FriendRequest } from '../../types/entities/FriendRequest'
@@ -12,9 +14,10 @@ export class FriendRequestResolver {
   async createFriendRequest (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('data') data: FriendRequestInputData
   ): Promise<FriendRequest> {
-    return await sendFriendRequestAction(data, ctx.user, em)
+    return await sendFriendRequestAction(data, ctx.user, io, em)
   }
 
   @Mutation(() => FriendRequest)
@@ -30,9 +33,10 @@ export class FriendRequestResolver {
   async answerFriendRequest (
     @Ctx('em') em: EntityManager,
       @Ctx('ctx') ctx: AuthCustomContext,
+      @Ctx('io') io: Server,
       @Arg('id') id: string,
       @Arg('answer') answer: boolean
   ): Promise<FriendRequest> {
-    return await answerFriendRequestAction(id, answer, ctx.user, em)
+    return await answerFriendRequestAction(id, answer, ctx.user, io, em)
   }
 }

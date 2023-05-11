@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core'
 import { ForbiddenError, UserInputError } from 'apollo-server-koa'
 import { Server } from 'socket.io'
+
 import { VoiceChannelInputData } from '../../types/classes/input-data/VoiceChannelInputData'
 import { Group } from '../../types/entities/Group'
 import { User } from '../../types/entities/User'
