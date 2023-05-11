@@ -108,12 +108,13 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   if (friendRequest.answer !== null) {
     throw new UserInputError('This friend request has been answered')
   }
+  let personalChat: PersonalChat | null = null
 
   if (answer) {
     user.friendList.add(friendRequest.fromUser)
     friendRequest.fromUser.friendList.add(user)
 
-    const personalChat = em.create(PersonalChat, {
+    personalChat = em.create(PersonalChat, {
       mute: false
     })
 
@@ -126,8 +127,9 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   em.assign(friendRequest, { answer, updatedAt: new Date() })
 
   await em.flush()
-  if (answer) {
-    sendReceiveAnswerFriendRequest(friendRequest, io)
+
+  if (personalChat) {
+    sendReceiveAnswerFriendRequest(friendRequest, personalChat, io)
   }
 
   return friendRequest
