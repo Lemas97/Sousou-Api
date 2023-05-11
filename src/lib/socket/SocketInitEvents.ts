@@ -31,7 +31,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
     socket.emit('authorization', 'succeeded')
     console.log(`User ${user.username} logged in`)
-    console.log(socket)
+    console.log(socket.id)
 
     await socket.join(`user:${user.id}`)
     console.log('edwwwwwwwwwwwwwwwwwwww', user.groups.getItems())
