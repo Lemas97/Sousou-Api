@@ -31,7 +31,6 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
     socket.emit('authorization', 'succeeded')
     console.log(`User ${user.username} logged in`)
-    console.log(socket.id)
 
     em.assign(user, {
       socketId: socket.id
@@ -122,6 +121,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite, group?: Group): void {
   const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
   toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
+  console.log(toSockets)
   io.to(toSockets).emit('invitation-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
 }
 
