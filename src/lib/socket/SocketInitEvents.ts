@@ -121,13 +121,13 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite, group?: Group): void {
   const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
   toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
-  console.log(toSockets)
   io.to(toSockets).emit('invitation-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
 }
 
 export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: FriendRequest, personalChat?: PersonalChat, groupInvite?: GroupInvite, group?: Group): void {
   const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
   toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
+  toSockets.push(`user:${friendRequest?.fromUser.id ?? groupInvite!.toUser.id}`)
   io.to(toSockets).emit('invitation-answer-receive', {
     identifier: friendRequest?.id ?? groupInvite?.id,
     personalChat,
