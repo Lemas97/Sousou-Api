@@ -115,18 +115,18 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 }
 
 export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite): void {
-  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('friend-request-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
+  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('invitation-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
 }
 
 export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: FriendRequest, personalChat?: PersonalChat, groupInvite?: GroupInvite, group?: Group): void {
-  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('friend-request-answer-receive', {
+  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('invitation-answer-receive', {
     identifier: friendRequest?.id ?? groupInvite?.id,
     personalChat,
     group,
     type: personalChat ? 'PERSONAL_CHAT' : 'GROUP'
   })
 
-  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('friend-request-answer-receive', {
+  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('invitation-answer-receive', {
     identifier: friendRequest?.id ?? groupInvite?.id,
     personalChat,
     group,
