@@ -124,7 +124,7 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   console.log(sockets)
 
-  const socketIndex = sockets.findIndex(s => s.id === currentUser.id)
+  const socketIndex = sockets.findIndex(s => s.id === group.id)
 
   console.log(socketIndex, sockets[socketIndex])
 
