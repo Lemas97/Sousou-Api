@@ -58,7 +58,7 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
   io.socketsJoin(`group:${group.id}`)
   console.log(sockets)
 
-  const socketIndex = sockets.findIndex(s => s.id === currentUser.socketId)
+  const socketIndex = sockets.findIndex(s => s.handshake.auth.token === currentUser.jwtToken)
 
   console.log(socketIndex, sockets[socketIndex])
 
