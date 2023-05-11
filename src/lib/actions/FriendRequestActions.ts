@@ -59,7 +59,7 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
 
   await em.populate(friendRequest, ['fromUser', 'toUser'])
 
-  sendReceiveFriendRequest(friendRequest, io)
+  sendReceiveFriendRequest(io, friendRequest)
 
   return friendRequest
 }
@@ -129,7 +129,7 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   await em.flush()
 
   if (personalChat) {
-    sendReceiveAnswerFriendRequest(friendRequest, personalChat, io)
+    sendReceiveAnswerFriendRequest(io, friendRequest, personalChat)
   }
 
   return friendRequest

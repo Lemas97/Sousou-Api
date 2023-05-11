@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { EntityManager } from '@mikro-orm/core'
 import jwt from 'jsonwebtoken'
 import { Server } from 'socket.io'
@@ -113,13 +114,24 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
   })
 }
 
-export function sendReceiveFriendRequest (friendRequest: FriendRequest, io: Server): void {
-  io.to(`user:${friendRequest.toUser.id}`).emit('friend-request-receive', { friendRequest })
+export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite): void {
+  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('friend-request-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
 }
 
-export function sendReceiveAnswerFriendRequest (friendRequest: FriendRequest, personalChat: PersonalChat, io: Server): void {
-  io.to(`user:${friendRequest.toUser.id}`).emit('friend-request-answer-receive', { friendRequestId: friendRequest.id, personalChat, userToAdd: friendRequest.fromUser })
-  io.to(`user:${friendRequest.fromUser.id}`).emit('friend-request-answer-receive', { friendRequestId: friendRequest.id, personalChat, userToAdd: friendRequest.toUser })
+export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: FriendRequest, personalChat?: PersonalChat, groupInvite?: GroupInvite, group?: Group): void {
+  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('friend-request-answer-receive', {
+    identifier: friendRequest?.id ?? groupInvite?.id,
+    personalChat,
+    group,
+    type: personalChat ? 'PERSONAL_CHAT' : 'GROUP'
+  })
+
+  io.to(`user:${friendRequest?.toUser.id ?? groupInvite?.toUser.id}`).emit('friend-request-answer-receive', {
+    identifier: friendRequest?.id ?? groupInvite?.id,
+    personalChat,
+    group,
+    type: personalChat ? 'PERSONAL_CHAT' : 'GROUP'
+  })
 }
 
 export function updateUserEvent (user: User, io: Server): void {

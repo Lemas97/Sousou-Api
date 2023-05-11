@@ -7,7 +7,7 @@ import { Group } from '../../types/entities/Group'
 import { GroupInvite } from '../../types/entities/GroupInvite'
 import { User } from '../../types/entities/User'
 import { Server } from 'socket.io'
-import { disconnectUserFromVoiceChannel, newInviteOnCreateGroupInvite, updateGroup } from '../socket/SocketInitEvents'
+import { disconnectUserFromVoiceChannel, sendReceiveAnswerFriendRequest, sendReceiveFriendRequest, updateGroup } from '../socket/SocketInitEvents'
 import { VoiceChannel } from '../../types/entities/VoiceChannel'
 
 export async function getGroupInviteActions (paginationData: PaginatedInputData, forMe: boolean, currentUser: User, em: EntityManager): Promise<PaginatedGroupInvites> {
@@ -80,7 +80,7 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   await em.populate(currentUser, ['groups'])
 
-  newInviteOnCreateGroupInvite(toUser, groupInvite, io)
+  sendReceiveFriendRequest(io, undefined, groupInvite)
 
   return groupInvite
 }
@@ -102,7 +102,7 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
   const groupInvite = await em.findOneOrFail(GroupInvite, id, { populate: ['toUser', 'fromUser', 'group.members'] })
   const user = await em.findOneOrFail(User, currentUser.id)
 
-  const group = await em.findOneOrFail(Group, groupInvite.group.id, { populate: ['textChannels'] })
+  const group = await em.findOneOrFail(Group, groupInvite.group.id, { populate: ['textChannels', 'members'] })
 
   if (user.id !== groupInvite.toUser.id) throw new UserInputError('NO_ACCESS')
 
@@ -120,7 +120,9 @@ export async function answerGroupInviteAction (id: string, answer: boolean, curr
 
   await em.flush()
 
-  updateGroup(currentUser, group, io)
+  if (answer) {
+    sendReceiveAnswerFriendRequest(io, undefined, undefined, groupInvite, group)
+  }
 
   return groupInvite
 }
