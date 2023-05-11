@@ -5,6 +5,7 @@ import { PRIVATE_KEY, SECONDS_FOR_LOGOUT } from '../../dependencies/config'
 import { DeleteMessageInputData } from '../../types/classes/input-data/DeleteMessageInputData'
 import { SendMessageInputData } from '../../types/classes/input-data/PersonalMessageInputData'
 import { ReadMessageInputData } from '../../types/classes/input-data/ReadMessageInputData'
+import { FriendRequest } from '../../types/entities/FriendRequest'
 import { Group } from '../../types/entities/Group'
 import { GroupInvite } from '../../types/entities/GroupInvite'
 import { PersonalChat } from '../../types/entities/PersonalChat'
@@ -110,6 +111,10 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       }
     })
   })
+}
+
+export function sendReceiveFriendRequest (friendRequest: FriendRequest, io: Server): void {
+  io.to(`user:${friendRequest.toUser.id}`).emit('friend-request-receive', { friendRequest })
 }
 
 export function updateUserEvent (user: User, io: Server): void {

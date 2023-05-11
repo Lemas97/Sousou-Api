@@ -1,11 +1,15 @@
 import { EntityManager } from '@mikro-orm/core'
 import { UserInputError } from 'apollo-server-koa'
+import { Server } from 'socket.io'
+
 import { FriendRequestInputData } from '../../types/classes/input-data/FriendRequestInputData'
 import { FriendRequest } from '../../types/entities/FriendRequest'
 import { PersonalChat } from '../../types/entities/PersonalChat'
 import { User } from '../../types/entities/User'
 
-export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, em: EntityManager): Promise<FriendRequest> {
+import { sendReceiveFriendRequest } from '../socket/SocketInitEvents'
+
+export async function sendFriendRequestAction (data: FriendRequestInputData, currentUser: User, io: Server, em: EntityManager): Promise<FriendRequest> {
   if (data.toUserId === currentUser.id) {
     throw new UserInputError('You cannot send a friend request to yourself')
   }
@@ -54,6 +58,8 @@ export async function sendFriendRequestAction (data: FriendRequestInputData, cur
   await em.persistAndFlush(friendRequest)
 
   await em.populate(friendRequest, ['fromUser', 'toUser'])
+
+  sendReceiveFriendRequest(friendRequest, io)
 
   return friendRequest
 }
