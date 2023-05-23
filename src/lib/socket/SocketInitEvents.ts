@@ -92,7 +92,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     })
 
     socket.on('send-voice-one-to-one', async (data: { personalChatId: string, description: RTCSessionDescriptionInit }) => {
-      const personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
+      const personalChat = await em.findOne(PersonalChat, { id: data.personalChatId }, { populate: ['users'] })
 
       if (!personalChat) {
         socket.emit('answer-call-one-to-one', { err: 'User not found' })
@@ -117,7 +117,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     })
 
     socket.on('answer-call-one-to-one', async (data: { callMessageId: string, description?: RTCSessionDescriptionInit, answer: boolean }) => {
-      const callMessage = await em.findOne(PersonalMessage, data.callMessageId, { populate: ['personalChat.users'] })
+      const callMessage = await em.findOne(PersonalMessage, { id: data.callMessageId }, { populate: ['personalChat.users'] })
 
       if (!callMessage || callMessage.callData?.endTimestamp || callMessage.callData?.endTimestamp) {
         io.to(`user:${currentUser.id}`).emit('answer-call-one-to-one', {
@@ -139,7 +139,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     })
 
     socket.on('send-candidate', async (data: { personalChatId: string, candidate: RTCIceCandidate }) => {
-      const personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
+      const personalChat = await em.findOne(PersonalChat, { id: data.personalChatId }, { populate: ['users'] })
 
       if (!personalChat) {
         io.to(`user:${currentUser.id}`).emit('receive-candidate', { err: 'This call message does not exit' })
@@ -152,7 +152,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     })
 
     socket.on('end-call-one-to-one', async (data: { callMessageId: string }) => {
-      const callMessage = await em.findOne(PersonalMessage, data.callMessageId)
+      const callMessage = await em.findOne(PersonalMessage, { id: data.callMessageId })
 
       if (!callMessage || callMessage.callData?.endTimestamp || callMessage.callData?.endCallingTimestamp) {
         if (!callMessage || !callMessage?.isCall || callMessage.callData?.endCallingTimestamp || callMessage.callData?.endTimestamp) {
