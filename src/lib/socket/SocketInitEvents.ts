@@ -42,10 +42,6 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     socket.emit('authorization', 'succeeded')
     console.log(`User ${currentUser.username} logged in`)
 
-    em.assign(currentUser, {
-      socketId: socket.id
-    })
-
     await em.flush()
     await socket.join(`user:${currentUser.id}`)
     const groupsRooms = currentUser.groups.getItems().map(group => `group:${group.id}`)
