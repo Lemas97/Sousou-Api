@@ -138,6 +138,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       await em.flush()
 
       const to = `user:${callMessage.personalChat.users.getItems().find(u => u.id !== currentUser.id)!.id}`
+      console.log(to)
       io.to(to).emit('answer-call-one-to-one', { callMessage, answer: data.answer, description: data.answer ? data.description : undefined })
     })
 
