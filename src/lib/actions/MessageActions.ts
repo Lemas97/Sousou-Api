@@ -82,6 +82,7 @@ export async function sendMessageToFriendAction (messageInputData: SendMessageIn
     createdAt: new Date(),
     personalChat: personalChat,
     from: currentUser,
+    isCall: false,
     text: messageInputData.text,
     file: messageInputData.file,
     state: MessageStateType.SENDED
