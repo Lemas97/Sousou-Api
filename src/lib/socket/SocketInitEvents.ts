@@ -131,14 +131,15 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
       em.assign(callMessage, {
         callData: {
-          answer: data.answer
+          answer: data.answer,
+          endCallingTimestamp: new Date(),
+          startTimestamp: data.answer ? new Date() : undefined
         }
       })
 
       await em.flush()
 
       const to = `user:${callMessage.personalChat.users.getItems().find(u => u.id !== currentUser.id)!.id}`
-      console.log(to)
       io.to(to).emit('answer-call-one-to-one', { callMessage, answer: data.answer, description: data.answer ? data.description : undefined })
     })
 
@@ -158,13 +159,24 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
     socket.on('end-call-one-to-one', async (data: { callMessageId: string }) => {
       if (!data.callMessageId?.length) return
-      const callMessage = await em.findOne(PersonalMessage, data.callMessageId)
+      const callMessage = await em.findOne(PersonalMessage, data.callMessageId, {
+        populate: ['personalChat.users']
+      })
 
       if (!callMessage || callMessage.callData?.endTimestamp || callMessage.callData?.endCallingTimestamp) {
         if (!callMessage || !callMessage?.isCall || callMessage.callData?.endCallingTimestamp || callMessage.callData?.endTimestamp) {
           return
         }
       }
+
+      em.assign(callMessage, {
+        callData: {
+          ...callMessage,
+          endTimestamp: new Date()
+        }
+      })
+
+      await em.flush()
 
       const to = `user:${callMessage.personalChat.users.getItems().find(u => u.id !== currentUser.id)!.id}`
 
