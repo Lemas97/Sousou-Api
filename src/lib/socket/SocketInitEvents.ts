@@ -183,6 +183,25 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       io.to(to).emit('end-call-one-to-one')
     })
 
+    socket.on('signal', async (data: { voiceChannelId: string, signal: any }) => {
+      const voiceChannel = await em.findOne(VoiceChannel, data.voiceChannelId, { populate: ['users'] }) // todo check if user is member of group
+      console.log(voiceChannel)
+      if (!voiceChannel) return
+      await socket.join(`voice-channel:${voiceChannel.id}`)
+
+      if (!voiceChannel.users.getItems().find(u => u.id === currentUser.id)) {
+        const user = await em.findOneOrFail(User, currentUser.id)
+        voiceChannel.users.add(user)
+
+        await em.flush()
+      }
+
+      console.log(voiceChannel.users.getItems().filter(u => u.id !== currentUser.id).map(u => `user:${u.id}`))
+
+      io.to(`voice-channel:${voiceChannel.id}`)
+        .emit('signal', { voiceChannel, source: currentUser.id, signal: data.signal })
+    })
+
     socket.on('disconnect', async () => {
       try {
         const secondsOfTimeout = SECONDS_FOR_LOGOUT
