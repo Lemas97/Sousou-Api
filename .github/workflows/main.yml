@@ -1,10 +1,10 @@
-on: 
+on:
   push:
     branches:
       - main
 jobs:
   test_schedule:
-    runs-on: sousou
+    runs-on: self-hosted
     steps:
       - name: build
         run: echo 'buling'
