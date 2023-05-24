@@ -55,6 +55,7 @@ async function main (): Promise<void> {
     pingTimeout: 60000,
     transports: ['websocket']
   })
+  console.log('e')
 
   await initSocketEvents(io, connection.em.fork())
 
