@@ -1,0 +1,14 @@
+on: 
+  push:
+    branches:
+      - main
+jobs:
+  test_schedule:
+    runs-on: sousou
+    steps:
+      - name: build
+        run: echo 'buling'
+      - name: test
+        run: echo 'start testing...'
+      - name: deploy
+        run: echo 'deploy'
