@@ -91,7 +91,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       }
     })
 
-    socket.on('send-voice-one-to-one', async (data: { personalChatId: string, description: RTCSessionDescriptionInit }) => {
+    socket.on('send-voice-one-to-one', async (data: { personalChatId: string, description: RTCSessionDescriptionInit }, fn) => {
       if (!data.personalChatId?.length) return
 
       const personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
@@ -116,6 +116,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
         callMessage,
         description: data.description
       })
+      fn({ callMessageId: callMessage.id })
     })
 
     socket.on('answer-call-one-to-one', async (data: { callMessageId: string, description?: RTCSessionDescriptionInit, answer: boolean }) => {
