@@ -199,7 +199,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
       console.log(voiceChannel.users.getItems().filter(u => u.id !== currentUser.id).map(u => `user:${u.id}`))
 
-      io.to(`voice-channel:${voiceChannel.id}`)
+      io.to(voiceChannel.users.getItems().filter(u => u.id !== currentUser.id).map(u => `user:${u.id}`))
         .emit('signal', { voiceChannel, source: currentUser.id, signal: data.signal })
     })
 
