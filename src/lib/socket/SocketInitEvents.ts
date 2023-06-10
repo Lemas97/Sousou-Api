@@ -160,15 +160,15 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
     socket.on('end-call-one-to-one', async (data: { callMessageId: string }) => {
       if (!data.callMessageId?.length) return
-      const callMessage = await em.findOne(PersonalMessage, data.callMessageId, {
+      const callMessage = await em.findOneOrFail(PersonalMessage, data.callMessageId, {
         populate: ['personalChat.users']
       })
 
-      if (!callMessage || callMessage.callData?.endTimestamp || callMessage.callData?.endCallingTimestamp) {
-        if (!callMessage || !callMessage?.isCall || callMessage.callData?.endCallingTimestamp || callMessage.callData?.endTimestamp) {
-          return
-        }
-      }
+      // if (!callMessage || callMessage.callData?.endTimestamp || callMessage.callData?.endCallingTimestamp) {
+      //   if (!callMessage || !callMessage?.isCall || callMessage.callData?.endCallingTimestamp || callMessage.callData?.endTimestamp) {
+      //     return
+      //   }
+      // }
 
       em.assign(callMessage, {
         callData: {
@@ -179,9 +179,9 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
       await em.flush()
 
-      const to = `user:${callMessage.personalChat.users.getItems().find(u => u.id !== currentUser.id)!.id}`
+      const to = callMessage.personalChat.users.getItems().map(u => `user:${u.id}`)
 
-      io.to(to).emit('end-call-one-to-one')
+      io.to(to).emit('end-call-one-to-one', { callMessage })
     })
 
     socket.on('signal', async (data: { voiceChannelId: string, signal: any }) => {
