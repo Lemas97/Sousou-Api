@@ -146,6 +146,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     })
 
     socket.on('send-candidate', async (data: { personalChatId: string, candidate: RTCIceCandidate }) => {
+      em.clear()
       if (!data.personalChatId?.length) return
       const personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
 
