@@ -13,7 +13,7 @@ export async function getPersonalMessagesActionByPersonalChatIdAction (personalC
     id: personalChatId,
     users: currentUser
   })
-
+  console.log('edwwwwwwwwwwwwww1')
   const [messages, count] = await em.findAndCount(PersonalMessage, {
     personalChat: personalChatId
   }, {
@@ -22,6 +22,7 @@ export async function getPersonalMessagesActionByPersonalChatIdAction (personalC
     orderBy: { createdAt: 'DESC' },
     populate: ['readBy.user']
   })
+  console.log('edwwwwwwwwwwwwww2')
 
   return { data: messages, total: count }
 }
