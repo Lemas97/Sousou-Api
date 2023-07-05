@@ -27,6 +27,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
   let disconnectAction: undefined | ReturnType<typeof setTimeout>
   io.on('connection', async (socket) => {
     let currentUser: User
+    console.log('🚀 ~ file: SocketInitEvents.ts:31 ~ io.on ~ currentUser:')
     try {
       currentUser = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
       currentUser = await em.findOneOrFail(User, currentUser.id, { populate: ['groups', 'friendList', 'personalChats'] })
@@ -204,6 +205,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
     })
 
     socket.on('disconnect', async () => {
+      console.log('🚀 ~ file: SocketInitEvents.ts:208 ~ socket.on ~ disconnect:')
       try {
         const secondsOfTimeout = SECONDS_FOR_LOGOUT
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -221,12 +223,14 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 }
 
 export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite, group?: Group): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:226 ~ sendReceiveFriendRequest ~ sendReceiveFriendRequest:')
   const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
   toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
   io.to(toSockets).emit('invitation-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
 }
 
 export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: FriendRequest, personalChat?: PersonalChat, groupInvite?: GroupInvite, group?: Group): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:233 ~ sendReceiveAnswerFriendRequest ~ sendReceiveAnswerFriendRequest:', sendReceiveAnswerFriendRequest)
   const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
   toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
   toSockets.push(`user:${friendRequest?.fromUser.id ?? groupInvite!.toUser.id}`)
@@ -246,36 +250,44 @@ export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: Frie
 }
 
 export function updateUserEvent (user: User, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:253 ~ updateUserEvent ~ updateUserEvent:')
   const roomsToSeeTheChange = [...user.friendList.getItems().map(friend => `user:${friend.id}`, ...user.groups.getItems().map(group => `group:${group.id}`))]
 
   io.to(roomsToSeeTheChange).emit('something-changed', user)
 }
 
 export function emitMessageEvents (io: Server, event: string, data: SocketMessageRooms): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:260 ~ emitMessageEvents ~ emitMessageEvents:')
   io.to(data.rooms).emit(event, data.message)
 }
 
 export function connectedUserInVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:265 ~ connectedUserInVoiceChannel ~ connectedUserInVoiceChannel:')
   io.to([`group:${voiceChannel.group.id}`]).emit('connected-user-in-voice-channel', voiceChannel)
 }
 
 export function disconnectUserFromVoiceChannel (voiceChannel: VoiceChannel, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:270 ~ disconnectUserFromVoiceChannel ~ disconnectUserFromVoiceChannel:')
   io.to([`group:${voiceChannel.group.id}`]).emit('disconnect-user-from-voice-channel', voiceChannel)
 }
 
 export function updateGroup (user: User, group: Group, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:275 ~ updateGroup ~ updateGroup:')
   io.to([`user:${user.id}`, `group:${group.id}`]).emit('update-group', group)
 }
 
 export function newInviteOnCreateGroupInvite (user: User, groupInvite: GroupInvite, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:280 ~ newInviteOnCreateGroupInvite ~ newInviteOnCreateGroupInvite:')
   io.to([`user:${user.id}`]).emit('new-invite', groupInvite)
 }
 
 export function updatePersonalChatEvent (usersIds: string[], personalChat: PersonalChat, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:285 ~ updatePersonalChatEvent ~ updatePersonalChatEvent:')
   io.to(usersIds.map(userId => `user:${userId}`)).emit('update-personal-chat', personalChat)
 }
 
 export function kickFromVoiceChannel (voiceChannel: VoiceChannel, user: User, io: Server): void {
+  console.log('🚀 ~ file: SocketInitEvents.ts:290 ~ kickFromVoiceChannel ~ kickFromVoiceChannel:')
   io.to([`group:${voiceChannel.group.id}`]).emit('kick-user-from-voice-channel', {
     user,
     voiceChannel
