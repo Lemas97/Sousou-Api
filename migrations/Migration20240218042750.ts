@@ -3,7 +3,7 @@ import { Migration } from '@mikro-orm/migrations'
 import { Group } from '../src/types/entities/Group'
 import { TextChannel } from '../src/types/entities/TextChannel'
 
-export class Migration20240218042749 extends Migration {
+export class Migration20240218042750 extends Migration {
   async up (): Promise<void> {
     const em = (await MikroORM.init()).em.fork()
 
@@ -13,7 +13,7 @@ export class Migration20240218042749 extends Migration {
       if (!group.members.getItems().map(m => m.id).includes(group.owner.id)) {
         group.members.add(group.owner)
       }
-      const textChannels = await em.find(TextChannel, {}, { populate: ['users'] })
+      const textChannels = await em.find(TextChannel, { group }, { populate: ['users'] })
       for (const textChannel of textChannels) {
         em.assign(textChannel, {
           users: group.members.getItems().map(member => member)
