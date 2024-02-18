@@ -20,7 +20,7 @@ export async function getGroupsAction (paginationData: PaginatedInputData, em: E
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,
     offset,
     orderBy: { createdAt: 'DESC' },
-    populate: ['owner', 'textChannels', 'voiceChannels.users']
+    populate: ['owner', 'textChannels.users', 'voiceChannels.users']
   })
   return { data: group, total: count }
 }
