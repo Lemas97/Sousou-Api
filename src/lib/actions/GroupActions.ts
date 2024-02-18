@@ -50,7 +50,7 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
 
   const generalTextChannel = em.create(TextChannel, {
     name: 'General',
-    users: [currentUser.id],
+    users: [currentUser],
     group: group.id
   })
 
