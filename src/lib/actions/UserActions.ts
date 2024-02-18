@@ -49,6 +49,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 
 export async function getAvailableUsersToAddAction (paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
   await em.populate(currentUser, ['friendList'])
+  console.log('friend list hehe', currentUser.friendList.getItems().map(fl => fl.id))
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
 
   const [users, count] = await em.findAndCount(User, {
