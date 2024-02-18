@@ -254,9 +254,9 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
   }
 }
 
-export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite, group?: Group): void {
+export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequest, groupInvite?: GroupInvite): void {
   try {
-    const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
+    const toSockets = []
     toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
     io.to(toSockets).emit('invitation-receive', { friendRequest, groupInvite, type: friendRequest ? 'FRIEND_REQUEST' : 'GROUP_INVITE' })
   } catch (e) {

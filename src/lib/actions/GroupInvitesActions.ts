@@ -80,7 +80,7 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   await em.populate(currentUser, ['groups'])
 
-  sendReceiveFriendRequest(io, undefined, groupInvite, group)
+  sendReceiveFriendRequest(io, undefined, groupInvite)
 
   return groupInvite
 }
