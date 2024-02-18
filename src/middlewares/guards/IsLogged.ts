@@ -3,6 +3,7 @@ import { CustomContext } from '../../types/interfaces/CustomContext'
 import { MiddlewareFn } from 'type-graphql'
 
 export const isLogged: MiddlewareFn<CustomContext> = async (ctx, next) => {
+  ctx.context.em.clear()
   if (!ctx.context) {
     return await next()
   }
