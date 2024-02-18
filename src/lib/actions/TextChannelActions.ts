@@ -32,6 +32,8 @@ export async function getPaginatedTextChannelMessagesByTextChannelIdAction (text
     populate: ['users']
   })
 
+  console.log('edwwwwww?')
+
   const lastReadPivot = await em.findOneOrFail(TextChannelUserPivot, {
     user: currentUser.id,
     textChannel
