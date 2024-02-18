@@ -52,7 +52,7 @@ export async function getPaginatedTextChannelMessagesByTextChannelIdAction (text
 }
 
 export async function createTextChannelAction (data: TextChannelInputData, currentUser: User, em: EntityManager): Promise<boolean> {
-  const group = await em.findOneOrFail(Group, data.groupId)
+  const group = await em.findOneOrFail(Group, data.groupId, { populate: ['members'] })
 
   if (group.owner.id !== currentUser.id) {
     throw new ForbiddenError('NO_ACCESS')
