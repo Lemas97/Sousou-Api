@@ -102,7 +102,7 @@ export async function getAvailableUsersToInviteAction (paginationData: Paginated
             : {}
         ]
       },
-      { id: { $nin: [...group.members.getItems().map(me => me.id), currentUser.id] } }
+      { id: { $nin: [...group.members.getItems().map(me => me.id), currentUser.id, group.owner.id] } }
     ]
   }, {
     limit: paginationData.limit > 0 ? paginationData.limit : undefined,

@@ -68,7 +68,7 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
 
   const user = await em.findOneOrFail(User, currentUser.id)
 
-  user.groups.add(group)
+  group.members.add(user)
 
   await em.flush()
   await em.populate(group, ['owner'])
