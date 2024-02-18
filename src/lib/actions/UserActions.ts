@@ -22,6 +22,7 @@ import { PersonalMessage } from '../../types/entities/PersonalMessage'
 import { PersonalChatUserPivot } from '../../types/entities/LastReadMessagePivot'
 
 export async function getUsersAction (paginationData: PaginatedInputData, em: EntityManager): Promise<PaginatedUsers> {
+  em.clear()
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
 
   const [users, count] = await em.findAndCount(User, {
@@ -48,6 +49,7 @@ export async function getUsersAction (paginationData: PaginatedInputData, em: En
 }
 
 export async function getAvailableUsersToAddAction (paginationData: PaginatedInputData, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
+  em.clear()
   await em.populate(currentUser, ['friendList'])
   console.log('friend list hehe', currentUser.friendList.getItems().map(fl => fl.id))
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
@@ -82,6 +84,7 @@ export async function getAvailableUsersToAddAction (paginationData: PaginatedInp
 }
 
 export async function getAvailableUsersToInviteAction (paginationData: PaginatedInputData, groupId: string, currentUser: User, em: EntityManager): Promise<PaginatedUsers> {
+  em.clear()
   const offset = (paginationData.limit * paginationData.page) - paginationData.limit
   const search = paginationData.filter ? { $like: `%${paginationData.filter}%` } : undefined
 
