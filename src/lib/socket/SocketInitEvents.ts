@@ -264,19 +264,17 @@ export function sendReceiveFriendRequest (io: Server, friendRequest?: FriendRequ
   }
 }
 
-export function sendReceiveAnswerFriendRequest (io: Server, friendRequest?: FriendRequest, personalChat?: PersonalChat, groupInvite?: GroupInvite, group?: Group): void {
+export function sendReceiveAnswerFriendRequest (
+  io: Server,
+  friendRequest?: FriendRequest,
+  personalChat?: PersonalChat,
+  groupInvite?: GroupInvite,
+  group?: Group
+): void {
   try {
     const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
-    toSockets.push(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`)
     toSockets.push(`user:${friendRequest?.fromUser.id ?? groupInvite!.toUser.id}`)
-    io.to(toSockets).emit('invitation-answer-receive', {
-      identifier: friendRequest?.id ?? groupInvite?.id,
-      personalChat,
-      group,
-      type: personalChat ? 'PERSONAL_CHAT' : 'GROUP'
-    })
-
-    io.to(toSockets).emit('invitation-answer-receive', {
+    io.to(toSockets).except(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`).emit('invitation-answer-receive', {
       identifier: friendRequest?.id ?? groupInvite?.id,
       personalChat,
       group,
