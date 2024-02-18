@@ -62,6 +62,7 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
   const toUser = await em.findOneOrFail(User, groupInviteInputData.toUserId, {
     populateWhere: {
       groupInvites: {
+        group,
         answer: null,
         canceled: null
       }
@@ -71,7 +72,7 @@ export async function createGroupInviteAction (groupInviteInputData: GroupInvite
 
   if (toUser.groups.getItems().map(gr => gr.id).includes(groupInviteInputData.groupId)) throw new UserInputError('This user is already a member')
   if (
-    toUser.groupInvites.getItems().map(gr => gr.group.id).includes(groupInviteInputData.groupId)
+    toUser.groupInvites.getItems().length
   ) {
     throw new UserInputError('This user is already invited')
   }
