@@ -7,7 +7,7 @@ export default {
   host: DB_HOST,
   port: DB_PORT,
   password: DB_PASSWORD,
-  debug: true,
+  debug: false,
   migrations: {
     glob: '!(*.d).{js,ts}',
     pathTs: './migrations',
