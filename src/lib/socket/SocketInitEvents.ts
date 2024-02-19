@@ -32,7 +32,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
         currentUser = jwt.verify(socket.handshake.auth.token as string, PRIVATE_KEY) as User
         currentUser = await em.findOneOrFail(User, currentUser.id, { populate: ['groups', 'friendList', 'personalChats'] })
         disconnectAction && clearTimeout(disconnectAction)
-        currentUser.isLoggedIn && em.assign(currentUser, { isLoggedIn: true })
+        currentUser.isLoggedIn && em.assign(currentUser, { isLoggedIn: true, socketId: socket.id })
       } catch (e) {
         console.log(e)
         socket.emit('authorization', 'failed')
@@ -240,7 +240,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
           disconnectAction = setTimeout(async () => {
             console.log(`User ${currentUser.username} logged out`)
             io.to([...currentUser.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-out', currentUser)
-            em.assign(currentUser, { isLoggedIn: false, lastLoggedInDate: new Date(new Date().valueOf() - secondsOfTimeout) })
+            em.assign(currentUser, { isLoggedIn: false, lastLoggedInDate: new Date(new Date().valueOf() - secondsOfTimeout), socketId: null })
             await em.flush()
           }, secondsOfTimeout)
         } catch (e) {
@@ -272,10 +272,16 @@ export function sendReceiveAnswerFriendRequest (
   group?: Group
 ): void {
   try {
+    const invite = groupInvite ?? friendRequest
+    const sockets: string[] = [invite!.toUser.socketId!]
+    invite!.fromUser.socketId && sockets.push(invite!.fromUser.socketId)
+
+    io.to(sockets).socketsJoin(`${groupInvite ? 'group:' : 'personal-chat:'}${invite!.id}`)
+
     const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
-    toSockets.push(`user:${friendRequest?.fromUser.id ?? groupInvite!.toUser.id}`)
-    io.to(toSockets).except(`user:${friendRequest?.toUser.id ?? groupInvite!.toUser.id}`).emit('invitation-answer-receive', {
-      identifier: friendRequest?.id ?? groupInvite?.id,
+    toSockets.push(`user:${invite!.toUser.id}`)
+    io.to(toSockets).except(`user:${invite!.toUser.id}`).emit('invitation-answer-receive', {
+      identifier: invite?.id,
       personalChat,
       group,
       type: personalChat ? 'PERSONAL_CHAT' : 'GROUP'

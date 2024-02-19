@@ -80,6 +80,9 @@ export class User {
   @Field(() => Boolean)
     isLoggedIn: boolean
 
+  @Property({ nullable: true })
+    socketId?: string
+
   @Property({ type: Date, nullable: true })
   @Field(() => Date, { nullable: true })
     lastLoggedInDate?: Date
