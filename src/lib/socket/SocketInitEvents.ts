@@ -276,9 +276,12 @@ export function sendReceiveAnswerFriendRequest (
     const sockets: string[] = [invite!.toUser.socketId!]
     invite!.fromUser.socketId && sockets.push(invite!.fromUser.socketId)
 
+    console.log('sockets', sockets)
+
     io.to(sockets).socketsJoin(`${groupInvite ? 'group:' : 'personal-chat:'}${invite!.id}`)
 
     const toSockets = group ? group.members.getItems().map(m => `user:${m.id}`) : []
+
     toSockets.push(`user:${invite!.toUser.id}`)
     io.to(toSockets).except(`user:${invite!.toUser.id}`).emit('invitation-answer-receive', {
       identifier: invite?.id,
