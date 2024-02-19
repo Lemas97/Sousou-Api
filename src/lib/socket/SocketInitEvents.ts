@@ -55,6 +55,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       io.to([...currentUser.friendList.getItems().map(fr => `user:${fr.id}`), ...groupsRooms]).emit('log-in')
 
       socket.on('message-send', async (data: SendMessageInputData) => {
+        em.clear()
         try {
           let socketMessageRooms: SocketMessageRooms
           if (data.personal) {
@@ -70,6 +71,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('message-read', async (data: ReadMessageInputData) => {
+        em.clear()
         try {
           const result = await readMessageAction(data, currentUser, em)
 
@@ -81,6 +83,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('message-delete', async (data: DeleteMessageInputData) => {
+        em.clear()
         try {
           let result: SocketMessageRooms
           if (data.personal) {
@@ -96,6 +99,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('send-voice-one-to-one', async (data: { personalChatId: string, description: RTCSessionDescriptionInit }, fn) => {
+        em.clear()
         try {
           if (!data.personalChatId?.length) return
 
@@ -130,6 +134,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('answer-call-one-to-one', async (data: { callMessageId: string, description?: RTCSessionDescriptionInit, answer: boolean }) => {
+        em.clear()
         try {
           if (!data.callMessageId?.length) return
           const callMessage = await em.findOne(PersonalMessage, data.callMessageId, { populate: ['personalChat.users'] })
@@ -151,7 +156,11 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
           await em.flush()
 
-          const to = `user:${callMessage.personalChat.users.getItems().find(u => u.id !== currentUser.id)!.id}`
+          const personalChat = await em.findOneOrFail(PersonalChat, callMessage.personalChat.id, {populate: ['users']})
+
+          await em.populate(callMessage, ['personalChat.users'])
+
+          const to = `user:${personalChat.users.getItems().find(u => u.id !== currentUser.id)!.id}`
           io.to(to).emit('answer-call-one-to-one', { callMessage, answer: data.answer, description: data.answer ? data.description : undefined })
         } catch (e) {
           console.error(e)
@@ -163,7 +172,19 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
         em.clear()
         try {
           if (!data.personalChatId?.length) return
-          const personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
+          let personalChat
+          while (!personalChat) {
+              try {
+                personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
+              } catch (e) {
+                console.log('eskasa: ', data.personalChatId, personalChat)
+                await new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve(true)
+                  }, 500);
+                })
+              }
+            }
 
           if (!personalChat) {
             io.to(`user:${currentUser.id}`).emit('receive-candidate', { err: 'This call message does not exit' })
@@ -179,6 +200,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('end-call-one-to-one', async (data: { callMessageId: string }) => {
+        em.clear()
         try {
           if (!data.callMessageId?.length) return
           const callMessage = await em.findOneOrFail(PersonalMessage, data.callMessageId, {
@@ -210,6 +232,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('signal', async (data: { voiceChannelId: string, signal: any }) => {
+        em.clear()
         try {
           const voiceChannel = await em.findOne(VoiceChannel, data.voiceChannelId, { populate: ['users'] }) // todo check if user is member of group
           console.log(voiceChannel)
@@ -234,6 +257,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
       })
 
       socket.on('disconnect', async () => {
+        em.clear()
         try {
           const secondsOfTimeout = SECONDS_FOR_LOGOUT
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
