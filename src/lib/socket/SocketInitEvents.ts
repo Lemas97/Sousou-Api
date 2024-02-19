@@ -272,6 +272,8 @@ export function sendReceiveAnswerFriendRequest (
   group?: Group
 ): void {
   try {
+    const chat = group ?? personalChat
+
     const invite = groupInvite ?? friendRequest
     console.log('edo')
     const sockets: string[] = [invite!.toUser.socketId!]
@@ -280,7 +282,7 @@ export function sendReceiveAnswerFriendRequest (
 
     console.log('sockets', sockets)
 
-    const joinRoom = `${groupInvite ? 'group:' : 'personal-chat:'}${invite!.id}`
+    const joinRoom = `${groupInvite ? 'group:' : 'personal-chat:'}${chat!.id}`
 
     io.to(sockets).socketsJoin(joinRoom)
 
