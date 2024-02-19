@@ -156,7 +156,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
 
           await em.flush()
 
-          const personalChat = await em.findOneOrFail(PersonalChat, callMessage.personalChat.id, {populate: ['users']})
+          const personalChat = await em.findOneOrFail(PersonalChat, callMessage.personalChat.id, { populate: ['users'] })
 
           await em.populate(callMessage, ['personalChat.users'])
 
@@ -174,17 +174,17 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
           if (!data.personalChatId?.length) return
           let personalChat
           while (!personalChat) {
-              try {
-                personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
-              } catch (e) {
-                console.log('eskasa: ', data.personalChatId, personalChat)
-                await new Promise((resolve) => {
-                  setTimeout(() => {
-                    resolve(true)
-                  }, 500);
-                })
-              }
+            try {
+              personalChat = await em.findOne(PersonalChat, data.personalChatId, { populate: ['users'] })
+            } catch (e) {
+              console.log('eskasa: ', data.personalChatId, personalChat)
+              await new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve(true)
+                }, 500)
+              })
             }
+          }
 
           if (!personalChat) {
             io.to(`user:${currentUser.id}`).emit('receive-candidate', { err: 'This call message does not exit' })
