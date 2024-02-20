@@ -225,6 +225,7 @@ export async function initSocketEvents (io: Server, em: EntityManager): Promise<
           const to = callMessage.personalChat.users.getItems().map(u => `user:${u.id}`)
 
           io.to(to).emit('end-call-one-to-one', { callMessage })
+          io.to(to).emit('message-receive', callMessage)
           em.clear()
         } catch (e) {
           console.error(e)
