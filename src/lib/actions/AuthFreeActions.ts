@@ -38,8 +38,7 @@ export async function registerUserAction (data: UserRegisterInputData, em: Entit
   const user = em.create(User, {
     ...data,
     isLoggedIn: false,
-    emailConfirm: true,
-    // emailConfirm: false,
+    emailConfirm: false,
     icon: '',
     createdAt: new Date(),
     password: hash,
