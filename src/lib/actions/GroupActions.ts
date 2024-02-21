@@ -66,9 +66,9 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
 
   await em.persistAndFlush(generalTextChannel)
 
-  io.to(currentUser.socketId ?? '').socketsJoin(`group:${group.id}`)
-
   const user = await em.findOneOrFail(User, currentUser.id)
+
+  io.to(user.socketId!).socketsJoin(`group:${group.id}`)
 
   group.members.add(user)
 

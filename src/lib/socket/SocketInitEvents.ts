@@ -300,12 +300,8 @@ export function sendReceiveAnswerFriendRequest (
     const chat = group ?? personalChat
 
     const invite = groupInvite ?? friendRequest
-    console.log('edo')
     const sockets: string[] = [invite!.toUser.socketId!]
-    console.log('edo2')
     invite!.fromUser.socketId && sockets.push(invite!.fromUser.socketId)
-
-    console.log('sockets', sockets)
 
     const joinRoom = `${groupInvite ? 'group:' : 'personal-chat:'}${chat!.id}`
 
