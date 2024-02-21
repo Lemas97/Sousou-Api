@@ -36,7 +36,7 @@ export async function getGroupByIdAction (id: string, currentUser: User, em: Ent
   return group
 }
 
-export async function createGroupAction (data: GroupInputData, currentUser: User, em: EntityManager): Promise<Group> {
+export async function createGroupAction (data: GroupInputData, currentUser: User, io: Server, em: EntityManager): Promise<Group> {
   const group = em.create(Group, {
     ...data,
     preferences: {
@@ -65,6 +65,8 @@ export async function createGroupAction (data: GroupInputData, currentUser: User
   // sockets[socketIndex].join(`group:${group.id}`)
 
   await em.persistAndFlush(generalTextChannel)
+
+  io.to(currentUser.socketId ?? '').socketsJoin(`group:${group.id}`)
 
   const user = await em.findOneOrFail(User, currentUser.id)
 
