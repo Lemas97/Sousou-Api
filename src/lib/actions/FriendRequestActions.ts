@@ -129,11 +129,10 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
         mute: false
       })
       em.persist(personalChat)
+      personalChat.users.add(user)
+      personalChat.users.add(friendRequest.fromUser)
     }
     personalChat.disabled = false
-
-    personalChat.users.add(user)
-    personalChat.users.add(friendRequest.fromUser)
   }
 
   em.assign(friendRequest, { answer, updatedAt: new Date() })
