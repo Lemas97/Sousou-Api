@@ -113,12 +113,24 @@ export async function answerFriendRequestAction (id: string, answer: boolean, cu
   if (answer) {
     user.friendList.add(friendRequest.fromUser)
     friendRequest.fromUser.friendList.add(user)
-
-    personalChat = em.create(PersonalChat, {
-      mute: false
+    personalChat = await em.findOne(PersonalChat, {
+      $and: [
+        {
+          users: friendRequest.toUser
+        },
+        {
+          users: friendRequest.fromUser
+        }
+      ]
     })
 
-    em.persist(personalChat)
+    if (!personalChat) {
+      personalChat = em.create(PersonalChat, {
+        mute: false
+      })
+      em.persist(personalChat)
+    }
+    personalChat.disabled = false
 
     personalChat.users.add(user)
     personalChat.users.add(friendRequest.fromUser)
