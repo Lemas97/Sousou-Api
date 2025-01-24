@@ -13,7 +13,7 @@ export async function getPersonalMessagesActionByPersonalChatIdAction (personalC
     id: personalChatId,
     users: currentUser
   })
-  console.log('edwwwwwwwwwwwwww1')
+  console.log('edwwwwwwwwwwwwww 1')
   const [messages, count] = await em.findAndCount(PersonalMessage, {
     personalChat: personalChatId
   }, {
